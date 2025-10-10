@@ -167,6 +167,7 @@ This system is about:
 
 - `BUILD_APPROACH.md` - Development philosophy and iteration notes
 - `SECURITY_TODO.md` - Security issues to address before production
+- `GITHUB_SETUP.md` - GitHub authentication for gh CLI and git operations
 - `DNS_SETUP.md` - Subdomain and SSL configuration
 - `SSH_ROUTING.md` - SSH key-based container routing
 - `VAULT_SETUP.md` - Ansible Vault usage (when configured)

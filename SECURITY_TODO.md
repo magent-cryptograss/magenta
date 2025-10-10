@@ -19,6 +19,12 @@
   - Action: Replace with actual team member public keys
   - File: `ansible/inventory.yml` lines 24, 33, 42
 
+- [ ] **GitHub Personal Access Tokens** - Required for gh CLI authentication
+  - Solution: Create PATs for each user, store in Ansible Vault
+  - Permissions needed: `repo`, `read:org`, `gist`, `workflow`
+  - Add to vault: `vault_justin_github_token`, `vault_rj_github_token`, etc.
+  - Set as `GH_TOKEN` environment variable in containers
+
 ## Access Control
 - [ ] **Docker socket mounting** - Gives containers root-equivalent access to host
   - Current: Mounting `/var/run/docker.sock` for Puppeteer MCP

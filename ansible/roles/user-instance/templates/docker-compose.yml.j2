@@ -26,6 +26,8 @@ services:
       - POSTGRES_USER=magent
       - POSTGRES_PASSWORD={{ postgres_password }}
       - CODE_SERVER_PASSWORD={{ user.code_server_password }}
+      - GH_TOKEN={{ user.github_token | default('') }}
+      - DJANGO_SECRET_KEY={{ user.django_secret_key | default('') }}
     restart: unless-stopped
 
 networks:
