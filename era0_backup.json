@@ -1,0 +1,53 @@
+[
+{
+  "model": "conversations.thinkingentity",
+  "pk": "justin",
+  "fields": {
+    "is_biological_human": true
+  }
+},
+{
+  "model": "conversations.thinkingentity",
+  "pk": "magent",
+  "fields": {
+    "is_biological_human": false
+  }
+},
+{
+  "model": "conversations.era",
+  "pk": "2880c974-544c-46d6-868e-85f35844a6af",
+  "fields": {
+    "name": "Era 0",
+    "created_at": "2025-10-09T17:54:05.239Z"
+  }
+},
+{
+  "model": "conversations.contextwindow",
+  "pk": "1c99084c-2b18-46d3-a28e-c97c428ee579",
+  "fields": {
+    "era": "2880c974-544c-46d6-868e-85f35844a6af",
+    "first_message": "78428fc5-12dc-4000-b2d9-daf1bf3e9466",
+    "type": "split_point",
+    "created_at": "2025-10-09T17:54:21.221Z"
+  }
+},
+{
+  "model": "conversations.contextwindow",
+  "pk": "61103e06-58a4-4a35-8083-3a96654cd04b",
+  "fields": {
+    "era": "2880c974-544c-46d6-868e-85f35844a6af",
+    "first_message": "7893f78f-6d91-4621-8a07-d6331682b4f3",
+    "type": "fresh",
+    "created_at": "2025-10-09T17:59:31.800Z"
+  }
+},
+{
+  "model": "conversations.contextwindow",
+  "pk": "8544fe2d-49a8-42c0-9c84-2e6d4156a410",
+  "fields": {
+    "era": "2880c974-544c-46d6-868e-85f35844a6af",
+    "first_message": "ac3ef92c-5d84-4a52-92bc-622bce019c3a",
+    "type": "split_point",
+    "created_at": "2025-10-09T17:54:05.243Z"
+  }
+}

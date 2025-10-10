@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact Memory Viewer</title>
+    <style>
+        body {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            margin: 0;
+            padding: 10px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .header {
+            padding: 10px;
+            background: #252526;
+            border-bottom: 1px solid #3e3e42;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .stats {
+            color: #858585;
+            margin-bottom: 5px;
+        }
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+        .filters input, .filters select, .filters button, .filters label {
+            padding: 4px 8px;
+            font-size: 11px;
+            background: #3c3c3c;
+            color: #d4d4d4;
+            border: 1px solid #555;
+            border-radius: 3px;
+        }
+        .filters button {
+            cursor: pointer;
+        }
+        .filters button:hover {
+            background: #505050;
+        }
+        .filters label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filters input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        tr {
+            border-bottom: 1px solid #2d2d30;
+            cursor: pointer;
+        }
+        tr:hover {
+            background: #2a2d2e;
+        }
+        tr.justin {
+            background: #1e2731;
+        }
+        tr.magent {
+            background: #1e2e26;
+        }
+        tr.thinking {
+            background: #2e2626;
+            font-style: italic;
+        }
+        tr.child {
+            opacity: 0.85;
+        }
+        td {
+            padding: 4px 8px;
+            vertical-align: top;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .indent-1 { padding-left: 40px !important; }
+        .indent-2 { padding-left: 80px !important; }
+        .num {
+            color: #858585;
+            width: 50px;
+            text-align: right;
+            font-size: 10px;
+        }
+        .row-num {
+            color: #4ec9b0;
+            width: 40px;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .missing-marker {
+            color: #ff0000;
+            width: 30px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .expand-icon {
+            color: #569cd6;
+            width: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .importance {
+            color: #dcdcaa;
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .from {
+            color: #4ec9b0;
+            width: 60px;
+            font-weight: bold;
+        }
+        .arrow {
+            color: #666;
+            width: 20px;
+            text-align: center;
+        }
+        .to {
+            color: #4ec9b0;
+            width: 60px;
+        }
+        .content {
+            color: #d4d4d4;
+            max-width: 600px;
+        }
+        .timestamp {
+            color: #858585;
+            font-size: 10px;
+            width: 140px;
+        }
+        .uuid {
+            color: #666;
+            font-size: 9px;
+            width: 70px;
+            font-family: monospace;
+        }
+        .source {
+            color: #858585;
+            font-size: 9px;
+            width: 120px;
+        }
+        .expanded td {
+            white-space: pre-wrap;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #858585;
+        }
+        .thinking-marker {
+            color: #ce9178;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stats">
+            <span id="messageCount">Loading...</span> | Database: <strong id="databaseName">{{ database }}</strong>
+        </div>
+        <div class="filters">
+            <input type="text" id="searchFilter" placeholder="Search content..." style="min-width: 200px;">
+            <input type="number" id="minLengthFilter" placeholder="Min length" style="width: 100px;">
+            <select id="personFilter">
+                <option value="">All people</option>
+                <option value="justin">justin</option>
+                <option value="magent">magent</option>
+            </select>
+            <label>
+                <input type="checkbox" id="showChildrenFilter" checked>
+                Auto-expand children
+            </label>
+            <label>
+                <input type="checkbox" id="showThinkingFilter" checked>
+                Show thinking
+            </label>
+            <label>
+                <input type="checkbox" id="flatViewFilter">
+                Flat view (all messages)
+            </label>
+            <button onclick="loadMessages()">Refresh</button>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">Loading messages...</div>
+
+    <table id="messagesTable" style="display: none;">
+        <tbody id="messagesBody"></tbody>
+    </table>
+
+    <script>
+        let eraData = null;
+        let allMessages = [];
+        let expandedRows = new Set();
+        let collapsedEras = new Set();
+        let collapsedWindows = new Set();
+        let collapsedMainFlows = new Set();
+        const database = '{{ database }}';
+
+        async function loadMessages() {
+            try {
+                const response = await fetch(`/api/all_messages/?db=${database}`);
+                eraData = await response.json();
+
+                // Flatten messages for searching and build parent-child relationships
+                allMessages = [];
+                eraData.eras.forEach(era => {
+                    // Collapse all eras by default
+                    collapsedEras.add(era.id);
+
+                    era.context_windows.forEach(window => {
+                        // Collapse all windows by default
+                        collapsedWindows.add(window.id);
+
+                        // Collapse main flow for windows that have splits
+                        if (window.child_windows && window.child_windows.length > 0) {
+                            collapsedMainFlows.add(window.id);
+                        }
+
+                        allMessages.push(...window.messages);
+
+                        // Recursively collapse child windows
+                        function collapseChildWindows(win) {
+                            if (win.child_windows) {
+                                win.child_windows.forEach(child => {
+                                    collapsedWindows.add(child.id);
+                                    collapseChildWindows(child);
+                                });
+                            }
+                        }
+                        collapseChildWindows(window);
+                    });
+                });
+
+                allMessages.forEach(msg => {
+                    msg.children = allMessages.filter(m => m.parent_uuid === msg.id);
+                });
+
+                renderMessages();
+            } catch (error) {
+                document.getElementById('loading').textContent = 'Error loading messages: ' + error.message;
+            }
+        }
+
+        function renderMessages() {
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+            const minLength = parseInt(document.getElementById('minLengthFilter').value) || 0;
+            const person = document.getElementById('personFilter').value;
+            const autoExpand = document.getElementById('showChildrenFilter').checked;
+            const showThinking = document.getElementById('showThinkingFilter').checked;
+            const flatView = document.getElementById('flatViewFilter').checked;
+
+            const tbody = document.getElementById('messagesBody');
+            let html = '';
+            let rowNumber = 1;
+            let totalMessages = 0;
+
+            // Render by Era > ContextWindow > Messages
+            eraData.eras.forEach(era => {
+                const eraCollapsed = collapsedEras.has(era.id);
+                const eraIcon = eraCollapsed ? '►' : '▼';
+
+                // Count messages in this era
+                let eraMessageCount = 0;
+                era.context_windows.forEach(window => {
+                    eraMessageCount += window.messages.length;
+                });
+
+                // Era header row
+                html += `
+                    <tr style="background: #3e3e42; font-weight: bold; cursor: pointer;" onclick="toggleEra('${era.id}')">
+                        <td colspan="2" class="expand-icon">${eraIcon}</td>
+                        <td colspan="10" style="padding: 8px;">
+                            ${era.name} (${era.context_windows.length} windows, ${eraMessageCount} messages)
+                        </td>
+                    </tr>
+                `;
+
+                if (!eraCollapsed) {
+                    // Recursive function to render a window and its child splits
+                    function renderWindow(window, depth = 0, parentIndent = 20) {
+                        const windowCollapsed = collapsedWindows.has(window.id);
+                        const windowIcon = windowCollapsed ? '►' : '▼';
+                        const childCount = window.child_windows ? window.child_windows.length : 0;
+                        const childSuffix = childCount > 0 ? ` · ${childCount} splits` : '';
+
+                        // Context window header row
+                        html += `
+                            <tr style="background: #2d2d30; font-weight: bold; cursor: pointer;" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
+                                <td></td>
+                                <td class="expand-icon">${windowIcon}</td>
+                                <td colspan="10" style="padding: 6px; padding-left: ${parentIndent}px;">
+                                    ${window.type_display} (${window.messages.length} messages)${childSuffix}
+                                </td>
+                            </tr>
+                        `;
+
+                        if (!windowCollapsed) {
+                            // If this window has child splits, wrap messages in "Main flow"
+                            if (childCount > 0) {
+                                const mainFlowCollapsed = collapsedMainFlows.has(window.id);
+                                const mainFlowIcon = mainFlowCollapsed ? '►' : '▼';
+                                const mainFlowIndent = parentIndent + 20;
+
+                                html += `
+                                    <tr style="background: #252526; font-style: italic; cursor: pointer;" onclick="event.stopPropagation(); toggleMainFlow('${window.id}')">
+                                        <td></td>
+                                        <td></td>
+                                        <td class="expand-icon">${mainFlowIcon}</td>
+                                        <td colspan="9" style="padding: 4px; padding-left: ${mainFlowIndent}px;">
+                                            Main flow (${window.messages.length} messages)
+                                        </td>
+                                    </tr>
+                                `;
+
+                                if (!mainFlowCollapsed) {
+                                    // Render messages
+                                    const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+                                    const filtered = baseMessages.filter(m => {
+                                        if (search && !m.content.toLowerCase().includes(search)) return false;
+                                        if (minLength && m.content.length < minLength) return false;
+                                        if (person && m.sender !== person && !m.recipients.includes(person)) return false;
+                                        if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
+                                        return true;
+                                    });
+
+                                    filtered.forEach((m, idx) => {
+                                        if (flatView) {
+                                            const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
+                                            html += rendered.html;
+                                            rowNumber++;
+                                        } else {
+                                            const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
+                                            html += rendered.html;
+                                            rowNumber = rendered.nextRowNumber;
+                                        }
+                                    });
+
+                                    totalMessages += filtered.length;
+                                }
+
+                                // Render child split windows as siblings to main flow (same indent)
+                                window.child_windows.forEach(childWindow => {
+                                    renderWindow(childWindow, depth + 1, mainFlowIndent);
+                                });
+                            } else {
+                                // No child splits, just render messages directly
+                                const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+                                const filtered = baseMessages.filter(m => {
+                                    if (search && !m.content.toLowerCase().includes(search)) return false;
+                                    if (minLength && m.content.length < minLength) return false;
+                                    if (person && m.sender !== person && !m.recipients.includes(person)) return false;
+                                    if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
+                                    return true;
+                                });
+
+                                filtered.forEach((m, idx) => {
+                                    if (flatView) {
+                                        const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
+                                        html += rendered.html;
+                                        rowNumber++;
+                                    } else {
+                                        const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
+                                        html += rendered.html;
+                                        rowNumber = rendered.nextRowNumber;
+                                    }
+                                });
+
+                                totalMessages += filtered.length;
+                            }
+                        }
+                    }
+
+                    era.context_windows.forEach(window => {
+                        renderWindow(window);
+                    });
+                }
+            });
+
+            const countText = `${totalMessages} messages shown (${allMessages.length} total)`;
+            document.getElementById('messageCount').textContent = countText;
+
+            tbody.innerHTML = html;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('messagesTable').style.display = 'table';
+        }
+
+        function toggleEra(eraId) {
+            if (collapsedEras.has(eraId)) {
+                collapsedEras.delete(eraId);
+            } else {
+                collapsedEras.add(eraId);
+            }
+            renderMessages();
+        }
+
+        function toggleWindow(windowId) {
+            if (collapsedWindows.has(windowId)) {
+                collapsedWindows.delete(windowId);
+            } else {
+                collapsedWindows.add(windowId);
+            }
+            renderMessages();
+        }
+
+        function toggleMainFlow(windowId) {
+            if (collapsedMainFlows.has(windowId)) {
+                collapsedMainFlows.delete(windowId);
+            } else {
+                collapsedMainFlows.add(windowId);
+            }
+            renderMessages();
+        }
+
+        function countDescendants(msg) {
+            if (!msg.children || msg.children.length === 0) return 0;
+            let count = msg.children.length;
+            msg.children.forEach(child => {
+                count += countDescendants(child);
+            });
+            return count;
+        }
+
+        function renderMessage(m, depth, idx, autoExpand, showThinking, rowNumber = null) {
+            const timestamp = m.timestamp
+                ? new Date(m.timestamp * 1000).toISOString().replace('T', ' ').substring(0, 19)
+                : '';
+
+            const hasChildren = m.children && m.children.length > 0;
+            const isExpanded = expandedRows.has(m.id) || (autoExpand && hasChildren);
+            const descendantCount = hasChildren ? countDescendants(m) : 0;
+            const expandIcon = hasChildren ? (isExpanded ? `▼ ${descendantCount}` : `► ${descendantCount}`) : ' ';
+
+            let rowClass = '';
+            if (m.message_type === 'thought') {
+                rowClass = 'thinking';
+            } else if (m.sender === 'justin') {
+                rowClass = 'justin';
+            } else if (m.sender === 'magent') {
+                rowClass = 'magent';
+            }
+            if (depth > 0) rowClass += ' child';
+
+            const thinkingMarker = m.message_type === 'thought' ? '<span class="thinking-marker">[THINKING]</span>' : '';
+            const typeMarker = m.message_type === 'tool_use' ? '<span class="type-marker">[TOOL]</span>' :
+                             m.message_type === 'tool_result' ? '<span class="type-marker">[RESULT]</span>' : '';
+            const preview = m.content ? (m.content.length > 200 ? m.content.substring(0, 200) + '...' : m.content) : '';
+            const indentClass = depth > 0 ? `indent-${Math.min(depth, 2)}` : '';
+            const uuid = m.id ? m.id.substring(0, 8) : '';
+
+            const recipientsDisplay = Array.isArray(m.recipients) ? m.recipients.join(', ') : m.recipients;
+            const sourceFile = m.source_file || '';
+            const rowNumDisplay = rowNumber !== null ? rowNumber : '';
+            const missingMarker = m.missing_from_markdown ? '✗' : '';
+
+            let html = `
+                <tr class="${rowClass}" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
+                    <td class="missing-marker">${missingMarker}</td>
+                    <td class="row-num">${rowNumDisplay}</td>
+                    <td class="num">${m.message_number || '?'}</td>
+                    <td class="expand-icon">${expandIcon}</td>
+                    <td class="importance">${m.message_type}</td>
+                    <td class="from ${indentClass}">${m.sender}${thinkingMarker}${typeMarker}</td>
+                    <td class="arrow">→</td>
+                    <td class="to">${recipientsDisplay}</td>
+                    <td class="content">${escapeHtml(preview)}</td>
+                    <td class="timestamp">${timestamp}</td>
+                    <td class="source">${sourceFile}</td>
+                    <td class="uuid">${uuid}</td>
+                </tr>
+            `;
+
+            let nextRowNumber = rowNumber !== null ? rowNumber + 1 : null;
+
+            // Add children if expanded
+            if (isExpanded && hasChildren) {
+                m.children.forEach((child, childIdx) => {
+                    if (!showThinking && (child.message_type === 'thought' || child.message_type === 'context_opening_thought')) return;
+                    const childRendered = renderMessage(child, depth + 1, childIdx, autoExpand, showThinking, nextRowNumber);
+                    html += childRendered.html;
+                    nextRowNumber = childRendered.nextRowNumber;
+                });
+            }
+
+            return { html, nextRowNumber };
+        }
+
+        function expandAllDescendants(msg) {
+            if (!msg.children || msg.children.length === 0) return;
+            msg.children.forEach(child => {
+                expandedRows.add(child.id);
+                expandAllDescendants(child);
+            });
+        }
+
+        function collapseAllDescendants(msg) {
+            if (!msg.children || msg.children.length === 0) return;
+            msg.children.forEach(child => {
+                expandedRows.delete(child.id);
+                collapseAllDescendants(child);
+            });
+        }
+
+        function toggleRow(messageId) {
+            event.stopPropagation();
+
+            // Don't toggle if user is selecting text
+            const selection = window.getSelection();
+            if (selection.toString().length > 0) {
+                return;
+            }
+
+            const message = allMessages.find(m => m.id === messageId);
+            const row = event.target.closest('tr');
+            const clickedElement = event.target;
+
+            // If clicked on expand icon and message has children, expand/collapse tree
+            if (clickedElement.classList.contains('expand-icon') && message.children && message.children.length > 0) {
+                if (expandedRows.has(messageId)) {
+                    expandedRows.delete(messageId);
+                    collapseAllDescendants(message);
+                } else {
+                    expandedRows.add(messageId);
+                    expandAllDescendants(message);
+                }
+                renderMessages();
+                return;
+            }
+
+            // If clicked on content, toggle text expansion
+            const contentCell = row.querySelector('.content');
+            const isExpanded = row.classList.contains('expanded');
+
+            if (isExpanded) {
+                row.classList.remove('expanded');
+                const preview = message.content.length > 200 ? message.content.substring(0, 200) + '...' : message.content;
+                contentCell.textContent = preview;
+            } else {
+                row.classList.add('expanded');
+                contentCell.textContent = message.content;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Set up filter listeners
+        document.getElementById('searchFilter').addEventListener('input', renderMessages);
+        document.getElementById('minLengthFilter').addEventListener('input', renderMessages);
+        document.getElementById('personFilter').addEventListener('change', renderMessages);
+        document.getElementById('showChildrenFilter').addEventListener('change', renderMessages);
+        document.getElementById('showThinkingFilter').addEventListener('change', renderMessages);
+        document.getElementById('flatViewFilter').addEventListener('change', renderMessages);
+
+        // Load on page load
+        loadMessages();
+    </script>
+</body>
+</html>

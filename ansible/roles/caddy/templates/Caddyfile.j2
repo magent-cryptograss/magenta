@@ -1,0 +1,11 @@
+# Auto-generated Caddyfile for Magenta multi-user environment
+
+{% for user in users %}
+# {{ user.full_name }} - Port range {{ user.port_range_start }}-{{ user.port_range_start + 9 }}
+{% for i in range(10) %}
+{{ user.name }}{{ i }}.{{ base_domain }} {
+    reverse_proxy localhost:{{ user.port_range_start + i }}
+}
+
+{% endfor %}
+{% endfor %}

@@ -1,0 +1,116 @@
+from django.contrib import admin
+from .models import (
+    ThinkingEntity,
+    Era,
+    ContextWindow,
+    Message,
+    Thought,
+    ToolUse,
+    ToolResult,
+    CompactingAction,
+    Topic,
+    Note
+)
+
+
+@admin.register(ThinkingEntity)
+class ThinkingEntityAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_biological_human')
+    list_filter = ('is_biological_human',)
+    search_fields = ('name',)
+
+
+@admin.register(Era)
+class EraAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at')
+    search_fields = ('name',)
+    readonly_fields = ('id', 'created_at')
+
+
+@admin.register(ContextWindow)
+class ContextWindowAdmin(admin.ModelAdmin):
+    list_display = ('id', 'era', 'type', 'first_message', 'created_at')
+    list_filter = ('era', 'type')
+    search_fields = ('id',)
+    readonly_fields = ('id', 'created_at')
+
+
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('id', 'sender', 'get_recipients', 'timestamp', 'session_id', 'get_type')
+    list_filter = ('sender',)
+    search_fields = ('id', 'session_id')
+    readonly_fields = ('id', 'created_at')
+
+    def get_recipients(self, obj):
+        return ', '.join(r.name for r in obj.recipients.all())
+    get_recipients.short_description = 'Recipients'
+
+    def get_type(self, obj):
+        """Determine polymorphic type"""
+        if hasattr(obj, 'thought'):
+            return 'thought'
+        elif hasattr(obj, 'tooluse'):
+            return 'tool_use'
+        elif hasattr(obj, 'toolresult'):
+            return 'tool_result'
+        return 'message'
+    get_type.short_description = 'Type'
+
+
+@admin.register(Thought)
+class ThoughtAdmin(admin.ModelAdmin):
+    list_display = ('id', 'sender', 'content_preview', 'timestamp')
+    search_fields = ('id', 'content', 'signature')
+    readonly_fields = ('id', 'created_at', 'signature')
+
+    def content_preview(self, obj):
+        content_str = str(obj.content)
+        return content_str[:100] + '...' if len(content_str) > 100 else content_str
+    content_preview.short_description = 'Thought'
+
+
+@admin.register(ToolUse)
+class ToolUseAdmin(admin.ModelAdmin):
+    list_display = ('id', 'tool_name', 'tool_id', 'sender', 'timestamp')
+    list_filter = ('tool_name',)
+    search_fields = ('id', 'tool_name', 'tool_id')
+    readonly_fields = ('id', 'created_at')
+
+
+@admin.register(ToolResult)
+class ToolResultAdmin(admin.ModelAdmin):
+    list_display = ('id', 'tool_use_id', 'is_error', 'content_preview', 'timestamp')
+    list_filter = ('is_error',)
+    search_fields = ('id', 'tool_use_id', 'content')
+    readonly_fields = ('id', 'created_at')
+
+    def content_preview(self, obj):
+        content_str = str(obj.content)
+        return content_str[:100] + '...' if len(content_str) > 100 else content_str
+    content_preview.short_description = 'Content'
+
+
+@admin.register(CompactingAction)
+class CompactingActionAdmin(admin.ModelAdmin):
+    list_display = ('context_window', 'ending_message_id', 'compact_trigger', 'created_at')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(Topic)
+class TopicAdmin(admin.ModelAdmin):
+    list_display = ('name', 'category', 'description')
+    list_filter = ('category',)
+    search_fields = ('name', 'description')
+
+
+@admin.register(Note)
+class NoteAdmin(admin.ModelAdmin):
+    list_display = ('id', 'message', 'author', 'content_preview', 'created_at')
+    list_filter = ('author',)
+    search_fields = ('content',)
+    readonly_fields = ('id', 'created_at')
+
+    def content_preview(self, obj):
+        return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content
+    content_preview.short_description = 'Content'

@@ -1,0 +1,46 @@
+all:
+  hosts:
+    hunter:  # After Robert Hunter
+      ansible_host: 5.78.83.4
+      ansible_user: root
+      # ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+  vars:
+    # Shared PostgreSQL configuration
+    postgres_password: "{{ vault_postgres_password }}"
+    postgres_db: cryptograss_memory
+
+    # Base directory for all instances
+    base_dir: /opt/magenta
+
+    # Domain for subdomains
+    base_domain: hunter.cryptograss.live
+
+    # User instances configuration
+    users:
+      - name: justin
+        full_name: "Justin Holmes"
+        email: "justin@justinholmes.com"
+        github_username: "jMyles"
+        ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINKHaQ2Nt6I/ADwE+ybNAyBUDG4APLTgu0oQ0V5Jsa0E jmyles@lukowala"  # Replace with: cat ~/.ssh/id_ed25519.pub
+        ssh_port: 2222
+        port_range_start: 14000  # 14000-14009
+        code_server_password: "{{ vault_justin_password }}"
+
+      # Uncomment when ready to add more users:
+      # - name: rj
+      #   full_name: "R.J. Partington III"
+      #   email: "rj@example.com"
+      #   github_username: "rjpartingtoniii"
+      #   ssh_pubkey: "rj_ssh_key_here"
+      #   ssh_port: 2223
+      #   port_range_start: 14010
+      #   code_server_password: "{{ vault_rj_password | default('change-me-rj') }}"
+
+      # - name: skyler
+      #   full_name: "Skyler Golden"
+      #   email: "skyler@example.com"
+      #   github_username: "AudioSkyWalker"
+      #   ssh_pubkey: "skyler_ssh_key_here"
+      #   ssh_port: 2224
+      #   port_range_start: 14020
+      #   code_server_password: "{{ vault_skyler_password | default('change-me-skyler') }}"
