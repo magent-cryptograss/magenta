@@ -10,17 +10,16 @@ from .models import (
 
 def memory_lane(request):
     """Main memory viewer/editor page."""
-    database = request.GET.get('db', 'default')
-    return render(request, 'conversations/memory_lane.html', {'database': database})
+    return render(request, 'conversations/memory_lane.html')
 
 
 def all_messages(request):
     """Messages grouped by Era and ContextWindow."""
-    database = request.GET.get('db', 'default')
-
     # Get all context windows with their eras
-    from .models import ContextWindow, Era
-    eras = Era.objects.using(database).prefetch_related(
+    from .models import ContextWindow, Era, Note
+    from django.contrib.contenttypes.models import ContentType
+
+    eras = Era.objects.prefetch_related(
         'context_windows__messages__sender',
         'context_windows__messages__recipients'
     ).order_by('created_at')
@@ -29,12 +28,29 @@ def all_messages(request):
         'eras': []
     }
 
+    # Get content types for lookups
+    message_ct = ContentType.objects.get(app_label='conversations', model='message')
+    window_ct = ContentType.objects.get(app_label='conversations', model='contextwindow')
+    era_ct = ContentType.objects.get(app_label='conversations', model='era')
+
     for era in eras:
+        # Get notes for this era
+        era_notes = Note.objects.filter(
+            content_type=era_ct,
+            object_id=era.id
+        ).order_by('created_at')
+
         era_data = {
             'id': str(era.id),
             'name': era.name,
             'created_at': era.created_at.isoformat(),
-            'context_windows': []
+            'context_windows': [],
+            'notes': [{
+                'id': str(note.id),
+                'from_entity': note.from_entity.name,
+                'content': note.content,
+                'created_at': note.created_at.isoformat()
+            } for note in era_notes]
         }
 
         # Get all windows for this era
@@ -42,6 +58,12 @@ def all_messages(request):
 
         # Build hierarchy: find root windows (non-split) and their children (splits)
         def serialize_window(window):
+            # Get notes for this window
+            window_notes = Note.objects.filter(
+                content_type=window_ct,
+                object_id=window.id
+            ).order_by('created_at')
+
             window_data = {
                 'id': str(window.id),
                 'type': window.type,
@@ -49,12 +71,24 @@ def all_messages(request):
                 'first_message_id': str(window.first_message_id),
                 'created_at': window.created_at.isoformat(),
                 'messages': [],
-                'child_windows': []
+                'child_windows': [],
+                'notes': [{
+                    'id': str(note.id),
+                    'from_entity': note.from_entity.name,
+                    'content': note.content,
+                    'created_at': note.created_at.isoformat()
+                } for note in window_notes]
             }
 
             # Get messages for this window
             messages = window.messages.all().order_by('message_number')
             for msg in messages:
+                # Get notes for this message
+                msg_notes = Note.objects.filter(
+                    content_type=message_ct,
+                    object_id=msg.id
+                ).order_by('created_at')
+
                 window_data['messages'].append({
                     'id': str(msg.id),
                     'message_number': msg.message_number,
@@ -67,6 +101,12 @@ def all_messages(request):
                     'session_id': str(msg.session_id) if msg.session_id else None,
                     'source_file': msg.source_file,
                     'missing_from_markdown': msg.missing_from_markdown,
+                    'notes': [{
+                        'id': str(note.id),
+                        'from_entity': note.from_entity.name,
+                        'content': note.content,
+                        'created_at': note.created_at.isoformat()
+                    } for note in msg_notes]
                 })
 
             # Find child split windows
@@ -90,9 +130,6 @@ def all_messages(request):
 
 def api_messages(request):
     """API endpoint for fetching messages with filtering."""
-    # Get database parameter
-    database = request.GET.get('db', 'default')
-
     # Get filter parameters
     search = request.GET.get('search', '').lower()
     person = request.GET.get('person', '')
@@ -101,7 +138,7 @@ def api_messages(request):
     limit = int(request.GET.get('limit', 100))
 
     # Start with all messages from base table
-    messages = Message.objects.using(database).all()
+    messages = Message.objects.all()
 
     # Apply filters
     if person:

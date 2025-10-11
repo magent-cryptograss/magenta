@@ -106,10 +106,14 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'message', 'author', 'content_preview', 'created_at')
-    list_filter = ('author',)
+    list_display = ('id', 'from_entity', 'about_type', 'content_preview', 'created_at')
+    list_filter = ('from_entity', 'content_type')
     search_fields = ('content',)
     readonly_fields = ('id', 'created_at')
+
+    def about_type(self, obj):
+        return obj.content_type.model if obj.content_type else '?'
+    about_type.short_description = 'About'
 
     def content_preview(self, obj):
         return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content

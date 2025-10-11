@@ -18,6 +18,8 @@ Message hierarchy (polymorphic):
 """
 
 from django.db import models
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 import uuid
 
 
@@ -330,25 +332,38 @@ class MessageTopic(models.Model):
 
 class Note(models.Model):
     """
-    Notes about messages.
+    Notes about various objects (messages, context windows, eras).
 
-    Notes are authored by thinking entities (humans or AI) and attached to messages.
-    Examples: import metadata, editorial comments, corrections, context.
+    Notes are authored by thinking entities (humans or AI) and can be attached to
+    any model using generic foreign keys.
+
+    Examples: import metadata, editorial comments, corrections, context about
+    incomplete conversations, compacting decisions.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    message = models.ForeignKey(Message, models.CASCADE, related_name='notes')
-    author = models.ForeignKey(ThinkingEntity, models.PROTECT, related_name='authored_notes')
+
+    # Generic foreign key to attach notes to any model
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    about = GenericForeignKey('content_type', 'object_id')
+
+    # Who wrote this note
+    from_entity = models.ForeignKey(ThinkingEntity, models.PROTECT, related_name='authored_notes')
+
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = 'notes'
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
         ordering = ['created_at']
 
     def __str__(self):
         preview = self.content[:50] + '...' if len(self.content) > 50 else self.content
-        return f"{self.author.name}: {preview}"
+        return f"Note by {self.from_entity}: {preview}"
 
 
 class ConversationFile(models.Model):

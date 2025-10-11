@@ -168,6 +168,60 @@
             font-size: 10px;
             margin-left: 5px;
         }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background-color: #252526;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #3e3e42;
+            width: 70%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 4px;
+        }
+        .modal-header {
+            color: #cccccc;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3e3e42;
+        }
+        .modal-close {
+            color: #858585;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-close:hover {
+            color: #cccccc;
+        }
+        .note-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: #2d2d30;
+            border-left: 3px solid #ce9178;
+        }
+        .note-author {
+            color: #ce9178;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+        .note-content {
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
@@ -204,6 +258,17 @@
     <table id="messagesTable" style="display: none;">
         <tbody id="messagesBody"></tbody>
     </table>
+
+    <!-- Modal for displaying notes -->
+    <div id="notesModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeNotesModal()">&times;</span>
+                <span id="modalTitle">Notes</span>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
 
     <script>
         let eraData = null;
@@ -283,12 +348,21 @@
                     eraMessageCount += window.messages.length;
                 });
 
+                // Build era note icons
+                let eraNoteIcons = '';
+                if (era.notes && era.notes.length > 0) {
+                    const eraNotesId = `era-notes-${era.id}`;
+                    // Store notes data in the global object
+                    globalThis[eraNotesId] = era.notes;
+                    eraNoteIcons += ` <span class="note-icon" data-notes-id="${eraNotesId}" data-title="${escapeHtml(era.name)} Notes" style="font-size: 0.9em; cursor: pointer; color: #ce9178;">📝 ${era.notes.length}</span>`;
+                }
+
                 // Era header row
                 html += `
                     <tr style="background: #3e3e42; font-weight: bold; cursor: pointer;" onclick="toggleEra('${era.id}')">
                         <td colspan="2" class="expand-icon">${eraIcon}</td>
                         <td colspan="10" style="padding: 8px;">
-                            ${era.name} (${era.context_windows.length} windows, ${eraMessageCount} messages)
+                            ${era.name} (${era.context_windows.length} windows, ${eraMessageCount} messages)${eraNoteIcons}
                         </td>
                     </tr>
                 `;
@@ -301,13 +375,22 @@
                         const childCount = window.child_windows ? window.child_windows.length : 0;
                         const childSuffix = childCount > 0 ? ` · ${childCount} splits` : '';
 
+                        // Build window note icons
+                        let windowNoteIcons = '';
+                        if (window.notes && window.notes.length > 0) {
+                            const windowNotesId = `window-notes-${window.id}`;
+                            // Store notes data in the global window object (not the function parameter)
+                            globalThis[windowNotesId] = window.notes;
+                            windowNoteIcons += ` <span class="note-icon" data-notes-id="${windowNotesId}" data-title="Context Window Notes" style="font-size: 0.9em; cursor: pointer; color: #ce9178;">📝 ${window.notes.length}</span>`;
+                        }
+
                         // Context window header row
                         html += `
                             <tr style="background: #2d2d30; font-weight: bold; cursor: pointer;" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
                                 <td></td>
                                 <td class="expand-icon">${windowIcon}</td>
                                 <td colspan="10" style="padding: 6px; padding-left: ${parentIndent}px;">
-                                    ${window.type_display} (${window.messages.length} messages)${childSuffix}
+                                    ${window.type_display} (${window.messages.length} messages)${childSuffix}${windowNoteIcons}
                                 </td>
                             </tr>
                         `;
@@ -470,6 +553,15 @@
             const rowNumDisplay = rowNumber !== null ? rowNumber : '';
             const missingMarker = m.missing_from_markdown ? '✗' : '';
 
+            // Build note icons with hover tooltips
+            let noteIcons = '';
+            if (m.notes && m.notes.length > 0) {
+                m.notes.forEach(note => {
+                    const truncated = note.content.length > 100 ? note.content.substring(0, 100) + '...' : note.content;
+                    noteIcons += `<span style="font-size: 0.7em; cursor: help;" title="[${note.from_entity}] ${escapeHtml(truncated)}">📝</span> `;
+                });
+            }
+
             let html = `
                 <tr class="${rowClass}" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
                     <td class="missing-marker">${missingMarker}</td>
@@ -480,7 +572,7 @@
                     <td class="from ${indentClass}">${m.sender}${thinkingMarker}${typeMarker}</td>
                     <td class="arrow">→</td>
                     <td class="to">${recipientsDisplay}</td>
-                    <td class="content">${escapeHtml(preview)}</td>
+                    <td class="content">${noteIcons}${escapeHtml(preview)}</td>
                     <td class="timestamp">${timestamp}</td>
                     <td class="source">${sourceFile}</td>
                     <td class="uuid">${uuid}</td>
@@ -544,17 +636,48 @@
                 return;
             }
 
-            // If clicked on content, toggle text expansion
-            const contentCell = row.querySelector('.content');
+            // If clicked on content, toggle text expansion and show notes
             const isExpanded = row.classList.contains('expanded');
+            const expandedRowId = `expanded-${messageId}`;
+            let expandedRow = document.getElementById(expandedRowId);
 
             if (isExpanded) {
+                // Collapse
                 row.classList.remove('expanded');
-                const preview = message.content.length > 200 ? message.content.substring(0, 200) + '...' : message.content;
-                contentCell.textContent = preview;
+                if (expandedRow) {
+                    expandedRow.remove();
+                }
             } else {
+                // Expand
                 row.classList.add('expanded');
-                contentCell.textContent = message.content;
+
+                // Create expanded row with full content and notes
+                if (!expandedRow) {
+                    expandedRow = document.createElement('tr');
+                    expandedRow.id = expandedRowId;
+                    expandedRow.classList.add('expanded-details');
+                    expandedRow.style.background = row.style.background || '#1e1e1e';
+
+                    let expandedContent = `<td colspan="12" style="padding: 10px 20px; border-left: 3px solid #007acc;">`;
+                    expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(message.content)}</div>`;
+
+                    // Add notes if present
+                    if (message.notes && message.notes.length > 0) {
+                        expandedContent += `<div style="border-top: 1px solid #3e3e42; padding-top: 10px; margin-top: 10px;">`;
+                        expandedContent += `<div style="color: #858585; font-size: 11px; margin-bottom: 5px;">NOTES:</div>`;
+                        message.notes.forEach(note => {
+                            expandedContent += `<div style="margin-bottom: 8px; padding: 8px; background: #2d2d30; border-left: 2px solid #ce9178;">`;
+                            expandedContent += `<div style="color: #ce9178; font-size: 10px; margin-bottom: 4px;">[${note.from_entity}]</div>`;
+                            expandedContent += `<div style="white-space: pre-wrap;">${escapeHtml(note.content)}</div>`;
+                            expandedContent += `</div>`;
+                        });
+                        expandedContent += `</div>`;
+                    }
+
+                    expandedContent += `</td>`;
+                    expandedRow.innerHTML = expandedContent;
+                    row.after(expandedRow);
+                }
             }
         }
 
@@ -564,6 +687,20 @@
             return div.innerHTML;
         }
 
+        // Handle note icon clicks with event delegation
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('note-icon')) {
+                e.stopPropagation();
+                e.preventDefault();
+                const notesId = e.target.dataset.notesId;
+                const title = e.target.dataset.title;
+                const notes = globalThis[notesId];
+                if (notes) {
+                    showNotesModal(title, notes);
+                }
+            }
+        }, true); // Use capture phase to intercept before bubbling
+
         // Set up filter listeners
         document.getElementById('searchFilter').addEventListener('input', renderMessages);
         document.getElementById('minLengthFilter').addEventListener('input', renderMessages);
@@ -571,6 +708,39 @@
         document.getElementById('showChildrenFilter').addEventListener('change', renderMessages);
         document.getElementById('showThinkingFilter').addEventListener('change', renderMessages);
         document.getElementById('flatViewFilter').addEventListener('change', renderMessages);
+
+        function showNotesModal(title, notes) {
+            const modal = document.getElementById('notesModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.textContent = title;
+
+            let html = '';
+            notes.forEach(note => {
+                html += `
+                    <div class="note-item">
+                        <div class="note-author">[${escapeHtml(note.from_entity)}]</div>
+                        <div class="note-content">${escapeHtml(note.content)}</div>
+                    </div>
+                `;
+            });
+
+            modalBody.innerHTML = html;
+            modal.style.display = 'block';
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('notesModal');
+            if (event.target === modal) {
+                closeNotesModal();
+            }
+        }
 
         // Load on page load
         loadMessages();
