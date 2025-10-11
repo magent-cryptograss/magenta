@@ -49,6 +49,7 @@ def all_messages(request):
                 'id': str(note.id),
                 'from_entity': note.from_entity.name,
                 'content': note.content,
+                'eth_blockheight': note.eth_blockheight,
                 'created_at': note.created_at.isoformat()
             } for note in era_notes]
         }
@@ -76,6 +77,7 @@ def all_messages(request):
                     'id': str(note.id),
                     'from_entity': note.from_entity.name,
                     'content': note.content,
+                    'eth_blockheight': note.eth_blockheight,
                     'created_at': note.created_at.isoformat()
                 } for note in window_notes]
             }
@@ -105,6 +107,7 @@ def all_messages(request):
                         'id': str(note.id),
                         'from_entity': note.from_entity.name,
                         'content': note.content,
+                        'eth_blockheight': note.eth_blockheight,
                         'created_at': note.created_at.isoformat()
                     } for note in msg_notes]
                 })

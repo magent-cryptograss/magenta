@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-zqun#rs1hda@a#za&#&9p7qs-5@hvh97nepfddp%mt6#^l078d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'hunter.cryptograss.live']
 
 
 # Application definition

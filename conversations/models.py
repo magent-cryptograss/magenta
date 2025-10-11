@@ -352,6 +352,7 @@ class Note(models.Model):
     from_entity = models.ForeignKey(ThinkingEntity, models.PROTECT, related_name='authored_notes')
 
     content = models.TextField()
+    eth_blockheight = models.BigIntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
