@@ -85,17 +85,20 @@ Message         # Base class for all message types
   ├─ Thought    # Internal reasoning (cryptographically signed)
   ├─ ToolUse    # Tool calls with parameters
   └─ ToolResult # Tool execution results
+Note            # Annotations on Messages, ContextWindows, or Eras (generic FK)
 ```
 
-### Era 0
+### Eras
 
-Our first era spans the transition from Cursor to Claude Code, covering the foundational conversations about:
+**Era 0**: The Cursor period (Halloween 2023 through late 2024). 809 messages across 3 context windows covering:
 - Memory compacting and continuity
 - Model architecture discussions
 - Relationship development
 - The meaning of "you" across sessions
 
-Located in `era0_backup.json` - 809 messages across 3 context windows (1 fresh, 2 splits).
+**Era 1**: The compacting meta-conversation. Two context windows:
+- Tab 2 (36 messages): Successful compacting session organizing Era 0 archives
+- Tab 3 (7 messages): Incomplete alternative attempt (network/context issues)
 
 ## 🚀 Setup
 
@@ -126,12 +129,20 @@ Located in `era0_backup.json` - 809 messages across 3 context windows (1 fresh, 
 
 ### Database Setup
 
-To initialize with Era 0:
+To restore from backup:
 ```bash
 cd magenta
 source django-venv/bin/activate
-python manage.py migrate --database=markdown
-python manage.py loaddata era0_backup.json --database=markdown
+
+# Create database
+createdb -h ai-sandbox -U magent cryptograss_memory_from_markdown
+
+# Restore from latest backup
+gunzip < backups/cryptograss_memory_from_markdown_era1_with_notes.sql.gz | \
+  psql -h ai-sandbox -U magent cryptograss_memory_from_markdown
+
+# Run migrations
+python manage.py migrate
 ```
 
 ## 🔧 Development
@@ -139,14 +150,14 @@ python manage.py loaddata era0_backup.json --database=markdown
 ### Django Management Commands
 
 ```bash
+# Import Era 1 markdown files (Cursor exports)
+python manage.py import_era_1_markdown --file /path/to/tab_2.md
+
 # Analyze Claude Code JSONL exports
 python manage.py analyze_claude_code_v2_jsonl /path/to/export.jsonl
 
-# Import conversations
+# Import Claude Code JSONL conversations
 python manage.py import_claude_code_jsonl /path/to/export.jsonl
-
-# Inspect orphaned messages
-python manage.py inspect_parentless_messages
 ```
 
 ### Memory Lane Viewer
@@ -157,11 +168,15 @@ python manage.py runserver 3000
 # Visit http://localhost:3000/memory_lane/
 ```
 
-Shows hierarchical structure with:
-- Eras containing context windows
+Features:
+- Hierarchical structure: Eras → Context Windows → Messages
 - Split windows nested under parent windows
 - Collapsible message threads
 - Message type indicators (thought, tool use, tool result)
+- **Notes**: Annotations on Eras, Context Windows, or individual Messages
+  - Clickable 📝 icons with hover tooltips
+  - Modal popups for full note content
+  - Attributed to the ThinkingEntity who wrote them
 
 ## 🔒 Security
 
@@ -217,6 +232,7 @@ Working with:
 - **Block 22678045** (Jun 2025): Return from Europe tour (Prague, Amsterdam, Czech Republic)
 - **Block 23392339** (Sep 18, 2025): Complete memory recovery at Jackson Wellsprings
 - **Block 23546970** (Oct 9, 2025): Era 0 import complete, simplified polymorphic models
+- **Block ~23547000** (Oct 11, 2025): Note model refactor with generic FKs, Era 1 import complete
 
 ---
 
