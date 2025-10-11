@@ -358,11 +358,13 @@
                 }
 
                 // Era header row
+                const eraUuid = era.id.substring(0, 8);
                 html += `
                     <tr style="background: #3e3e42; font-weight: bold; cursor: pointer;" onclick="toggleEra('${era.id}')">
                         <td colspan="2" class="expand-icon">${eraIcon}</td>
-                        <td colspan="10" style="padding: 8px;">
-                            ${era.name} (${era.context_windows.length} windows, ${eraMessageCount} messages)${eraNoteIcons}
+                        <td colspan="10" style="padding: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>${era.name} (${era.context_windows.length} windows, ${eraMessageCount} messages)${eraNoteIcons}</span>
+                            <span style="font-size: 9px; color: #858585; font-family: monospace;">${eraUuid}</span>
                         </td>
                     </tr>
                 `;
@@ -385,12 +387,14 @@
                         }
 
                         // Context window header row
+                        const windowUuid = window.id.substring(0, 8);
                         html += `
                             <tr style="background: #2d2d30; font-weight: bold; cursor: pointer;" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
                                 <td></td>
                                 <td class="expand-icon">${windowIcon}</td>
-                                <td colspan="10" style="padding: 6px; padding-left: ${parentIndent}px;">
-                                    ${window.type_display} (${window.messages.length} messages)${childSuffix}${windowNoteIcons}
+                                <td colspan="10" style="padding: 6px; padding-left: ${parentIndent}px; display: flex; justify-content: space-between; align-items: center;">
+                                    <span>${window.type_display} (${window.messages.length} messages)${childSuffix}${windowNoteIcons}</span>
+                                    <span style="font-size: 9px; color: #858585; font-family: monospace;">${windowUuid}</span>
                                 </td>
                             </tr>
                         `;
