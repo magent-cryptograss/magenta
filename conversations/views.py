@@ -44,6 +44,8 @@ def all_messages(request):
             'id': str(era.id),
             'name': era.name,
             'created_at': era.created_at.isoformat(),
+            'earliest_blockheight': era.earliest_blockheight(),
+            'latest_blockheight': era.latest_blockheight(),
             'context_windows': [],
             'notes': [{
                 'id': str(note.id),
@@ -71,6 +73,8 @@ def all_messages(request):
                 'type_display': window.get_type_display(),
                 'first_message_id': str(window.first_message_id),
                 'created_at': window.created_at.isoformat(),
+                'earliest_blockheight': window.earliest_blockheight(),
+                'latest_blockheight': window.latest_blockheight(),
                 'messages': [],
                 'child_windows': [],
                 'notes': [{
@@ -99,6 +103,8 @@ def all_messages(request):
                     'recipients': [r.name for r in msg.recipients.all()],
                     'content': str(msg.content),
                     'timestamp': msg.timestamp,
+                    'eth_blockheight': msg.eth_blockheight,
+                    'eth_block_offset': msg.eth_block_offset,
                     'created_at': msg.created_at.isoformat(),
                     'session_id': str(msg.session_id) if msg.session_id else None,
                     'source_file': msg.source_file,

@@ -146,12 +146,21 @@
         }
         .indent-1 { padding-left: 40px !important; }
         .indent-2 { padding-left: 80px !important; }
+        .blockheight {
+            color: #569cd6;
+            width: 85px;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        body.light-mode .blockheight {
+            color: #0066cc;
+        }
         .num {
             color: #858585;
             width: 50px;
             text-align: right;
             font-size: 10px;
-            display: none;
         }
         body.light-mode .num {
             color: #666666;
@@ -219,7 +228,9 @@
         }
         .content {
             color: #d4d4d4;
-            /* No width constraint - takes remaining space */
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         body.light-mode .content {
             color: #1a1a1a;
@@ -378,6 +389,13 @@
         body.light-mode .window-uuid {
             color: #666666;
         }
+        .window-preview-text {
+            color: #999;
+            font-style: italic;
+        }
+        body.light-mode .window-preview-text {
+            color: #666;
+        }
         .main-flow-header {
             background: #252526;
             font-style: italic;
@@ -422,6 +440,10 @@
             <label>
                 <input type="checkbox" id="flatViewFilter">
                 Flat view (all messages)
+            </label>
+            <label>
+                <input type="checkbox" id="blockheightSpecifiedFilter">
+                Blockheight specified
             </label>
             <button onclick="loadMessages()">Refresh</button>
         </div>
@@ -475,11 +497,12 @@
 
                         allMessages.push(...window.messages);
 
-                        // Recursively collapse child windows
+                        // Recursively collapse child windows and collect their messages
                         function collapseChildWindows(win) {
                             if (win.child_windows) {
                                 win.child_windows.forEach(child => {
                                     collapsedWindows.add(child.id);
+                                    allMessages.push(...child.messages);
                                     collapseChildWindows(child);
                                 });
                             }
@@ -505,6 +528,7 @@
             const autoExpand = document.getElementById('showChildrenFilter').checked;
             const showThinking = document.getElementById('showThinkingFilter').checked;
             const flatView = document.getElementById('flatViewFilter').checked;
+            const blockheightSpecified = document.getElementById('blockheightSpecifiedFilter').checked;
 
             const tbody = document.getElementById('messagesBody');
             let html = '';
@@ -526,22 +550,44 @@
                 let eraNoteIcons = '';
                 if (era.notes && era.notes.length > 0) {
                     const eraNotesId = `era-notes-${era.id}`;
-                    // Store notes data in the global object
                     globalThis[eraNotesId] = era.notes;
-                    eraNoteIcons += ` <span class="note-icon" data-notes-id="${eraNotesId}" data-title="${escapeHtml(era.name)} Notes" style="font-size: 0.9em; cursor: pointer; color: #ce9178;">📝 ${era.notes.length}</span>`;
+                    eraNoteIcons = ` <span class="note-icon" data-notes-id="${eraNotesId}" data-title="Era Notes" style="font-size: 0.9em; cursor: pointer; color: #ce9178;">📝 ${era.notes.length}</span>`;
                 }
 
-                // Era header row
                 const eraUuid = era.id.substring(0, 8);
-                html += `
-                    <tr class="era-header" onclick="toggleEra('${era.id}')">
-                        <td class="expand-icon">${eraIcon}</td>
-                        <td colspan="5" style="padding: 8px;">
-                            ${era.name} (${era.context_windows.length} windows, ${eraMessageCount} messages)${eraNoteIcons}
-                        </td>
-                        <td class="era-uuid" style="padding: 8px; text-align: right;">${eraUuid}</td>
-                    </tr>
-                `;
+                const eraBlockheightRange = (era.earliest_blockheight && era.latest_blockheight)
+                    ? ` [${era.earliest_blockheight.toLocaleString()}-${era.latest_blockheight.toLocaleString()}]`
+                    : '';
+
+                // Helper function to count visible messages in a window (without rendering)
+                function countVisibleInWindow(window) {
+                    let count = 0;
+
+                    // Count messages in this window
+                    const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+                    const filtered = baseMessages.filter(m => {
+                        if (search && !m.content.toLowerCase().includes(search)) return false;
+                        if (minLength && m.content.length < minLength) return false;
+                        if (person && m.sender !== person && !m.recipients.includes(person)) return false;
+                        if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
+                        if (blockheightSpecified && (!m.eth_blockheight || m.eth_block_offset !== 0)) return false;
+                        return true;
+                    });
+                    count += filtered.length;
+
+                    // Count messages in child windows recursively
+                    if (window.child_windows) {
+                        window.child_windows.forEach(childWindow => {
+                            count += countVisibleInWindow(childWindow);
+                        });
+                    }
+
+                    return count;
+                }
+
+                // Collect all windows HTML and count visible messages
+                let eraWindowsHtml = '';
+                let eraVisibleCount = 0;
 
                 if (!eraCollapsed) {
                     // Recursive function to render a window and its child splits
@@ -555,20 +601,45 @@
                         let windowNoteIcons = '';
                         if (window.notes && window.notes.length > 0) {
                             const windowNotesId = `window-notes-${window.id}`;
-                            // Store notes data in the global window object (not the function parameter)
                             globalThis[windowNotesId] = window.notes;
                             windowNoteIcons += ` <span class="note-icon" data-notes-id="${windowNotesId}" data-title="Context Window Notes" style="font-size: 0.9em; cursor: pointer; color: #ce9178;">📝 ${window.notes.length}</span>`;
                         }
 
+                        let windowHtml = '';
+                        let windowVisibleCount = 0;
+
                         // Context window header row
                         const windowUuid = window.id.substring(0, 8);
-                        html += `
+                        const windowBlockheightRange = (window.earliest_blockheight && window.latest_blockheight)
+                            ? `[${window.earliest_blockheight.toLocaleString()}-${window.latest_blockheight.toLocaleString()}]`
+                            : '';
+
+                        // Calculate split info
+                        let splitInfo = '';
+                        if (childCount > 0) {
+                            const splitCounts = window.child_windows.map(c => c.messages.length).join(', ');
+                            splitInfo = ` | Splits: ${splitCounts}`;
+                        }
+
+                        // Shorten window type
+                        const shortType = window.type_display.replace(' conversation', '').replace('After compacting', 'Post-compact');
+
+                        // Get first message preview
+                        const firstMessage = window.messages[0];
+                        const messagePreview = firstMessage ? escapeHtml(firstMessage.content.substring(0, 20)) + '...' : '';
+
+                        const headerRow = `
                             <tr class="window-header" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
-                                <td class="expand-icon">${windowIcon}</td>
-                                <td colspan="5" style="padding: 6px; padding-left: ${parentIndent}px;">
-                                    ${window.type_display} (${window.messages.length} messages)${childSuffix}${windowNoteIcons}
+                                <td class="expand-icon" rowspan="2">${windowIcon}</td>
+                                <td colspan="7" style="padding: 4px 6px; padding-left: ${parentIndent}px; border-bottom: none;">
+                                    <div style="font-weight: bold;">${shortType} ${window.messages.length}${splitInfo} ${windowBlockheightRange}</div>
                                 </td>
-                                <td class="window-uuid" style="padding: 6px; text-align: right;">${windowUuid}</td>
+                                <td class="window-uuid" rowspan="2" style="padding: 6px; text-align: right; vertical-align: top;">${windowUuid}</td>
+                            </tr>
+                            <tr class="window-header window-preview" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
+                                <td colspan="7" style="padding: 0 6px 4px 6px; padding-left: ${parentIndent}px; border-top: none; font-size: 10px;">
+                                    <span class="window-preview-text">"${messagePreview}"</span>${windowNoteIcons}
+                                </td>
                             </tr>
                         `;
 
@@ -579,45 +650,54 @@
                                 const mainFlowIcon = mainFlowCollapsed ? '►' : '▼';
                                 const mainFlowIndent = parentIndent + 20;
 
-                                html += `
-                                    <tr class="main-flow-header" onclick="event.stopPropagation(); toggleMainFlow('${window.id}')">
-                                        <td class="expand-icon">${mainFlowIcon}</td>
-                                        <td colspan="6" style="padding: 4px; padding-left: ${mainFlowIndent}px;">
-                                            Main flow (${window.messages.length} messages)
-                                        </td>
-                                    </tr>
-                                `;
+                                // Check if there are any matching messages to decide if header should show
+                                const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+                                const filtered = baseMessages.filter(m => {
+                                    if (search && !m.content.toLowerCase().includes(search)) return false;
+                                    if (minLength && m.content.length < minLength) return false;
+                                    if (person && m.sender !== person && !m.recipients.includes(person)) return false;
+                                    if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
+                                    if (blockheightSpecified && (!m.eth_blockheight || m.eth_block_offset !== 0)) return false;
+                                    return true;
+                                });
 
-                                if (!mainFlowCollapsed) {
-                                    // Render messages
-                                    const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
-                                    const filtered = baseMessages.filter(m => {
-                                        if (search && !m.content.toLowerCase().includes(search)) return false;
-                                        if (minLength && m.content.length < minLength) return false;
-                                        if (person && m.sender !== person && !m.recipients.includes(person)) return false;
-                                        if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
-                                        return true;
-                                    });
+                                // Only show main flow header if there are matching messages
+                                if (filtered.length > 0) {
+                                    const mainFlowHeader = `
+                                        <tr class="main-flow-header" onclick="event.stopPropagation(); toggleMainFlow('${window.id}')">
+                                            <td class="expand-icon">${mainFlowIcon}</td>
+                                            <td colspan="7" style="padding: 4px; padding-left: ${mainFlowIndent}px;">
+                                                Main flow (${window.messages.length} messages)
+                                            </td>
+                                        </tr>
+                                    `;
+                                    windowHtml += mainFlowHeader;
 
-                                    filtered.forEach((m, idx) => {
-                                        if (flatView) {
-                                            const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
-                                            html += rendered.html;
-                                            rowNumber++;
-                                        } else {
-                                            const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
-                                            html += rendered.html;
-                                            rowNumber = rendered.nextRowNumber;
-                                        }
-                                    });
-
-                                    totalMessages += filtered.length;
+                                    if (!mainFlowCollapsed) {
+                                        // Render messages
+                                        filtered.forEach((m, idx) => {
+                                            if (flatView) {
+                                                const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
+                                                windowHtml += rendered.html;
+                                                rowNumber++;
+                                            } else {
+                                                const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
+                                                windowHtml += rendered.html;
+                                                rowNumber = rendered.nextRowNumber;
+                                            }
+                                        });
+                                        windowVisibleCount += filtered.length;
+                                    }
                                 }
 
                                 // Render child split windows as siblings to main flow (same indent)
-                                window.child_windows.forEach(childWindow => {
-                                    renderWindow(childWindow, depth + 1, mainFlowIndent);
-                                });
+                                if (window.child_windows) {
+                                    window.child_windows.forEach(childWindow => {
+                                        const childResult = renderWindow(childWindow, depth + 1, mainFlowIndent);
+                                        windowHtml += childResult.html;
+                                        windowVisibleCount += childResult.count;
+                                    });
+                                }
                             } else {
                                 // No child splits, just render messages directly
                                 const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
@@ -626,29 +706,63 @@
                                     if (minLength && m.content.length < minLength) return false;
                                     if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                                     if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
+                                    if (blockheightSpecified && (!m.eth_blockheight || m.eth_block_offset !== 0)) return false;
                                     return true;
                                 });
 
                                 filtered.forEach((m, idx) => {
                                     if (flatView) {
                                         const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
-                                        html += rendered.html;
+                                        windowHtml += rendered.html;
                                         rowNumber++;
                                     } else {
                                         const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
-                                        html += rendered.html;
+                                        windowHtml += rendered.html;
                                         rowNumber = rendered.nextRowNumber;
                                     }
                                 });
 
-                                totalMessages += filtered.length;
+                                windowVisibleCount += filtered.length;
                             }
+                        }
+
+                        // Always include window header if it has any matching messages (even if collapsed)
+                        // Check using helper function to see if there are ANY matches
+                        const potentialMatches = countVisibleInWindow(window);
+                        if (potentialMatches > 0) {
+                            // Return potentialMatches for count so collapsed windows still register as having content
+                            return { html: headerRow + windowHtml, count: potentialMatches };
+                        } else {
+                            return { html: '', count: 0 };
                         }
                     }
 
                     era.context_windows.forEach(window => {
-                        renderWindow(window);
+                        const result = renderWindow(window);
+                        eraWindowsHtml += result.html;
+                        eraVisibleCount += result.count;
                     });
+                } else {
+                    // Era is collapsed, but count potential matches for visibility check
+                    era.context_windows.forEach(window => {
+                        eraVisibleCount += countVisibleInWindow(window);
+                    });
+                }
+
+                // Only render this era if it has visible messages
+                // (When collapsed, we still count potential matches to decide visibility)
+                if (eraVisibleCount > 0) {
+                    html += `
+                        <tr class="era-header" onclick="toggleEra('${era.id}')">
+                            <td class="expand-icon">${eraIcon}</td>
+                            <td colspan="7" style="padding: 8px;">
+                                ${era.name}${eraBlockheightRange}${eraNoteIcons}
+                            </td>
+                            <td class="era-uuid" style="padding: 8px; text-align: right;">${eraUuid}</td>
+                        </tr>
+                    `;
+                    html += eraWindowsHtml;
+                    totalMessages += eraVisibleCount;
                 }
             });
 
@@ -737,8 +851,12 @@
                 });
             }
 
+            const blockheight = m.eth_blockheight ? m.eth_blockheight.toLocaleString() : '';
+
             let html = `
                 <tr class="${rowClass}" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
+                    <td class="blockheight">${blockheight}</td>
+                    <td class="num">${m.message_number || '?'}</td>
                     <td class="importance">${m.message_type}</td>
                     <td class="from ${indentClass}">${m.sender}${thinkingMarker}${typeMarker}</td>
                     <td class="arrow">→</td>
@@ -838,7 +956,7 @@
                     const noteBorderColor = isLightMode ? '#d17a4a' : '#ce9178';
                     const noteAuthorColor = isLightMode ? '#d17a4a' : '#ce9178';
 
-                    let expandedContent = `<td colspan="7" style="padding: 10px 20px; border-left: 3px solid ${borderColor};">`;
+                    let expandedContent = `<td colspan="9" style="padding: 10px 20px; border-left: 3px solid ${borderColor};">`;
                     expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(message.content)}</div>`;
 
                     // Add notes if present
@@ -880,6 +998,10 @@
                     showNotesModal(title, notes);
                 }
             }
+            // Allow UUID selection without triggering collapse/expand
+            if (e.target.classList.contains('era-uuid') || e.target.classList.contains('window-uuid')) {
+                e.stopPropagation();
+            }
         }, true); // Use capture phase to intercept before bubbling
 
         // Set up filter listeners
@@ -889,6 +1011,7 @@
         document.getElementById('showChildrenFilter').addEventListener('change', renderMessages);
         document.getElementById('showThinkingFilter').addEventListener('change', renderMessages);
         document.getElementById('flatViewFilter').addEventListener('change', renderMessages);
+        document.getElementById('blockheightSpecifiedFilter').addEventListener('change', renderMessages);
 
         function showNotesModal(title, notes) {
             const modal = document.getElementById('notesModal');

@@ -66,6 +66,24 @@ class Era(models.Model):
         db_table = 'eras'
         ordering = ['created_at']
 
+    def earliest_blockheight(self):
+        """Returns the earliest blockheight from all messages in this era."""
+        from django.db.models import Min
+        result = Message.objects.filter(
+            context_window__era=self,
+            eth_blockheight__isnull=False
+        ).aggregate(earliest=Min('eth_blockheight'))
+        return result['earliest']
+
+    def latest_blockheight(self):
+        """Returns the latest blockheight from all messages in this era."""
+        from django.db.models import Max
+        result = Message.objects.filter(
+            context_window__era=self,
+            eth_blockheight__isnull=False
+        ).aggregate(latest=Max('eth_blockheight'))
+        return result['latest']
+
     def __str__(self):
         return self.name
 
@@ -116,6 +134,20 @@ class ContextWindow(models.Model):
         if self.type != ContextWindowType.SPLIT_POINT:
             return None
         return self.first_message.context_window  # Will be different from self
+
+    def earliest_blockheight(self):
+        """Returns the earliest blockheight from messages in this window."""
+        result = self.messages.filter(eth_blockheight__isnull=False).aggregate(
+            earliest=models.Min('eth_blockheight')
+        )
+        return result['earliest']
+
+    def latest_blockheight(self):
+        """Returns the latest blockheight from messages in this window."""
+        result = self.messages.filter(eth_blockheight__isnull=False).aggregate(
+            latest=models.Max('eth_blockheight')
+        )
+        return result['latest']
 
 
 # ============================================================================
