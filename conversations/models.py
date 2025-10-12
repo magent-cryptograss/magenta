@@ -109,10 +109,10 @@ class ContextWindow(models.Model):
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    era = models.ForeignKey(Era, models.PROTECT, related_name='context_windows')
+    era = models.ForeignKey(Era, models.CASCADE, related_name='context_windows')
     first_message = models.ForeignKey(
         'Message',
-        models.PROTECT,
+        models.CASCADE,
         related_name='opened_windows'
     )
     type = models.CharField(
@@ -171,13 +171,13 @@ class Message(models.Model):
     content = models.JSONField()
 
     # Context - all messages belong to a window
-    context_window = models.ForeignKey('ContextWindow', models.PROTECT, related_name='messages', null=True, blank=True)
+    context_window = models.ForeignKey('ContextWindow', models.CASCADE, related_name='messages', null=True, blank=True)
 
     # Threading - optional parent for message chains
-    parent = models.ForeignKey('self', models.PROTECT, related_name='children', null=True, blank=True)
+    parent = models.ForeignKey('self', models.CASCADE, related_name='children', null=True, blank=True)
 
     # Participants
-    sender = models.ForeignKey(ThinkingEntity, models.PROTECT, related_name='sent_messages')
+    sender = models.ForeignKey(ThinkingEntity, models.CASCADE, related_name='sent_messages')
     recipients = models.ManyToManyField(ThinkingEntity, related_name='received_messages')
 
     # Session context
@@ -381,7 +381,7 @@ class Note(models.Model):
     about = GenericForeignKey('content_type', 'object_id')
 
     # Who wrote this note
-    from_entity = models.ForeignKey(ThinkingEntity, models.PROTECT, related_name='authored_notes')
+    from_entity = models.ForeignKey(ThinkingEntity, models.CASCADE, related_name='authored_notes')
 
     content = models.TextField()
     eth_blockheight = models.BigIntegerField(null=True, blank=True)

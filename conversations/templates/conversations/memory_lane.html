@@ -473,6 +473,7 @@
         let collapsedEras = new Set();
         let collapsedWindows = new Set();
         let collapsedMainFlows = new Set();
+        let collapsedChains = new Set();
         const database = '{{ database }}';
 
         async function loadMessages() {
@@ -674,19 +675,29 @@
                                     windowHtml += mainFlowHeader;
 
                                     if (!mainFlowCollapsed) {
-                                        // Render messages
-                                        filtered.forEach((m, idx) => {
-                                            if (flatView) {
-                                                const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
-                                                windowHtml += rendered.html;
-                                                rowNumber++;
-                                            } else {
-                                                const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
+                                        // Group messages into chains
+                                        const grouped = groupMessagesIntoChains(filtered);
+
+                                        // Render messages and chains
+                                        grouped.forEach((item, idx) => {
+                                            if (item.isChain) {
+                                                const rendered = renderChain(item, rowNumber);
                                                 windowHtml += rendered.html;
                                                 rowNumber = rendered.nextRowNumber;
+                                                windowVisibleCount += item.messages.length;
+                                            } else {
+                                                if (flatView) {
+                                                    const rendered = renderMessage(item, 0, idx, false, showThinking, rowNumber);
+                                                    windowHtml += rendered.html;
+                                                    rowNumber++;
+                                                } else {
+                                                    const rendered = renderMessage(item, 0, idx, autoExpand, showThinking, rowNumber);
+                                                    windowHtml += rendered.html;
+                                                    rowNumber = rendered.nextRowNumber;
+                                                }
+                                                windowVisibleCount++;
                                             }
                                         });
-                                        windowVisibleCount += filtered.length;
                                     }
                                 }
 
@@ -710,19 +721,28 @@
                                     return true;
                                 });
 
-                                filtered.forEach((m, idx) => {
-                                    if (flatView) {
-                                        const rendered = renderMessage(m, 0, idx, false, showThinking, rowNumber);
-                                        windowHtml += rendered.html;
-                                        rowNumber++;
-                                    } else {
-                                        const rendered = renderMessage(m, 0, idx, autoExpand, showThinking, rowNumber);
+                                // Group messages into chains
+                                const grouped = groupMessagesIntoChains(filtered);
+
+                                grouped.forEach((item, idx) => {
+                                    if (item.isChain) {
+                                        const rendered = renderChain(item, rowNumber);
                                         windowHtml += rendered.html;
                                         rowNumber = rendered.nextRowNumber;
+                                        windowVisibleCount += item.messages.length;
+                                    } else {
+                                        if (flatView) {
+                                            const rendered = renderMessage(item, 0, idx, false, showThinking, rowNumber);
+                                            windowHtml += rendered.html;
+                                            rowNumber++;
+                                        } else {
+                                            const rendered = renderMessage(item, 0, idx, autoExpand, showThinking, rowNumber);
+                                            windowHtml += rendered.html;
+                                            rowNumber = rendered.nextRowNumber;
+                                        }
+                                        windowVisibleCount++;
                                     }
                                 });
-
-                                windowVisibleCount += filtered.length;
                             }
                         }
 
@@ -801,6 +821,65 @@
             renderMessages();
         }
 
+        function isInternalMessage(msg) {
+            return msg.message_type === 'Thought' || msg.message_type === 'ToolUse' || msg.message_type === 'ToolResult';
+        }
+
+        function toggleChain(chainId) {
+            if (collapsedChains.has(chainId)) {
+                collapsedChains.delete(chainId);
+            } else {
+                collapsedChains.add(chainId);
+            }
+            renderMessages();
+        }
+
+        function groupMessagesIntoChains(messages) {
+            // Group consecutive internal messages into chains
+            const result = [];
+            let currentChain = null;
+
+            messages.forEach(msg => {
+                if (isInternalMessage(msg)) {
+                    if (!currentChain) {
+                        currentChain = {
+                            isChain: true,
+                            id: `chain-${msg.id}`,
+                            messages: [],
+                            thoughtCount: 0,
+                            toolCount: 0
+                        };
+                    }
+                    currentChain.messages.push(msg);
+                    if (msg.message_type === 'Thought') {
+                        currentChain.thoughtCount++;
+                    } else {
+                        currentChain.toolCount++;
+                    }
+                } else {
+                    // End current chain if exists
+                    if (currentChain && currentChain.messages.length > 1) {
+                        result.push(currentChain);
+                        currentChain = null;
+                    } else if (currentChain && currentChain.messages.length === 1) {
+                        // Single internal message, don't make it a chain
+                        result.push(currentChain.messages[0]);
+                        currentChain = null;
+                    }
+                    result.push(msg);
+                }
+            });
+
+            // Don't forget the last chain
+            if (currentChain && currentChain.messages.length > 1) {
+                result.push(currentChain);
+            } else if (currentChain && currentChain.messages.length === 1) {
+                result.push(currentChain.messages[0]);
+            }
+
+            return result;
+        }
+
         function countDescendants(msg) {
             if (!msg.children || msg.children.length === 0) return 0;
             let count = msg.children.length;
@@ -810,9 +889,43 @@
             return count;
         }
 
+        function renderChain(chain, rowNumber) {
+            const isCollapsed = collapsedChains.has(chain.id);
+            const icon = isCollapsed ? '►' : '▼';
+            const thoughtText = chain.thoughtCount > 0 ? `💭 ${chain.thoughtCount} thought${chain.thoughtCount > 1 ? 's' : ''}` : '';
+            const toolText = chain.toolCount > 0 ? `🔧 ${chain.toolCount} tool${chain.toolCount > 1 ? 's' : ''}` : '';
+            const separator = thoughtText && toolText ? ', ' : '';
+            const summary = `${thoughtText}${separator}${toolText}`;
+
+            let html = `
+                <tr class="thinking" onclick="toggleChain('${chain.id}')" style="cursor: pointer;">
+                    <td class="expand-icon">${icon}</td>
+                    <td class="num">${chain.messages[0].message_number}</td>
+                    <td class="importance">Chain</td>
+                    <td colspan="4" style="font-style: italic; color: #858585;">${summary} (${chain.messages.length} messages)</td>
+                    <td class="timestamp"></td>
+                    <td class="source"></td>
+                    <td class="uuid"></td>
+                </tr>
+            `;
+
+            let nextRowNumber = rowNumber !== null ? rowNumber + 1 : null;
+
+            if (!isCollapsed) {
+                // Render all messages in the chain
+                chain.messages.forEach((msg, idx) => {
+                    const rendered = renderMessage(msg, 0, idx, false, true, nextRowNumber);
+                    html += rendered.html;
+                    nextRowNumber = rendered.nextRowNumber;
+                });
+            }
+
+            return { html, nextRowNumber };
+        }
+
         function renderMessage(m, depth, idx, autoExpand, showThinking, rowNumber = null) {
             const timestamp = m.timestamp
-                ? new Date(m.timestamp * 1000).toISOString().replace('T', ' ').substring(0, 19)
+                ? new Date(m.timestamp).toISOString().substring(0, 19).replace('T', ' ')
                 : '';
 
             const hasChildren = m.children && m.children.length > 0;
@@ -821,7 +934,7 @@
             const expandIcon = hasChildren ? (isExpanded ? `▼ ${descendantCount}` : `► ${descendantCount}`) : ' ';
 
             let rowClass = '';
-            if (m.message_type === 'thought') {
+            if (m.message_type === 'Thought') {
                 rowClass = 'thinking';
             } else if (m.sender === 'justin') {
                 rowClass = 'justin';
@@ -830,15 +943,30 @@
             }
             if (depth > 0) rowClass += ' child';
 
-            const thinkingMarker = m.message_type === 'thought' ? '<span class="thinking-marker">[THINKING]</span>' : '';
-            const typeMarker = m.message_type === 'tool_use' ? '<span class="type-marker">[TOOL]</span>' :
-                             m.message_type === 'tool_result' ? '<span class="type-marker">[RESULT]</span>' : '';
+            const thinkingIcon = m.message_type === 'Thought' ? '<span title="Thought">💭</span> ' : '';
+            const typeMarker = m.message_type === 'ToolUse' ? '<span title="Tool use">🔧</span> ' :
+                             m.message_type === 'ToolResult' ? '<span title="Tool result">✓</span> ' : '';
             const preview = m.content ? (m.content.length > 200 ? m.content.substring(0, 200) + '...' : m.content) : '';
             const indentClass = ''; // Removed indent since we removed hierarchy columns
             const uuid = m.id ? m.id.substring(0, 8) : '';
 
-            const recipientsDisplay = Array.isArray(m.recipients) ? m.recipients.join(', ') : m.recipients;
-            const sourceFile = m.source_file || '';
+            // For Thought/ToolUse/ToolResult, show tool info instead of recipients
+            let senderDisplay = m.sender;
+            let recipientsDisplay;
+
+            if (m.message_type === 'ToolUse') {
+                recipientsDisplay = m.tool_name || '(tool)';
+            } else if (m.message_type === 'ToolResult') {
+                // Show as "ToolName → magent"
+                senderDisplay = m.tool_name || '(tool)';
+                recipientsDisplay = 'magent';
+            } else if (m.message_type === 'Thought') {
+                recipientsDisplay = '(thinking)';
+            } else {
+                recipientsDisplay = Array.isArray(m.recipients) ? m.recipients.join(', ') : m.recipients;
+            }
+
+            const sourceFile = m.source_file ? (m.source_file.length > 15 ? '...' + m.source_file.substring(m.source_file.length - 12) : m.source_file) : '';
             const rowNumDisplay = rowNumber !== null ? rowNumber : '';
             const missingMarker = m.missing_from_markdown ? '✗' : '';
 
@@ -858,12 +986,12 @@
                     <td class="blockheight">${blockheight}</td>
                     <td class="num">${m.message_number || '?'}</td>
                     <td class="importance">${m.message_type}</td>
-                    <td class="from ${indentClass}">${m.sender}${thinkingMarker}${typeMarker}</td>
+                    <td class="from ${indentClass}">${thinkingIcon}${typeMarker}${senderDisplay}</td>
                     <td class="arrow">→</td>
                     <td class="to">${recipientsDisplay}</td>
                     <td class="content">${noteIcons}${escapeHtml(preview)}</td>
-                    <td class="timestamp">${timestamp}</td>
-                    <td class="source">${sourceFile}</td>
+                    <td class="timestamp" style="font-size: 0.85em;">${timestamp}</td>
+                    <td class="source" style="font-size: 0.85em;">${sourceFile}</td>
                     <td class="uuid">${uuid}</td>
                 </tr>
             `;
@@ -957,6 +1085,28 @@
                     const noteAuthorColor = isLightMode ? '#d17a4a' : '#ce9178';
 
                     let expandedContent = `<td colspan="9" style="padding: 10px 20px; border-left: 3px solid ${borderColor};">`;
+
+                    // Show metadata for tool messages
+                    if (message.message_type === 'ToolUse' || message.message_type === 'ToolResult' || message.message_type === 'Thought') {
+                        expandedContent += `<div style="font-size: 11px; color: ${noteHeaderColor}; margin-bottom: 8px;">`;
+                        if (message.message_type === 'ToolUse') {
+                            expandedContent += `Tool: ${message.tool_name || '?'} · ID: ${message.tool_id || '?'}`;
+                        } else if (message.message_type === 'ToolResult') {
+                            expandedContent += `Tool Result · Use ID: ${message.tool_use_id || '?'}`;
+                            if (message.is_error) expandedContent += ` · ERROR`;
+                        } else if (message.message_type === 'Thought') {
+                            expandedContent += `Thinking`;
+                            if (message.signature) expandedContent += ` · Signature: ${message.signature}`;
+                        }
+                        if (message.parent_id) {
+                            expandedContent += ` · Parent: ${message.parent_id.substring(0, 8)}`;
+                        }
+                        if (message.cwd) expandedContent += ` · CWD: ${message.cwd}`;
+                        if (message.git_branch) expandedContent += ` · Branch: ${message.git_branch}`;
+                        if (message.client_version) expandedContent += ` · Client: ${message.client_version}`;
+                        expandedContent += `</div>`;
+                    }
+
                     expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(message.content)}</div>`;
 
                     // Add notes if present

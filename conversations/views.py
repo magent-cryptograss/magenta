@@ -87,18 +87,28 @@ def all_messages(request):
             }
 
             # Get messages for this window
-            messages = window.messages.all().order_by('message_number')
+            messages = window.messages.select_related('thought', 'tooluse', 'toolresult').order_by('message_number')
             for msg in messages:
+                # Get the actual polymorphic instance
+                if hasattr(msg, 'thought'):
+                    actual_msg = msg.thought
+                elif hasattr(msg, 'tooluse'):
+                    actual_msg = msg.tooluse
+                elif hasattr(msg, 'toolresult'):
+                    actual_msg = msg.toolresult
+                else:
+                    actual_msg = msg
+
                 # Get notes for this message
                 msg_notes = Note.objects.filter(
                     content_type=message_ct,
                     object_id=msg.id
                 ).order_by('created_at')
 
-                window_data['messages'].append({
-                    'id': str(msg.id),
-                    'message_number': msg.message_number,
-                    'message_type': msg.__class__.__name__,
+                msg_dict = {
+                    'id': str(actual_msg.id),
+                    'message_number': actual_msg.message_number,
+                    'message_type': actual_msg.__class__.__name__,
                     'sender': msg.sender.name,
                     'recipients': [r.name for r in msg.recipients.all()],
                     'content': str(msg.content),
@@ -109,6 +119,10 @@ def all_messages(request):
                     'session_id': str(msg.session_id) if msg.session_id else None,
                     'source_file': msg.source_file,
                     'missing_from_markdown': msg.missing_from_markdown,
+                    'cwd': msg.cwd,
+                    'git_branch': msg.git_branch,
+                    'client_version': msg.client_version,
+                    'parent_id': str(msg.parent_id) if msg.parent_id else None,
                     'notes': [{
                         'id': str(note.id),
                         'from_entity': note.from_entity.name,
@@ -116,7 +130,22 @@ def all_messages(request):
                         'eth_blockheight': note.eth_blockheight,
                         'created_at': note.created_at.isoformat()
                     } for note in msg_notes]
-                })
+                }
+
+                # Add type-specific fields
+                if hasattr(msg, 'tooluse'):
+                    msg_dict['tool_name'] = msg.tooluse.tool_name
+                    msg_dict['tool_id'] = msg.tooluse.tool_id
+                elif hasattr(msg, 'toolresult'):
+                    msg_dict['tool_use_id'] = msg.toolresult.tool_use_id
+                    msg_dict['is_error'] = msg.toolresult.is_error
+                    # Look up parent ToolUse to get tool name
+                    if msg.parent and hasattr(msg.parent, 'tooluse'):
+                        msg_dict['tool_name'] = msg.parent.tooluse.tool_name
+                elif hasattr(msg, 'thought'):
+                    msg_dict['signature'] = msg.thought.signature
+
+                window_data['messages'].append(msg_dict)
 
             # Find child split windows
             for potential_child in all_windows:
