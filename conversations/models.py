@@ -203,6 +203,8 @@ class Message(models.Model):
 
     # Flags
     is_sidechain = models.BooleanField(default=False)
+    is_synthetic_error = models.BooleanField(default=False)  # Claude Code synthetic error response
+    is_retry = models.BooleanField(default=False)  # User retry due to timeout/error
 
     # Environment context
     cwd = models.TextField(null=True, blank=True)

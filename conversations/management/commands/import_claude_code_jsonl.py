@@ -16,6 +16,7 @@ from conversations.models import (
     Era, ContextWindow, ContextWindowType,
     Message, Thought, ToolUse, ToolResult, ThinkingEntity
 )
+from conversations.utils.retry_detection import RetryDetector
 
 
 class Command(BaseCommand):
@@ -236,7 +237,11 @@ class Command(BaseCommand):
 
             elif msg_type == 'assistant':
                 content_items = msg_data.get('message', {}).get('content', [])
-                
+
+                # Check if this is a synthetic error response
+                model = msg_data.get('message', {}).get('model', '')
+                is_synthetic = (model == '<synthetic>')
+
                 # Process thinking blocks
                 for item in content_items:
                     if item.get('type') == 'thinking':
@@ -302,12 +307,37 @@ class Command(BaseCommand):
                         message_number=message_num,
                         content=text_content.strip(),
                         sender=magent,
+                        is_synthetic_error=is_synthetic,
+                        model_backend=model if model != '<synthetic>' else None,
                         **common
                     )
                     text_msg.recipients.add(justin)
                     parent = text_msg
                     message_num += 1
 
+        # Detect retries using RetryDetector
+        self.stdout.write('Detecting retries...')
+        all_messages = Message.objects.filter(
+            context_window=context_window
+        ).select_related('sender').order_by('message_number')
+
+        detector = RetryDetector()
+        retry_count = 0
+
+        for msg in all_messages:
+            is_retry = detector.is_retry(
+                sender=msg.sender.name,
+                content=str(msg.content),
+                is_synthetic_error=msg.is_synthetic_error
+            )
+
+            if is_retry:
+                msg.is_retry = True
+                msg.save()
+                retry_count += 1
+
         self.stdout.write(self.style.SUCCESS(
             f'Imported {message_num} messages into {era.name}, window {context_window.id}'
         ))
+        if retry_count > 0:
+            self.stdout.write(self.style.WARNING(f'Marked {retry_count} messages as retries'))
