@@ -308,25 +308,34 @@ class CompactingAction(models.Model):
 
     Points to the ContextWindow that was closed.
     Not all context windows have a CompactingAction - some end naturally.
+
+    context_window can be null during import when we find summaries before
+    we've imported the context window they belong to.
     """
 
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     context_window = models.OneToOneField(
         ContextWindow,
         models.CASCADE,
-        primary_key=True,
+        null=True,
+        blank=True,
         related_name='compacting_action'
     )
-    ending_message_id = models.UUIDField()  # Last message before compact
+    ending_message_id = models.UUIDField(null=True, blank=True)  # Last message before compact
     compact_boundary_message_id = models.UUIDField(null=True, blank=True)
     summary = models.TextField(null=True, blank=True)
     compact_trigger = models.CharField(max_length=50, null=True, blank=True)
     pre_compact_tokens = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'compacting_actions'
+
     def __str__(self):
         trigger = self.compact_trigger or 'unknown'
         tokens = f"{self.pre_compact_tokens:,}" if self.pre_compact_tokens else '?'
-        return f"Compact ({trigger}, {tokens} tokens)"
+        window = f"window {str(self.context_window_id)[:8]}" if self.context_window_id else "orphaned"
+        return f"Compact ({trigger}, {tokens} tokens, {window})"
 
 
 # ============================================================================

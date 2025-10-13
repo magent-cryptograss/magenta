@@ -423,6 +423,7 @@
         <div class="filters">
             <button class="theme-toggle" onclick="toggleTheme()">☀️ Light Mode</button>
             <input type="text" id="searchFilter" placeholder="Search content..." style="min-width: 200px;">
+            <input type="text" id="uuidFilter" placeholder="Search UUID..." style="min-width: 200px;">
             <input type="number" id="minLengthFilter" placeholder="Min length" style="width: 100px;">
             <select id="personFilter">
                 <option value="">All people</option>
@@ -474,6 +475,7 @@
         let collapsedWindows = new Set();
         let collapsedMainFlows = new Set();
         let collapsedChains = new Set();
+        let commandChainsInitialized = false;  // Track if we've already auto-collapsed command chains
         const database = '{{ database }}';
 
         async function loadMessages() {
@@ -524,6 +526,7 @@
 
         function renderMessages() {
             const search = document.getElementById('searchFilter').value.toLowerCase();
+            const uuidSearch = document.getElementById('uuidFilter').value.toLowerCase();
             const minLength = parseInt(document.getElementById('minLengthFilter').value) || 0;
             const person = document.getElementById('personFilter').value;
             const autoExpand = document.getElementById('showChildrenFilter').checked;
@@ -568,6 +571,7 @@
                     const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
                     const filtered = baseMessages.filter(m => {
                         if (search && !m.content.toLowerCase().includes(search)) return false;
+                        if (uuidSearch && !m.id.toLowerCase().includes(uuidSearch)) return false;
                         if (minLength && m.content.length < minLength) return false;
                         if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                         if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
@@ -625,15 +629,77 @@
                         // Shorten window type
                         const shortType = window.type_display.replace(' conversation', '').replace('After compacting', 'Post-compact');
 
-                        // Get first message preview
-                        const firstMessage = window.messages[0];
-                        const messagePreview = firstMessage ? escapeHtml(firstMessage.content.substring(0, 20)) + '...' : '';
+                        // Get preview from first non-command messages (accumulate until ~80 chars)
+                        let messagePreview = '';
+                        const targetLength = 80;
+
+                        for (const msg of window.messages) {
+                            // Skip command pattern messages and synthetic errors
+                            if (typeof msg.content === 'object' && msg.content &&
+                                (msg.content.type === 'meta_caveat' ||
+                                 msg.content.type === 'slash_command' ||
+                                 msg.content.type === 'command_output')) {
+                                continue;
+                            }
+                            if (msg.is_synthetic_error) {
+                                continue;
+                            }
+
+                            // Add this message's content
+                            let msgText = '';
+                            if (typeof msg.content === 'string') {
+                                msgText = msg.content;
+                            } else if (typeof msg.content === 'object' && msg.content) {
+                                msgText = JSON.stringify(msg.content);
+                            }
+
+                            if (msgText) {
+                                if (messagePreview) {
+                                    messagePreview += ' ... ' + msgText;
+                                } else {
+                                    messagePreview = msgText;
+                                }
+                            }
+
+                            // Stop if we have enough text
+                            if (messagePreview.length >= targetLength) {
+                                break;
+                            }
+                        }
+
+                        // Truncate and add ellipsis
+                        if (messagePreview.length > targetLength) {
+                            messagePreview = escapeHtml(messagePreview.substring(0, targetLength)) + '...';
+                        } else if (messagePreview) {
+                            messagePreview = escapeHtml(messagePreview) + '...';
+                        }
+
+                        // Build compacting action display
+                        let compactingInfo = '';
+                        if (window.compacting_action) {
+                            const ca = window.compacting_action;
+                            const caId = ca.id.substring(0, 8);
+                            const caSummary = ca.summary ? escapeHtml(ca.summary.substring(0, 80)) : '(no summary)';
+                            compactingInfo = `
+                                <div style="font-size: 10px; color: #ce9178; margin-top: 2px;">
+                                    📋 Compacted: ${caSummary}... (${caId})
+                                </div>
+                            `;
+                        } else if (window.type === 'post_compacting') {
+                            // Post-compacting window but CA not linked yet
+                            compactingInfo = `
+                                <div style="font-size: 10px; color: #858585; margin-top: 2px; font-style: italic;">
+                                    📋 Compacted (not yet linked)
+                                </div>
+                            `;
+                        }
 
                         const headerRow = `
                             <tr class="window-header" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
                                 <td class="expand-icon" rowspan="2">${windowIcon}</td>
                                 <td colspan="7" style="padding: 4px 6px; padding-left: ${parentIndent}px; border-bottom: none;">
                                     <div style="font-weight: bold;">${shortType} ${window.messages.length}${splitInfo} ${windowBlockheightRange}</div>
+                                    ${compactingInfo}
                                 </td>
                                 <td class="window-uuid" rowspan="2" style="padding: 6px; text-align: right; vertical-align: top;">${windowUuid}</td>
                             </tr>
@@ -655,6 +721,7 @@
                                 const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
                                 const filtered = baseMessages.filter(m => {
                                     if (search && !m.content.toLowerCase().includes(search)) return false;
+                                    if (uuidSearch && !m.id.toLowerCase().includes(uuidSearch)) return false;
                                     if (minLength && m.content.length < minLength) return false;
                                     if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                                     if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
@@ -714,6 +781,7 @@
                                 const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
                                 const filtered = baseMessages.filter(m => {
                                     if (search && !m.content.toLowerCase().includes(search)) return false;
+                                    if (uuidSearch && !m.id.toLowerCase().includes(uuidSearch)) return false;
                                     if (minLength && m.content.length < minLength) return false;
                                     if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                                     if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
@@ -786,6 +854,43 @@
                 }
             });
 
+            // Render orphaned compacting actions at the bottom
+            if (eraData.orphaned_compacting_actions && eraData.orphaned_compacting_actions.length > 0) {
+                const orphanedCollapsed = collapsedEras.has('orphaned-compacting');
+                const orphanedIcon = orphanedCollapsed ? '►' : '▼';
+
+                html += `
+                    <tr class="era-header" onclick="toggleEra('orphaned-compacting')" style="cursor: pointer; background: #5a2a2a; border-top: 2px solid #8b4513;">
+                        <td class="expand-icon">${orphanedIcon}</td>
+                        <td colspan="7" style="padding: 8px;">
+                            ⚠️ ORPHANED COMPACTING ACTIONS (${eraData.orphaned_compacting_actions.length}) - Need manual linking
+                        </td>
+                        <td style="padding: 8px; text-align: right;"></td>
+                    </tr>
+                `;
+
+                if (!orphanedCollapsed) {
+                    eraData.orphaned_compacting_actions.forEach(compact => {
+                        const boundaryPreview = compact.compact_boundary_message_id
+                            ? compact.compact_boundary_message_id.substring(0, 8)
+                            : 'unknown';
+                        html += `
+                            <tr style="background: #3a1a1a;">
+                                <td class="expand-icon"></td>
+                                <td colspan="8" style="padding-left: 30px; color: #d4a574;">
+                                    📋 <strong>${compact.summary || '(no summary)'}</strong><br>
+                                    <span style="font-size: 10px; color: #858585;">
+                                        Boundary: ${boundaryPreview} ·
+                                        Trigger: ${compact.compact_trigger || 'unknown'} ·
+                                        Created: ${compact.created_at ? new Date(compact.created_at).toLocaleString() : 'unknown'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+
             const countText = `${totalMessages} messages shown (${allMessages.length} total)`;
             document.getElementById('messageCount').textContent = countText;
 
@@ -825,6 +930,16 @@
             return msg.message_type === 'Thought' || msg.message_type === 'ToolUse' || msg.message_type === 'ToolResult';
         }
 
+        function isCommandMessage(msg) {
+            // Check if content is an object with type field indicating command pattern
+            if (typeof msg.content === 'object' && msg.content !== null) {
+                return msg.content.type === 'meta_caveat' ||
+                       msg.content.type === 'slash_command' ||
+                       msg.content.type === 'command_output';
+            }
+            return false;
+        }
+
         function toggleChain(chainId) {
             if (collapsedChains.has(chainId)) {
                 collapsedChains.delete(chainId);
@@ -835,11 +950,11 @@
         }
 
         function groupMessagesIntoChains(messages) {
-            // Group consecutive internal messages into chains
+            // Group consecutive internal messages and command patterns into chains
             const result = [];
             let currentChain = null;
 
-            messages.forEach(msg => {
+            messages.forEach((msg, idx) => {
                 if (isInternalMessage(msg)) {
                     if (!currentChain) {
                         currentChain = {
@@ -847,7 +962,8 @@
                             id: `chain-${msg.id}`,
                             messages: [],
                             thoughtCount: 0,
-                            toolCount: 0
+                            toolCount: 0,
+                            commandCount: 0
                         };
                     }
                     currentChain.messages.push(msg);
@@ -856,13 +972,42 @@
                     } else {
                         currentChain.toolCount++;
                     }
+                } else if (isCommandMessage(msg)) {
+                    // Start or continue command pattern chain
+                    if (!currentChain) {
+                        currentChain = {
+                            isChain: true,
+                            id: `chain-${msg.id}`,
+                            messages: [],
+                            thoughtCount: 0,
+                            toolCount: 0,
+                            commandCount: 0,
+                            isCommandChain: true  // Mark as command chain for auto-collapse
+                        };
+                    }
+                    currentChain.messages.push(msg);
+                    currentChain.commandCount++;
                 } else {
+                    // Check if this is a synthetic error following a command pattern
+                    const isSyntheticError = typeof msg.content === 'string' && msg.is_synthetic_error;
+                    const previousWasCommand = currentChain && currentChain.commandCount > 0;
+
+                    if (isSyntheticError && previousWasCommand) {
+                        // Include synthetic error in command chain
+                        currentChain.messages.push(msg);
+                        return; // Skip to next message in forEach
+                    }
+
                     // End current chain if exists
                     if (currentChain && currentChain.messages.length > 1) {
+                        // Auto-collapse command chains (only on first run)
+                        if (currentChain.isCommandChain && !commandChainsInitialized) {
+                            collapsedChains.add(currentChain.id);
+                        }
                         result.push(currentChain);
                         currentChain = null;
                     } else if (currentChain && currentChain.messages.length === 1) {
-                        // Single internal message, don't make it a chain
+                        // Single internal/command message, don't make it a chain
                         result.push(currentChain.messages[0]);
                         currentChain = null;
                     }
@@ -872,11 +1017,16 @@
 
             // Don't forget the last chain
             if (currentChain && currentChain.messages.length > 1) {
+                // Auto-collapse command chains (only on first run)
+                if (currentChain.isCommandChain && !commandChainsInitialized) {
+                    collapsedChains.add(currentChain.id);
+                }
                 result.push(currentChain);
             } else if (currentChain && currentChain.messages.length === 1) {
                 result.push(currentChain.messages[0]);
             }
 
+            commandChainsInitialized = true;  // Mark as initialized after first grouping
             return result;
         }
 
@@ -894,8 +1044,10 @@
             const icon = isCollapsed ? '►' : '▼';
             const thoughtText = chain.thoughtCount > 0 ? `💭 ${chain.thoughtCount} thought${chain.thoughtCount > 1 ? 's' : ''}` : '';
             const toolText = chain.toolCount > 0 ? `🔧 ${chain.toolCount} tool${chain.toolCount > 1 ? 's' : ''}` : '';
-            const separator = thoughtText && toolText ? ', ' : '';
-            const summary = `${thoughtText}${separator}${toolText}`;
+            const commandText = chain.commandCount > 0 ? `🔧 /${chain.messages.find(m => m.content?.command_name)?.content.command_name || 'command'}` : '';
+
+            const parts = [thoughtText, toolText, commandText].filter(p => p);
+            const summary = parts.join(', ');
 
             let html = `
                 <tr class="thinking" onclick="toggleChain('${chain.id}')" style="cursor: pointer;">
@@ -924,6 +1076,29 @@
         }
 
         function renderMessage(m, depth, idx, autoExpand, showThinking, rowNumber = null) {
+            // Special rendering for CompactingAction pseudo-messages
+            if (m.message_type === 'CompactingAction') {
+                const orphanedIndicator = m.is_orphaned ? ' (orphaned)' : '';
+                const preview = `📋 COMPACTING: ${m.summary || '(no summary)'}`;
+                const uuid = m.id ? m.id.substring(0, 8) : '';
+                const rowNumDisplay = rowNumber !== null ? rowNumber : '';
+
+                const html = `
+                    <tr class="thinking" style="background: #3a2d1d; font-style: italic;" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
+                        <td class="blockheight"></td>
+                        <td class="num"></td>
+                        <td class="importance">Compact</td>
+                        <td class="from" colspan="3">${preview}${orphanedIndicator}</td>
+                        <td class="content"></td>
+                        <td class="timestamp"></td>
+                        <td class="source"></td>
+                        <td class="uuid">${uuid}</td>
+                    </tr>
+                `;
+                const nextRowNumber = rowNumber !== null ? rowNumber + 1 : null;
+                return { html, nextRowNumber };
+            }
+
             const timestamp = m.timestamp
                 ? new Date(m.timestamp).toISOString().substring(0, 19).replace('T', ' ')
                 : '';
@@ -946,7 +1121,24 @@
             const thinkingIcon = m.message_type === 'Thought' ? '<span title="Thought">💭</span> ' : '';
             const typeMarker = m.message_type === 'ToolUse' ? '<span title="Tool use">🔧</span> ' :
                              m.message_type === 'ToolResult' ? '<span title="Tool result">✓</span> ' : '';
-            const preview = m.content ? (m.content.length > 200 ? m.content.substring(0, 200) + '...' : m.content) : '';
+
+            // Handle command content specially
+            let preview = '';
+            if (m.content && typeof m.content === 'object') {
+                if (m.content.type === 'meta_caveat') {
+                    preview = '⚠️ Caveat: System-generated messages below';
+                } else if (m.content.type === 'slash_command') {
+                    preview = `🔧 Command: ${m.content.command_name}`;
+                } else if (m.content.type === 'command_output') {
+                    const stdout = m.content.stdout || '';
+                    preview = `📤 Output: ${stdout.length > 50 ? stdout.substring(0, 50) + '...' : stdout}`;
+                } else {
+                    preview = JSON.stringify(m.content).substring(0, 200);
+                }
+            } else if (m.content) {
+                preview = m.content.length > 200 ? m.content.substring(0, 200) + '...' : m.content;
+            }
+
             const indentClass = ''; // Removed indent since we removed hierarchy columns
             const uuid = m.id ? m.id.substring(0, 8) : '';
 
@@ -1086,8 +1278,29 @@
 
                     let expandedContent = `<td colspan="9" style="padding: 10px 20px; border-left: 3px solid ${borderColor};">`;
 
+                    // Show UUID at top (always)
+                    expandedContent += `<div style="font-size: 11px; color: ${noteHeaderColor}; margin-bottom: 8px; user-select: text;">UUID: ${message.id}</div>`;
+
+                    // Show metadata for CompactingAction
+                    if (message.message_type === 'CompactingAction') {
+                        expandedContent += `<div style="font-size: 12px; color: ${noteHeaderColor}; margin-bottom: 8px;">`;
+                        expandedContent += `<strong>COMPACTING ACTION</strong><br>`;
+                        expandedContent += `Summary: ${escapeHtml(message.summary || '(no summary)')}<br>`;
+                        expandedContent += `Trigger: ${message.compact_trigger || 'unknown'}<br>`;
+                        if (message.pre_compact_tokens) {
+                            expandedContent += `Pre-compact tokens: ${message.pre_compact_tokens.toLocaleString()}<br>`;
+                        }
+                        expandedContent += `Leaf message (last before compact): ${message.compact_boundary_message_id}<br>`;
+                        if (message.is_orphaned) {
+                            expandedContent += `<span style="color: #ce9178;">Status: Orphaned (context window not yet linked)</span><br>`;
+                        } else {
+                            expandedContent += `Linked to window: ${message.linked_window_id}<br>`;
+                        }
+                        expandedContent += `</div>`;
+                    }
+
                     // Show metadata for tool messages
-                    if (message.message_type === 'ToolUse' || message.message_type === 'ToolResult' || message.message_type === 'Thought') {
+                    else if (message.message_type === 'ToolUse' || message.message_type === 'ToolResult' || message.message_type === 'Thought') {
                         expandedContent += `<div style="font-size: 11px; color: ${noteHeaderColor}; margin-bottom: 8px;">`;
                         if (message.message_type === 'ToolUse') {
                             expandedContent += `Tool: ${message.tool_name || '?'} · ID: ${message.tool_id || '?'}`;
@@ -1107,7 +1320,10 @@
                         expandedContent += `</div>`;
                     }
 
-                    expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(message.content)}</div>`;
+                    // Show content (skip for CompactingAction which doesn't have content field)
+                    if (message.message_type !== 'CompactingAction' && message.content) {
+                        expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(message.content)}</div>`;
+                    }
 
                     // Add notes if present
                     if (message.notes && message.notes.length > 0) {
@@ -1156,6 +1372,7 @@
 
         // Set up filter listeners
         document.getElementById('searchFilter').addEventListener('input', renderMessages);
+        document.getElementById('uuidFilter').addEventListener('input', renderMessages);
         document.getElementById('minLengthFilter').addEventListener('input', renderMessages);
         document.getElementById('personFilter').addEventListener('change', renderMessages);
         document.getElementById('showChildrenFilter').addEventListener('change', renderMessages);

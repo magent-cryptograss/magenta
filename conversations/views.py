@@ -16,7 +16,7 @@ def memory_lane(request):
 def all_messages(request):
     """Messages grouped by Era and ContextWindow."""
     # Get all context windows with their eras
-    from .models import ContextWindow, Era, Note
+    from .models import ContextWindow, Era, Note, CompactingAction
     from django.contrib.contenttypes.models import ContentType
 
     eras = Era.objects.prefetch_related(
@@ -25,7 +25,8 @@ def all_messages(request):
     ).order_by('created_at')
 
     data = {
-        'eras': []
+        'eras': [],
+        'orphaned_compacting_actions': []
     }
 
     # Get content types for lookups
@@ -67,6 +68,17 @@ def all_messages(request):
                 object_id=window.id
             ).order_by('created_at')
 
+            # Check for compacting action
+            compacting_action = None
+            if hasattr(window, 'compacting_action') and window.compacting_action:
+                ca = window.compacting_action
+                compacting_action = {
+                    'id': str(ca.id),
+                    'summary': ca.summary,
+                    'compact_boundary_message_id': str(ca.compact_boundary_message_id) if ca.compact_boundary_message_id else None,
+                    'compact_trigger': ca.compact_trigger
+                }
+
             window_data = {
                 'id': str(window.id),
                 'type': window.type,
@@ -77,6 +89,7 @@ def all_messages(request):
                 'latest_blockheight': window.latest_blockheight(),
                 'messages': [],
                 'child_windows': [],
+                'compacting_action': compacting_action,
                 'notes': [{
                     'id': str(note.id),
                     'from_entity': note.from_entity.name,
@@ -84,6 +97,15 @@ def all_messages(request):
                     'eth_blockheight': note.eth_blockheight,
                     'created_at': note.created_at.isoformat()
                 } for note in window_notes]
+            }
+
+            # Build lookup of CompactingActions by their leaf message UUID
+            # This includes both linked CAs (for this window or others) and orphaned ones
+            all_compacting_actions = CompactingAction.objects.all()
+            compacting_action_by_leaf_uuid = {
+                action.compact_boundary_message_id: action
+                for action in all_compacting_actions
+                if action.compact_boundary_message_id
             }
 
             # Get messages for this window
@@ -111,7 +133,7 @@ def all_messages(request):
                     'message_type': actual_msg.__class__.__name__,
                     'sender': msg.sender.name,
                     'recipients': [r.name for r in msg.recipients.all()],
-                    'content': str(msg.content),
+                    'content': msg.content,  # JSONField - keep as dict/str, JsonResponse will serialize properly
                     'timestamp': msg.timestamp,
                     'eth_blockheight': msg.eth_blockheight,
                     'eth_block_offset': msg.eth_block_offset,
@@ -123,6 +145,8 @@ def all_messages(request):
                     'git_branch': msg.git_branch,
                     'client_version': msg.client_version,
                     'parent_id': str(msg.parent_id) if msg.parent_id else None,
+                    'is_synthetic_error': msg.is_synthetic_error,
+                    'is_retry': msg.is_retry,
                     'notes': [{
                         'id': str(note.id),
                         'from_entity': note.from_entity.name,
@@ -147,6 +171,21 @@ def all_messages(request):
 
                 window_data['messages'].append(msg_dict)
 
+                # Check if this message is the leaf of a CompactingAction
+                if msg.id in compacting_action_by_leaf_uuid:
+                    compacting_action = compacting_action_by_leaf_uuid[msg.id]
+                    # Add a pseudo-message representing the compacting action
+                    window_data['messages'].append({
+                        'id': str(compacting_action.id),
+                        'message_type': 'CompactingAction',
+                        'summary': compacting_action.summary,
+                        'compact_trigger': compacting_action.compact_trigger,
+                        'pre_compact_tokens': compacting_action.pre_compact_tokens,
+                        'compact_boundary_message_id': str(compacting_action.compact_boundary_message_id),
+                        'is_orphaned': compacting_action.context_window_id is None,
+                        'linked_window_id': str(compacting_action.context_window_id) if compacting_action.context_window_id else None
+                    })
+
             # Find child split windows
             for potential_child in all_windows:
                 if potential_child.type == 'split_point':
@@ -162,6 +201,17 @@ def all_messages(request):
                 era_data['context_windows'].append(serialize_window(window))
 
         data['eras'].append(era_data)
+
+    # Get orphaned compacting actions (not linked to any context window)
+    orphaned = CompactingAction.objects.filter(context_window__isnull=True).order_by('created_at')
+    for compact in orphaned:
+        data['orphaned_compacting_actions'].append({
+            'id': str(compact.id),
+            'summary': compact.summary,
+            'compact_boundary_message_id': str(compact.compact_boundary_message_id) if compact.compact_boundary_message_id else None,
+            'compact_trigger': compact.compact_trigger,
+            'created_at': compact.created_at.isoformat()
+        })
 
     return JsonResponse(data, safe=False)
 

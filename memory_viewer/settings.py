@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'memory_viewer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cryptograss_memory_from_markdown',
+        'NAME': 'magenta_memories',
         'USER': 'magent',
         'PASSWORD': '',  # Trust authentication on ai-sandbox
         'HOST': 'ai-sandbox',
