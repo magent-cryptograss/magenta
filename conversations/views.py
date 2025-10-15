@@ -158,7 +158,6 @@ def all_messages(request):
                     'parent_id': str(msg.parent_id) if msg.parent_id else None,
                     'is_synthetic_error': msg.is_synthetic_error,
                     'is_retry': msg.is_retry,
-                    'raw_imported_content': msg.raw_imported_content,  # Full JSONL object for debugging
                     'notes': [{
                         'id': str(note.id),
                         'from_entity': note.from_entity.name,
