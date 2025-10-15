@@ -38,6 +38,18 @@ class Command(BaseCommand):
             try:
                 leaf_msg = Message.objects.get(id=ca.compact_boundary_message_id)
                 if leaf_msg.context_heap:
+                    # Check if the heap already has a CA (would violate unique constraint)
+                    existing_ca = CompactingAction.objects.filter(context_heap=leaf_msg.context_heap).first()
+                    if existing_ca and existing_ca.id != ca.id:
+                        self.stdout.write(self.style.WARNING(
+                            f'  Heap {str(leaf_msg.context_heap_id)[:8]} already has CA {str(existing_ca.id)[:8]}, '
+                            f'skipping orphaned CA {str(ca.id)[:8]}'
+                        ))
+                        # Delete the duplicate orphaned CA
+                        if not dry_run:
+                            ca.delete()
+                        continue
+
                     if not dry_run:
                         ca.context_heap = leaf_msg.context_heap
                         ca.ending_message_id = ca.compact_boundary_message_id

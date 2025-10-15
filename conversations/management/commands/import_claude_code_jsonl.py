@@ -160,8 +160,7 @@ class Command(BaseCommand):
             cwd=first_msg_data.get('cwd'),
             git_branch=first_msg_data.get('gitBranch'),
             client_version=first_msg_data.get('version'),
-            is_sidechain=first_msg_data.get('isSidechain', False),
-            raw_imported_content=first_msg_data  # Store full JSONL object
+            is_sidechain=first_msg_data.get('isSidechain', False)
         )
         first_msg.recipients.add(first_recipient)
 
@@ -203,8 +202,7 @@ class Command(BaseCommand):
                 'cwd': msg_data.get('cwd'),
                 'git_branch': msg_data.get('gitBranch'),
                 'client_version': msg_data.get('version'),
-                'is_sidechain': msg_data.get('isSidechain', False),
-                'raw_imported_content': msg_data  # Store full JSONL object for debugging
+                'is_sidechain': msg_data.get('isSidechain', False)
             }
 
             # Process based on message type
@@ -244,44 +242,64 @@ class Command(BaseCommand):
                 # Detect continuation messages (system-injected summaries at start of post-compact sessions)
                 is_continuation = isinstance(content, str) and content.startswith("This session is being continued from")
 
+                # Continuation messages are actually from magent to magent, not justin to magent
+                sender = magent if is_continuation else justin
+                recipient = magent if is_continuation else magent
+
                 # If this is a continuation message, create a NEW heap
                 if is_continuation:
                     self.stdout.write(self.style.SUCCESS(
                         f'Found continuation message at msg #{message_num} - creating new heap'
                     ))
 
-                    # Create new heap (POST_COMPACTING type)
+                    # Create the message FIRST with no heap (continuation messages have no parent)
+                    msg = Message.objects.create(
+                        id=msg_uuid,
+                        message_number=1,  # New heap starts at 1
+                        content=content,
+                        context_heap=None,  # Will set after creating heap
+                        parent=None,  # Continuation messages have no parent
+                        sender=sender,
+                        timestamp=timestamp,
+                        session_id=common['session_id'],
+                        source_file=common['source_file'],
+                        cwd=common['cwd'],
+                        git_branch=common['git_branch'],
+                        client_version=common['client_version'],
+                        is_sidechain=common['is_sidechain'],
+                        is_continuation_message=True
+                    )
+                    msg.recipients.add(recipient)
+
+                    # Create new heap (POST_COMPACTING type) with this message as first
                     new_heap = ContextHeap.objects.create(
                         era=era,
-                        first_message=None,  # Will set after creating the message
+                        first_message=msg,
                         type=ContextHeapType.POST_COMPACTING
                     )
 
-                    # Update context_heap for this message onwards
+                    # Update the message to point to the heap
+                    msg.context_heap = new_heap
+                    msg.save()
+
+                    # Update context_heap for future messages in this heap
                     context_heap = new_heap
                     common['context_heap'] = context_heap
 
                     # Reset message numbering for new heap
-                    message_num = 1
+                    message_num = 2  # Next message will be #2
 
-                # Continuation messages are actually from magent to magent, not justin to magent
-                sender = magent if is_continuation else justin
-                recipient = magent if is_continuation else magent
-
-                msg = Message.objects.create(
-                    id=msg_uuid,
-                    message_number=message_num,
-                    content=content,
-                    sender=sender,
-                    is_continuation_message=is_continuation,
-                    **common
-                )
-                msg.recipients.add(recipient)
-
-                # If this was a continuation message, update the heap's first_message
-                if is_continuation:
-                    context_heap.first_message = msg
-                    context_heap.save()
+                else:
+                    # Regular user message
+                    msg = Message.objects.create(
+                        id=msg_uuid,
+                        message_number=message_num,
+                        content=content,
+                        sender=sender,
+                        is_continuation_message=False,
+                        **common
+                    )
+                    msg.recipients.add(recipient)
 
                 parent = msg
                 message_num += 1
