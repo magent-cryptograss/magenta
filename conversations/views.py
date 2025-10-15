@@ -185,6 +185,15 @@ def all_messages(request):
                 # Check if this message is the leaf of a CompactingAction
                 if msg.id in compacting_action_by_leaf_uuid:
                     compacting_action = compacting_action_by_leaf_uuid[msg.id]
+
+                    # Get raw imported content if it exists
+                    from .models import RawImportedContent
+                    ca_ct = ContentType.objects.get(app_label='conversations', model='compactingaction')
+                    raw_content = RawImportedContent.objects.filter(
+                        content_type=ca_ct,
+                        object_id=compacting_action.id
+                    ).first()
+
                     # Add a pseudo-message representing the compacting action
                     heap_data['messages'].append({
                         'id': str(compacting_action.id),
@@ -194,7 +203,8 @@ def all_messages(request):
                         'pre_compact_tokens': compacting_action.pre_compact_tokens,
                         'compact_boundary_message_id': str(compacting_action.compact_boundary_message_id),
                         'is_orphaned': compacting_action.context_heap_id is None,
-                        'linked_heap_id': str(compacting_action.context_heap_id) if compacting_action.context_heap_id else None
+                        'linked_heap_id': str(compacting_action.context_heap_id) if compacting_action.context_heap_id else None,
+                        'raw_imported_content': raw_content.raw_data if raw_content else None
                     })
 
             # Find child split heaps
@@ -214,14 +224,23 @@ def all_messages(request):
         data['eras'].append(era_data)
 
     # Get orphaned compacting actions (not linked to any context heap)
+    from .models import RawImportedContent
+    ca_ct = ContentType.objects.get(app_label='conversations', model='compactingaction')
     orphaned = CompactingAction.objects.filter(context_heap__isnull=True).order_by('created_at')
     for compact in orphaned:
+        # Get raw imported content if it exists
+        raw_content = RawImportedContent.objects.filter(
+            content_type=ca_ct,
+            object_id=compact.id
+        ).first()
+
         data['orphaned_compacting_actions'].append({
             'id': str(compact.id),
             'summary': compact.summary,
             'compact_boundary_message_id': str(compact.compact_boundary_message_id) if compact.compact_boundary_message_id else None,
             'compact_trigger': compact.compact_trigger,
-            'created_at': compact.created_at.isoformat()
+            'created_at': compact.created_at.isoformat(),
+            'raw_imported_content': raw_content.raw_data if raw_content else None
         })
 
     return JsonResponse(data, safe=False)

@@ -1413,6 +1413,23 @@
                             expandedContent += `Linked to heap: ${message.linked_heap_id}<br>`;
                         }
                         expandedContent += `</div>`;
+
+                        // Show raw imported content button if available
+                        if (message.raw_imported_content) {
+                            const rawId = `raw-${message.id}`;
+                            expandedContent += `
+                                <div style="margin: 10px 0;">
+                                    <button
+                                        onclick="toggleRawContent('${rawId}')"
+                                        style="padding: 4px 8px; font-size: 11px; cursor: pointer; background: ${buttonBackground}; color: ${buttonText}; border: 1px solid ${buttonBorder}; border-radius: 3px;">
+                                        Show Raw JSONL
+                                    </button>
+                                    <div id="${rawId}" style="display: none; margin-top: 10px; padding: 10px; background: ${noteBackground}; border: 1px solid ${noteBorderColor}; border-radius: 3px;">
+                                        <pre style="margin: 0; white-space: pre-wrap; font-size: 10px; max-height: 400px; overflow-y: auto;">${escapeHtml(JSON.stringify(message.raw_imported_content, null, 2))}</pre>
+                                    </div>
+                                </div>
+                            `;
+                        }
                     }
 
                     // Show metadata for tool messages
