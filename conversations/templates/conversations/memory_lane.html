@@ -987,9 +987,20 @@
                         const boundaryPreview = compact.compact_boundary_message_id
                             ? compact.compact_boundary_message_id.substring(0, 8)
                             : 'unknown';
+                        const compactPseudoMsg = {
+                            id: compact.id,
+                            message_type: 'CompactingAction',
+                            summary: compact.summary,
+                            compact_trigger: compact.compact_trigger,
+                            compact_boundary_message_id: compact.compact_boundary_message_id,
+                            is_orphaned: true,
+                            raw_imported_content: compact.raw_imported_content,
+                            created_at: compact.created_at
+                        };
+                        const msgId = `msg-${compact.id}`;
                         html += `
-                            <tr style="background: #3a1a1a;">
-                                <td class="expand-icon"></td>
+                            <tr id="${msgId}" onclick="toggleRow('${msgId}', ${JSON.stringify(compactPseudoMsg).replace(/"/g, '&quot;')})" style="cursor: pointer; background: #3a1a1a;">
+                                <td class="expand-icon">►</td>
                                 <td colspan="8" style="padding-left: 30px; color: #d4a574;">
                                     📋 <strong>${compact.summary || '(no summary)'}</strong><br>
                                     <span style="font-size: 10px; color: #858585;">
