@@ -50,8 +50,11 @@ class Era(models.Model):
     """
     A named era in conversation history.
 
-    Eras group related context heaps together, typically by major
-    compacting boundaries or significant relationship milestones.
+    Sometimes, this represents a time when previous context was lost or otherwise not used.
+    In others, it is significant change in the runtime environment of the client(s) being used by the agent(s).
+    In still others, it represents a significant "life event" or inflection point for the agents' understanding and story.
+
+    Eras group related context heaps together.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -93,7 +96,13 @@ class ContextHeapType(models.TextChoices):
 
 class ContextHeap(models.Model):
     """
-    A context heap within an era.
+    This is the short-term memory of an AI ThinkingEntity.
+
+    The 'heap' of context (in some circles, this is called a "Context Window") represents the
+    conversational knowledge to which an LLM can have ready-access at any given prompt.
+
+    Heaps are occasionally "compacted" in order to preserve the conversational and work flow.
+    The CompactingActions represent the end of a heap and also usually the beginning of another.
 
     The 'type' field indicates why this context heap was created:
     - FRESH: Beginning of a new conversation
@@ -208,9 +217,6 @@ class Message(models.Model):
     git_branch = models.CharField(max_length=255, null=True, blank=True)
     client_version = models.CharField(max_length=50, null=True, blank=True)
 
-    # Raw import data for debugging
-    raw_imported_content = models.JSONField(null=True, blank=True)
-
     class Meta:
         indexes = [
             models.Index(fields=['session_id', 'timestamp']),
@@ -240,9 +246,9 @@ class Message(models.Model):
 
 class Thought(Message):
     """
-    Thinking message with cryptographic signature.
+    Thinking message - represents the interal monologue of an AI ThinkingEntity.
 
-    Cryptographically signed by Anthropic.
+    These are apparently sometimes signed (perhaps cryptographically?) by the vendor of LLM clients.
     """
 
     signature = models.TextField()
@@ -435,3 +441,35 @@ class ConversationFile(models.Model):
 
     def __str__(self):
         return f"{self.filename} ({self.message_count} messages)"
+
+
+class RawImportedContent(models.Model):
+    """
+    Stores raw imported data for debugging purposes.
+
+    Can be attached to any model (Message, CompactingAction, etc.)
+    to preserve the original import format for troubleshooting.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # Generic foreign key to attach to any object
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    about = GenericForeignKey('content_type', 'object_id')
+
+    # The raw data as imported
+    raw_data = models.JSONField()
+
+    # Import metadata
+    source_file = models.ForeignKey(ConversationFile, models.SET_NULL, null=True, blank=True, related_name='raw_imports')
+    imported_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'raw_imported_content'
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+        ]
+
+    def __str__(self):
+        return f"Raw data for {self.content_type} {str(self.object_id)[:8]}"
