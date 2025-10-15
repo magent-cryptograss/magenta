@@ -2,19 +2,15 @@
 Conversation models for memory archive.
 
 Structure:
-- Era - groups related context windows (e.g., "Era 0", "Era 1")
-  - ContextWindow - a single context window within an era
-    - ContextOpeningMessage - first message in the window
-    - RegularMessage - subsequent messages (parent chain, FK to ContextWindow)
+- Era - groups related context heaps (e.g., "Era 0", "Era 1")
+  - ContextHeap - a single context heap within an era
+    - Message - messages accumulate in heaps until compacting
 
 Message hierarchy (polymorphic):
 - Message (concrete base) - common fields including content
-  - ContextOpeningMessage - starts a context window (no parent)
-    - ContextOpeningThought - signed thinking that opens a context
-  - RegularMessage - regular message with parent and context_window
-    - Thought - signed thinking message
-    - ToolUse - tool calls with parameters
-    - ToolResult - tool execution results
+  - Thought - signed thinking message
+  - ToolUse - tool calls with parameters
+  - ToolResult - tool execution results
 """
 
 from django.db import models
@@ -47,14 +43,14 @@ class ThinkingEntity(models.Model):
 
 
 # ============================================================================
-# Era and Context Window Models
+# Era and Context Heap Models
 # ============================================================================
 
 class Era(models.Model):
     """
     A named era in conversation history.
 
-    Eras group related context windows together, typically by major
+    Eras group related context heaps together, typically by major
     compacting boundaries or significant relationship milestones.
     """
 
@@ -70,7 +66,7 @@ class Era(models.Model):
         """Returns the earliest blockheight from all messages in this era."""
         from django.db.models import Min
         result = Message.objects.filter(
-            context_window__era=self,
+            context_heap__era=self,
             eth_blockheight__isnull=False
         ).aggregate(earliest=Min('eth_blockheight'))
         return result['earliest']
@@ -79,7 +75,7 @@ class Era(models.Model):
         """Returns the latest blockheight from all messages in this era."""
         from django.db.models import Max
         result = Message.objects.filter(
-            context_window__era=self,
+            context_heap__era=self,
             eth_blockheight__isnull=False
         ).aggregate(latest=Max('eth_blockheight'))
         return result['latest']
@@ -88,62 +84,62 @@ class Era(models.Model):
         return self.name
 
 
-class ContextWindowType(models.TextChoices):
-    """Types of context windows based on why they were created."""
+class ContextHeapType(models.TextChoices):
+    """Types of context heaps based on why they were created."""
     FRESH = 'fresh', 'Fresh conversation'
     POST_COMPACTING = 'post_compacting', 'After compacting'
     SPLIT_POINT = 'split_point', 'Context split'
 
 
-class ContextWindow(models.Model):
+class ContextHeap(models.Model):
     """
-    A context window within an era.
+    A context heap within an era.
 
-    The 'type' field indicates why this context window was created:
+    The 'type' field indicates why this context heap was created:
     - FRESH: Beginning of a new conversation
     - POST_COMPACTING: Started after a context compacting operation
     - SPLIT_POINT: Created due to export splits or model changes
 
-    For SPLIT_POINT windows, first_message points to the message in the parent window
-    where the split occurred (i.e., first_message.context_window != self).
+    For SPLIT_POINT heaps, first_message points to the message in the parent heap
+    where the split occurred (i.e., first_message.context_heap != self).
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    era = models.ForeignKey(Era, models.CASCADE, related_name='context_windows')
+    era = models.ForeignKey(Era, models.CASCADE, related_name='context_heaps')
     first_message = models.ForeignKey(
         'Message',
         models.CASCADE,
-        related_name='opened_windows'
+        related_name='opened_heaps'
     )
     type = models.CharField(
         max_length=20,
-        choices=ContextWindowType.choices,
-        default=ContextWindowType.FRESH
+        choices=ContextHeapType.choices,
+        default=ContextHeapType.FRESH
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'context_windows'
+        db_table = 'context_heaps'
         ordering = ['created_at']
 
     def __str__(self):
-        return f"{self.era.name} - {self.get_type_display()} - Window starting at msg #{self.first_message.message_number}"
+        return f"{self.era.name} - {self.get_type_display()} - Heap starting at msg #{self.first_message.message_number}"
 
-    def parent_window(self):
-        """For SPLIT_POINT windows, return the window they split from."""
-        if self.type != ContextWindowType.SPLIT_POINT:
+    def parent_heap(self):
+        """For SPLIT_POINT heaps, return the heap they split from."""
+        if self.type != ContextHeapType.SPLIT_POINT:
             return None
-        return self.first_message.context_window  # Will be different from self
+        return self.first_message.context_heap  # Will be different from self
 
     def earliest_blockheight(self):
-        """Returns the earliest blockheight from messages in this window."""
+        """Returns the earliest blockheight from messages in this heap."""
         result = self.messages.filter(eth_blockheight__isnull=False).aggregate(
             earliest=models.Min('eth_blockheight')
         )
         return result['earliest']
 
     def latest_blockheight(self):
-        """Returns the latest blockheight from messages in this window."""
+        """Returns the latest blockheight from messages in this heap."""
         result = self.messages.filter(eth_blockheight__isnull=False).aggregate(
             latest=models.Max('eth_blockheight')
         )
@@ -159,7 +155,7 @@ class Message(models.Model):
     Base class for all message types.
 
     All messages have content (JSONField to handle both text and structured data).
-    All messages belong to a context window.
+    All messages belong to a context heap.
     Messages can optionally have a parent for threading.
     """
 
@@ -170,8 +166,8 @@ class Message(models.Model):
     # Content - all messages have content
     content = models.JSONField()
 
-    # Context - all messages belong to a window
-    context_window = models.ForeignKey('ContextWindow', models.CASCADE, related_name='messages', null=True, blank=True)
+    # Context - all messages belong to a heap
+    context_heap = models.ForeignKey('ContextHeap', models.CASCADE, related_name='messages', null=True, blank=True)
 
     # Threading - optional parent for message chains
     parent = models.ForeignKey('self', models.CASCADE, related_name='children', null=True, blank=True)
@@ -205,18 +201,22 @@ class Message(models.Model):
     is_sidechain = models.BooleanField(default=False)
     is_synthetic_error = models.BooleanField(default=False)  # Claude Code synthetic error response
     is_retry = models.BooleanField(default=False)  # User retry due to timeout/error
+    is_continuation_message = models.BooleanField(default=False)  # System-injected summary at start of post-compact session
 
     # Environment context
     cwd = models.TextField(null=True, blank=True)
     git_branch = models.CharField(max_length=255, null=True, blank=True)
     client_version = models.CharField(max_length=50, null=True, blank=True)
 
+    # Raw import data for debugging
+    raw_imported_content = models.JSONField(null=True, blank=True)
+
     class Meta:
         indexes = [
             models.Index(fields=['session_id', 'timestamp']),
             models.Index(fields=['sender']),
         ]
-        unique_together = [['context_window', 'message_number']]
+        unique_together = [['context_heap', 'message_number']]
 
     def __str__(self):
         recipient_names = ','.join(r.name for r in self.recipients.all()) if self.pk else '?'
@@ -304,18 +304,18 @@ class ToolResult(Message):
 
 class CompactingAction(models.Model):
     """
-    Records when a context window was closed via compacting.
+    Records when a context heap was closed via compacting.
 
-    Points to the ContextWindow that was closed.
-    Not all context windows have a CompactingAction - some end naturally.
+    Points to the ContextHeap that was closed.
+    Not all context heaps have a CompactingAction - some end naturally.
 
-    context_window can be null during import when we find summaries before
-    we've imported the context window they belong to.
+    context_heap can be null during import when we find summaries before
+    we've imported the context heap they belong to.
     """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    context_window = models.OneToOneField(
-        ContextWindow,
+    context_heap = models.OneToOneField(
+        ContextHeap,
         models.CASCADE,
         null=True,
         blank=True,
@@ -323,6 +323,13 @@ class CompactingAction(models.Model):
     )
     ending_message_id = models.UUIDField(null=True, blank=True)  # Last message before compact
     compact_boundary_message_id = models.UUIDField(null=True, blank=True)
+    continuation_message = models.ForeignKey(
+        Message,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='continuation_for_compacting_action'
+    )  # The system-injected summary message at start of next heap
     summary = models.TextField(null=True, blank=True)
     compact_trigger = models.CharField(max_length=50, null=True, blank=True)
     pre_compact_tokens = models.IntegerField(null=True, blank=True)
@@ -334,8 +341,8 @@ class CompactingAction(models.Model):
     def __str__(self):
         trigger = self.compact_trigger or 'unknown'
         tokens = f"{self.pre_compact_tokens:,}" if self.pre_compact_tokens else '?'
-        window = f"window {str(self.context_window_id)[:8]}" if self.context_window_id else "orphaned"
-        return f"Compact ({trigger}, {tokens} tokens, {window})"
+        heap = f"heap {str(self.context_heap_id)[:8]}" if self.context_heap_id else "orphaned"
+        return f"Compact ({trigger}, {tokens} tokens, {heap})"
 
 
 # ============================================================================

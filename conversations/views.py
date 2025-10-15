@@ -14,14 +14,14 @@ def memory_lane(request):
 
 
 def all_messages(request):
-    """Messages grouped by Era and ContextWindow."""
-    # Get all context windows with their eras
-    from .models import ContextWindow, Era, Note, CompactingAction
+    """Messages grouped by Era and ContextHeap."""
+    # Get all context heaps with their eras
+    from .models import ContextHeap, Era, Note, CompactingAction
     from django.contrib.contenttypes.models import ContentType
 
     eras = Era.objects.prefetch_related(
-        'context_windows__messages__sender',
-        'context_windows__messages__recipients'
+        'context_heaps__messages__sender',
+        'context_heaps__messages__recipients'
     ).order_by('created_at')
 
     data = {
@@ -31,7 +31,7 @@ def all_messages(request):
 
     # Get content types for lookups
     message_ct = ContentType.objects.get(app_label='conversations', model='message')
-    window_ct = ContentType.objects.get(app_label='conversations', model='contextwindow')
+    heap_ct = ContentType.objects.get(app_label='conversations', model='contextheap')
     era_ct = ContentType.objects.get(app_label='conversations', model='era')
 
     for era in eras:
@@ -47,7 +47,7 @@ def all_messages(request):
             'created_at': era.created_at.isoformat(),
             'earliest_blockheight': era.earliest_blockheight(),
             'latest_blockheight': era.latest_blockheight(),
-            'context_windows': [],
+            'context_heaps': [],
             'notes': [{
                 'id': str(note.id),
                 'from_entity': note.from_entity.name,
@@ -57,38 +57,49 @@ def all_messages(request):
             } for note in era_notes]
         }
 
-        # Get all windows for this era
-        all_windows = list(era.context_windows.all().order_by('created_at'))
+        # Get all heaps for this era, sorted by first message timestamp
+        all_heaps = list(era.context_heaps.select_related('first_message').all())
+        # Sort by first message timestamp (handle null timestamps)
+        all_heaps.sort(key=lambda h: h.first_message.timestamp if h.first_message and h.first_message.timestamp else 0)
 
-        # Build hierarchy: find root windows (non-split) and their children (splits)
-        def serialize_window(window):
-            # Get notes for this window
-            window_notes = Note.objects.filter(
-                content_type=window_ct,
-                object_id=window.id
+        # Build hierarchy: find root heaps (non-split) and their children (splits)
+        def serialize_heap(heap):
+            # Get notes for this heap
+            heap_notes = Note.objects.filter(
+                content_type=heap_ct,
+                object_id=heap.id
             ).order_by('created_at')
 
             # Check for compacting action
             compacting_action = None
-            if hasattr(window, 'compacting_action') and window.compacting_action:
-                ca = window.compacting_action
+            if hasattr(heap, 'compacting_action') and heap.compacting_action:
+                ca = heap.compacting_action
                 compacting_action = {
                     'id': str(ca.id),
                     'summary': ca.summary,
                     'compact_boundary_message_id': str(ca.compact_boundary_message_id) if ca.compact_boundary_message_id else None,
-                    'compact_trigger': ca.compact_trigger
+                    'compact_trigger': ca.compact_trigger,
+                    'continuation_message_id': str(ca.continuation_message_id) if ca.continuation_message_id else None
                 }
 
-            window_data = {
-                'id': str(window.id),
-                'type': window.type,
-                'type_display': window.get_type_display(),
-                'first_message_id': str(window.first_message_id),
-                'created_at': window.created_at.isoformat(),
-                'earliest_blockheight': window.earliest_blockheight(),
-                'latest_blockheight': window.latest_blockheight(),
+            # Get first message timestamp
+            first_message = heap.first_message
+            first_message_timestamp = None
+            if first_message and first_message.timestamp:
+                from datetime import datetime
+                first_message_timestamp = datetime.fromtimestamp(first_message.timestamp / 1000).isoformat()
+
+            heap_data = {
+                'id': str(heap.id),
+                'type': heap.type,
+                'type_display': heap.get_type_display(),
+                'first_message_id': str(heap.first_message_id),
+                'first_message_timestamp': first_message_timestamp,
+                'created_at': heap.created_at.isoformat(),
+                'earliest_blockheight': heap.earliest_blockheight(),
+                'latest_blockheight': heap.latest_blockheight(),
                 'messages': [],
-                'child_windows': [],
+                'child_heaps': [],
                 'compacting_action': compacting_action,
                 'notes': [{
                     'id': str(note.id),
@@ -96,11 +107,11 @@ def all_messages(request):
                     'content': note.content,
                     'eth_blockheight': note.eth_blockheight,
                     'created_at': note.created_at.isoformat()
-                } for note in window_notes]
+                } for note in heap_notes]
             }
 
             # Build lookup of CompactingActions by their leaf message UUID
-            # This includes both linked CAs (for this window or others) and orphaned ones
+            # This includes both linked CAs (for this heap or others) and orphaned ones
             all_compacting_actions = CompactingAction.objects.all()
             compacting_action_by_leaf_uuid = {
                 action.compact_boundary_message_id: action
@@ -108,8 +119,8 @@ def all_messages(request):
                 if action.compact_boundary_message_id
             }
 
-            # Get messages for this window
-            messages = window.messages.select_related('thought', 'tooluse', 'toolresult').order_by('message_number')
+            # Get messages for this heap
+            messages = heap.messages.select_related('thought', 'tooluse', 'toolresult').order_by('message_number')
             for msg in messages:
                 # Get the actual polymorphic instance
                 if hasattr(msg, 'thought'):
@@ -147,6 +158,7 @@ def all_messages(request):
                     'parent_id': str(msg.parent_id) if msg.parent_id else None,
                     'is_synthetic_error': msg.is_synthetic_error,
                     'is_retry': msg.is_retry,
+                    'raw_imported_content': msg.raw_imported_content,  # Full JSONL object for debugging
                     'notes': [{
                         'id': str(note.id),
                         'from_entity': note.from_entity.name,
@@ -169,41 +181,41 @@ def all_messages(request):
                 elif hasattr(msg, 'thought'):
                     msg_dict['signature'] = msg.thought.signature
 
-                window_data['messages'].append(msg_dict)
+                heap_data['messages'].append(msg_dict)
 
                 # Check if this message is the leaf of a CompactingAction
                 if msg.id in compacting_action_by_leaf_uuid:
                     compacting_action = compacting_action_by_leaf_uuid[msg.id]
                     # Add a pseudo-message representing the compacting action
-                    window_data['messages'].append({
+                    heap_data['messages'].append({
                         'id': str(compacting_action.id),
                         'message_type': 'CompactingAction',
                         'summary': compacting_action.summary,
                         'compact_trigger': compacting_action.compact_trigger,
                         'pre_compact_tokens': compacting_action.pre_compact_tokens,
                         'compact_boundary_message_id': str(compacting_action.compact_boundary_message_id),
-                        'is_orphaned': compacting_action.context_window_id is None,
-                        'linked_window_id': str(compacting_action.context_window_id) if compacting_action.context_window_id else None
+                        'is_orphaned': compacting_action.context_heap_id is None,
+                        'linked_heap_id': str(compacting_action.context_heap_id) if compacting_action.context_heap_id else None
                     })
 
-            # Find child split windows
-            for potential_child in all_windows:
+            # Find child split heaps
+            for potential_child in all_heaps:
                 if potential_child.type == 'split_point':
-                    parent_window = potential_child.parent_window()
-                    if parent_window and parent_window.id == window.id:
-                        window_data['child_windows'].append(serialize_window(potential_child))
+                    parent_heap = potential_child.parent_heap()
+                    if parent_heap and parent_heap.id == heap.id:
+                        heap_data['child_heaps'].append(serialize_heap(potential_child))
 
-            return window_data
+            return heap_data
 
-        # Serialize root windows (non-split windows)
-        for window in all_windows:
-            if window.type != 'split_point':
-                era_data['context_windows'].append(serialize_window(window))
+        # Serialize root heaps (non-split heaps)
+        for heap in all_heaps:
+            if heap.type != 'split_point':
+                era_data['context_heaps'].append(serialize_heap(heap))
 
         data['eras'].append(era_data)
 
-    # Get orphaned compacting actions (not linked to any context window)
-    orphaned = CompactingAction.objects.filter(context_window__isnull=True).order_by('created_at')
+    # Get orphaned compacting actions (not linked to any context heap)
+    orphaned = CompactingAction.objects.filter(context_heap__isnull=True).order_by('created_at')
     for compact in orphaned:
         data['orphaned_compacting_actions'].append({
             'id': str(compact.id),
@@ -255,14 +267,14 @@ def api_messages(request):
             content = str(msg.thought.content)
             extra['signature'] = msg.thought.signature
             extra['parent_uuid'] = str(msg.parent.id) if msg.parent else None
-            extra['context_window'] = str(msg.context_window.id) if msg.context_window else None
+            extra['context_heap'] = str(msg.context_heap.id) if msg.context_heap else None
         elif hasattr(msg, 'tooluse'):
             message_type = 'tool_use'
             content = f"[Tool: {msg.tooluse.tool_name}]"
             extra['tool_name'] = msg.tooluse.tool_name
             extra['tool_id'] = msg.tooluse.tool_id
             extra['parent_uuid'] = str(msg.parent.id) if msg.parent else None
-            extra['context_window'] = str(msg.context_window.id) if msg.context_window else None
+            extra['context_heap'] = str(msg.context_heap.id) if msg.context_heap else None
         elif hasattr(msg, 'toolresult'):
             message_type = 'tool_result'
             result_content = str(msg.toolresult.content)
@@ -270,12 +282,12 @@ def api_messages(request):
             extra['is_error'] = msg.toolresult.is_error
             extra['tool_use_id'] = msg.toolresult.tool_use_id
             extra['parent_uuid'] = str(msg.parent.id) if msg.parent else None
-            extra['context_window'] = str(msg.context_window.id) if msg.context_window else None
+            extra['context_heap'] = str(msg.context_heap.id) if msg.context_heap else None
         else:
             message_type = 'message'
             content = str(msg.content)
             extra['parent_uuid'] = str(msg.parent.id) if msg.parent else None
-            extra['context_window'] = str(msg.context_window.id) if msg.context_window else None
+            extra['context_heap'] = str(msg.context_heap.id) if msg.context_heap else None
 
         # Filter by message type
         if message_type and message_type not in message_types:

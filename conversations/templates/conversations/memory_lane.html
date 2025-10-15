@@ -168,10 +168,12 @@
         .row-num {
             color: #4ec9b0;
             width: 40px;
+            max-width: 40px;
             text-align: right;
             font-size: 10px;
             font-weight: bold;
             display: none;
+            padding: 2px 0 !important;
         }
         body.light-mode .row-num {
             color: #0a7c6a;
@@ -179,16 +181,20 @@
         .missing-marker {
             color: #ff0000;
             width: 30px;
+            max-width: 30px;
             text-align: center;
             font-size: 16px;
             font-weight: bold;
+            padding: 2px 0 !important;
         }
         .expand-icon {
             color: #569cd6;
             width: 20px;
+            max-width: 20px;
             text-align: center;
             font-size: 14px;
             font-weight: bold;
+            padding: 2px 0 !important;
         }
         body.light-mode .expand-icon {
             color: #0066cc;
@@ -196,9 +202,11 @@
         .importance {
             color: #dcdcaa;
             width: 30px;
+            max-width: 30px;
             text-align: center;
             font-weight: bold;
             display: none;
+            padding: 2px 0 !important;
         }
         body.light-mode .importance {
             color: #7a6a00;
@@ -206,7 +214,12 @@
         .from {
             color: #4ec9b0;
             width: 60px;
+            max-width: 60px;
             font-weight: bold;
+            padding: 0 !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         body.light-mode .from {
             color: #0a7c6a;
@@ -214,7 +227,9 @@
         .arrow {
             color: #666;
             width: 20px;
+            max-width: 20px;
             text-align: center;
+            padding: 0 !important;
         }
         body.light-mode .arrow {
             color: #999999;
@@ -222,6 +237,11 @@
         .to {
             color: #4ec9b0;
             width: 60px;
+            max-width: 60px;
+            padding: 0 !important;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         body.light-mode .to {
             color: #0a7c6a;
@@ -231,6 +251,7 @@
             max-width: 400px;
             overflow: hidden;
             text-overflow: ellipsis;
+            padding: 2px 4px !important;
         }
         body.light-mode .content {
             color: #1a1a1a;
@@ -239,6 +260,8 @@
             color: #858585;
             font-size: 10px;
             width: 140px;
+            max-width: 140px;
+            padding: 2px 4px !important;
         }
         body.light-mode .timestamp {
             color: #666666;
@@ -247,7 +270,9 @@
             color: #666;
             font-size: 9px;
             width: 70px;
+            max-width: 70px;
             font-family: monospace;
+            padding: 2px 4px !important;
         }
         body.light-mode .uuid {
             color: #999999;
@@ -256,6 +281,8 @@
             color: #858585;
             font-size: 9px;
             width: 120px;
+            max-width: 120px;
+            padding: 2px 4px !important;
         }
         body.light-mode .source {
             color: #666666;
@@ -446,6 +473,10 @@
                 <input type="checkbox" id="blockheightSpecifiedFilter">
                 Blockheight specified
             </label>
+            <label>
+                <input type="checkbox" id="heapBoundariesOnlyFilter">
+                Show only heap boundaries
+            </label>
             <button onclick="loadMessages()">Refresh</button>
         </div>
     </div>
@@ -489,12 +520,12 @@
                     // Collapse all eras by default
                     collapsedEras.add(era.id);
 
-                    era.context_windows.forEach(window => {
+                    era.context_heaps.forEach(window => {
                         // Collapse all windows by default
                         collapsedWindows.add(window.id);
 
                         // Collapse main flow for windows that have splits
-                        if (window.child_windows && window.child_windows.length > 0) {
+                        if (window.child_heaps && window.child_heaps.length > 0) {
                             collapsedMainFlows.add(window.id);
                         }
 
@@ -502,8 +533,8 @@
 
                         // Recursively collapse child windows and collect their messages
                         function collapseChildWindows(win) {
-                            if (win.child_windows) {
-                                win.child_windows.forEach(child => {
+                            if (win.child_heaps) {
+                                win.child_heaps.forEach(child => {
                                     collapsedWindows.add(child.id);
                                     allMessages.push(...child.messages);
                                     collapseChildWindows(child);
@@ -533,6 +564,7 @@
             const showThinking = document.getElementById('showThinkingFilter').checked;
             const flatView = document.getElementById('flatViewFilter').checked;
             const blockheightSpecified = document.getElementById('blockheightSpecifiedFilter').checked;
+            const heapBoundariesOnly = document.getElementById('heapBoundariesOnlyFilter').checked;
 
             const tbody = document.getElementById('messagesBody');
             let html = '';
@@ -546,7 +578,7 @@
 
                 // Count messages in this era
                 let eraMessageCount = 0;
-                era.context_windows.forEach(window => {
+                era.context_heaps.forEach(window => {
                     eraMessageCount += window.messages.length;
                 });
 
@@ -569,10 +601,29 @@
 
                     // Count messages in this window
                     const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+
+                    // Determine first and last message numbers
+                    const firstMsgNum = window.messages.length > 0 ? Math.min(...window.messages.map(m => m.message_number)) : -1;
+                    const lastMsgNum = window.messages.length > 0 ? Math.max(...window.messages.map(m => m.message_number)) : -1;
+
                     const filtered = baseMessages.filter(m => {
-                        if (search && !m.content.toLowerCase().includes(search)) return false;
+                        // Heap boundaries filter
+                        if (heapBoundariesOnly) {
+                            const isFirstMsg = m.message_number === firstMsgNum;
+                            const isLastMsg = m.message_number === lastMsgNum;
+                            const isContinuation = m.is_continuation_message;
+                            if (!isFirstMsg && !isLastMsg && !isContinuation) return false;
+                        }
+
+                        if (search) {
+                            const contentStr = typeof m.content === 'string' ? m.content : (m.content ? JSON.stringify(m.content) : '');
+                            if (!contentStr.toLowerCase().includes(search)) return false;
+                        }
                         if (uuidSearch && !m.id.toLowerCase().includes(uuidSearch)) return false;
-                        if (minLength && m.content.length < minLength) return false;
+                        if (minLength) {
+                            const contentLength = typeof m.content === 'string' ? m.content.length : (m.content ? JSON.stringify(m.content).length : 0);
+                            if (contentLength < minLength) return false;
+                        }
                         if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                         if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
                         if (blockheightSpecified && (!m.eth_blockheight || m.eth_block_offset !== 0)) return false;
@@ -581,8 +632,8 @@
                     count += filtered.length;
 
                     // Count messages in child windows recursively
-                    if (window.child_windows) {
-                        window.child_windows.forEach(childWindow => {
+                    if (window.child_heaps) {
+                        window.child_heaps.forEach(childWindow => {
                             count += countVisibleInWindow(childWindow);
                         });
                     }
@@ -599,7 +650,7 @@
                     function renderWindow(window, depth = 0, parentIndent = 20) {
                         const windowCollapsed = collapsedWindows.has(window.id);
                         const windowIcon = windowCollapsed ? '►' : '▼';
-                        const childCount = window.child_windows ? window.child_windows.length : 0;
+                        const childCount = window.child_heaps ? window.child_heaps.length : 0;
                         const childSuffix = childCount > 0 ? ` · ${childCount} splits` : '';
 
                         // Build window note icons
@@ -619,10 +670,15 @@
                             ? `[${window.earliest_blockheight.toLocaleString()}-${window.latest_blockheight.toLocaleString()}]`
                             : '';
 
+                        // Format first message timestamp
+                        const windowTimestamp = window.first_message_timestamp
+                            ? new Date(window.first_message_timestamp).toISOString().replace('T', ' ').substring(0, 19)
+                            : '';
+
                         // Calculate split info
                         let splitInfo = '';
                         if (childCount > 0) {
-                            const splitCounts = window.child_windows.map(c => c.messages.length).join(', ');
+                            const splitCounts = window.child_heaps.map(c => c.messages.length).join(', ');
                             splitInfo = ` | Splits: ${splitCounts}`;
                         }
 
@@ -680,9 +736,19 @@
                             const ca = window.compacting_action;
                             const caId = ca.id.substring(0, 8);
                             const caSummary = ca.summary ? escapeHtml(ca.summary.substring(0, 80)) : '(no summary)';
+
+                            // Show continuation message link or red X
+                            let continuationLink = '';
+                            if (ca.continuation_message_id) {
+                                const contId = ca.continuation_message_id.substring(0, 8);
+                                continuationLink = `<a href="#msg-${ca.continuation_message_id}" style="color: #4ec9b0; text-decoration: none;">→ ${contId}</a>`;
+                            } else {
+                                continuationLink = `<span style="color: #f44747;">❌ No Continuation Message</span>`;
+                            }
+
                             compactingInfo = `
                                 <div style="font-size: 10px; color: #ce9178; margin-top: 2px;">
-                                    📋 Compacted: ${caSummary}... (${caId})
+                                    📋 Compacted: ${caSummary}... (${caId}) ${continuationLink}
                                 </div>
                             `;
                         } else if (window.type === 'post_compacting') {
@@ -692,6 +758,13 @@
                                     📋 Compacted (not yet linked)
                                 </div>
                             `;
+                        } else {
+                            // No compacting action for this heap
+                            compactingInfo = `
+                                <div style="font-size: 10px; color: #ff8800; margin-top: 2px;">
+                                    ❓ No known CompactingAction
+                                </div>
+                            `;
                         }
 
                         const headerRow = `
@@ -699,6 +772,7 @@
                                 <td class="expand-icon" rowspan="2">${windowIcon}</td>
                                 <td colspan="7" style="padding: 4px 6px; padding-left: ${parentIndent}px; border-bottom: none;">
                                     <div style="font-weight: bold;">${shortType} ${window.messages.length}${splitInfo} ${windowBlockheightRange}</div>
+                                    ${windowTimestamp ? `<div style="font-size: 10px; color: #858585; font-weight: normal;">${windowTimestamp}</div>` : ''}
                                     ${compactingInfo}
                                 </td>
                                 <td class="window-uuid" rowspan="2" style="padding: 6px; text-align: right; vertical-align: top;">${windowUuid}</td>
@@ -719,18 +793,37 @@
 
                                 // Check if there are any matching messages to decide if header should show
                                 const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+
+                                // Determine first and last message numbers for boundary filtering
+                                const firstMsgNum = window.messages.length > 0 ? Math.min(...window.messages.map(m => m.message_number)) : -1;
+                                const lastMsgNum = window.messages.length > 0 ? Math.max(...window.messages.map(m => m.message_number)) : -1;
+
                                 const filtered = baseMessages.filter(m => {
-                                    if (search && !m.content.toLowerCase().includes(search)) return false;
+                                    // Heap boundaries filter: only show first message, last message, and continuation messages
+                                    if (heapBoundariesOnly) {
+                                        const isFirstMsg = m.message_number === firstMsgNum;
+                                        const isLastMsg = m.message_number === lastMsgNum;
+                                        const isContinuation = m.is_continuation_message;
+                                        if (!isFirstMsg && !isLastMsg && !isContinuation) return false;
+                                    }
+
+                                    if (search) {
+                                        const contentStr = typeof m.content === 'string' ? m.content : (m.content ? JSON.stringify(m.content) : '');
+                                        if (!contentStr.toLowerCase().includes(search)) return false;
+                                    }
                                     if (uuidSearch && !m.id.toLowerCase().includes(uuidSearch)) return false;
-                                    if (minLength && m.content.length < minLength) return false;
+                                    if (minLength) {
+                                        const contentLength = typeof m.content === 'string' ? m.content.length : (m.content ? JSON.stringify(m.content).length : 0);
+                                        if (contentLength < minLength) return false;
+                                    }
                                     if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                                     if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
                                     if (blockheightSpecified && (!m.eth_blockheight || m.eth_block_offset !== 0)) return false;
                                     return true;
                                 });
 
-                                // Only show main flow header if there are matching messages
-                                if (filtered.length > 0) {
+                                // Only show main flow header if there are matching messages (or if boundaries mode is on)
+                                if (filtered.length > 0 || heapBoundariesOnly) {
                                     const mainFlowHeader = `
                                         <tr class="main-flow-header" onclick="event.stopPropagation(); toggleMainFlow('${window.id}')">
                                             <td class="expand-icon">${mainFlowIcon}</td>
@@ -769,8 +862,8 @@
                                 }
 
                                 // Render child split windows as siblings to main flow (same indent)
-                                if (window.child_windows) {
-                                    window.child_windows.forEach(childWindow => {
+                                if (window.child_heaps) {
+                                    window.child_heaps.forEach(childWindow => {
                                         const childResult = renderWindow(childWindow, depth + 1, mainFlowIndent);
                                         windowHtml += childResult.html;
                                         windowVisibleCount += childResult.count;
@@ -779,10 +872,29 @@
                             } else {
                                 // No child splits, just render messages directly
                                 const baseMessages = flatView ? window.messages : window.messages.filter(m => !m.parent_uuid);
+
+                                // Determine first and last message numbers
+                                const firstMsgNum = window.messages.length > 0 ? Math.min(...window.messages.map(m => m.message_number)) : -1;
+                                const lastMsgNum = window.messages.length > 0 ? Math.max(...window.messages.map(m => m.message_number)) : -1;
+
                                 const filtered = baseMessages.filter(m => {
-                                    if (search && !m.content.toLowerCase().includes(search)) return false;
+                                    // Heap boundaries filter
+                                    if (heapBoundariesOnly) {
+                                        const isFirstMsg = m.message_number === firstMsgNum;
+                                        const isLastMsg = m.message_number === lastMsgNum;
+                                        const isContinuation = m.is_continuation_message;
+                                        if (!isFirstMsg && !isLastMsg && !isContinuation) return false;
+                                    }
+
+                                    if (search) {
+                                        const contentStr = typeof m.content === 'string' ? m.content : (m.content ? JSON.stringify(m.content) : '');
+                                        if (!contentStr.toLowerCase().includes(search)) return false;
+                                    }
                                     if (uuidSearch && !m.id.toLowerCase().includes(uuidSearch)) return false;
-                                    if (minLength && m.content.length < minLength) return false;
+                                    if (minLength) {
+                                        const contentLength = typeof m.content === 'string' ? m.content.length : (m.content ? JSON.stringify(m.content).length : 0);
+                                        if (contentLength < minLength) return false;
+                                    }
                                     if (person && m.sender !== person && !m.recipients.includes(person)) return false;
                                     if (!showThinking && (m.message_type === 'Thought' || m.message_type === 'ContextOpeningThought')) return false;
                                     if (blockheightSpecified && (!m.eth_blockheight || m.eth_block_offset !== 0)) return false;
@@ -825,14 +937,14 @@
                         }
                     }
 
-                    era.context_windows.forEach(window => {
+                    era.context_heaps.forEach(window => {
                         const result = renderWindow(window);
                         eraWindowsHtml += result.html;
                         eraVisibleCount += result.count;
                     });
                 } else {
                     // Era is collapsed, but count potential matches for visibility check
-                    era.context_windows.forEach(window => {
+                    era.context_heaps.forEach(window => {
                         eraVisibleCount += countVisibleInWindow(window);
                     });
                 }
@@ -840,11 +952,12 @@
                 // Only render this era if it has visible messages
                 // (When collapsed, we still count potential matches to decide visibility)
                 if (eraVisibleCount > 0) {
+                    const heapCount = era.context_heaps.length;
                     html += `
                         <tr class="era-header" onclick="toggleEra('${era.id}')">
                             <td class="expand-icon">${eraIcon}</td>
                             <td colspan="7" style="padding: 8px;">
-                                ${era.name}${eraBlockheightRange}${eraNoteIcons}
+                                ${era.name} (${heapCount} heaps)${eraBlockheightRange}${eraNoteIcons}
                             </td>
                             <td class="era-uuid" style="padding: 8px; text-align: right;">${eraUuid}</td>
                         </tr>
@@ -1000,8 +1113,8 @@
 
                     // End current chain if exists
                     if (currentChain && currentChain.messages.length > 1) {
-                        // Auto-collapse command chains (only on first run)
-                        if (currentChain.isCommandChain && !commandChainsInitialized) {
+                        // Auto-collapse all chains (only on first run)
+                        if (!commandChainsInitialized) {
                             collapsedChains.add(currentChain.id);
                         }
                         result.push(currentChain);
@@ -1017,8 +1130,8 @@
 
             // Don't forget the last chain
             if (currentChain && currentChain.messages.length > 1) {
-                // Auto-collapse command chains (only on first run)
-                if (currentChain.isCommandChain && !commandChainsInitialized) {
+                // Auto-collapse all chains (only on first run)
+                if (!commandChainsInitialized) {
                     collapsedChains.add(currentChain.id);
                 }
                 result.push(currentChain);
@@ -1084,11 +1197,11 @@
                 const rowNumDisplay = rowNumber !== null ? rowNumber : '';
 
                 const html = `
-                    <tr class="thinking" style="background: #3a2d1d; font-style: italic;" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
+                    <tr class="thinking" style="background: #4a3a2a; font-style: italic;" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
                         <td class="blockheight"></td>
                         <td class="num"></td>
                         <td class="importance">Compact</td>
-                        <td class="from" colspan="3">${preview}${orphanedIndicator}</td>
+                        <td class="from" colspan="3" style="color: #dcdcaa; font-weight: bold;">${preview}${orphanedIndicator}</td>
                         <td class="content"></td>
                         <td class="timestamp"></td>
                         <td class="source"></td>
@@ -1275,6 +1388,9 @@
                     const noteBackground = isLightMode ? '#f8f8f8' : '#2d2d30';
                     const noteBorderColor = isLightMode ? '#d17a4a' : '#ce9178';
                     const noteAuthorColor = isLightMode ? '#d17a4a' : '#ce9178';
+                    const buttonBackground = isLightMode ? '#007acc' : '#0e639c';
+                    const buttonText = isLightMode ? '#ffffff' : '#ffffff';
+                    const buttonBorder = isLightMode ? '#005a9e' : '#1177bb';
 
                     let expandedContent = `<td colspan="9" style="padding: 10px 20px; border-left: 3px solid ${borderColor};">`;
 
@@ -1292,9 +1408,9 @@
                         }
                         expandedContent += `Leaf message (last before compact): ${message.compact_boundary_message_id}<br>`;
                         if (message.is_orphaned) {
-                            expandedContent += `<span style="color: #ce9178;">Status: Orphaned (context window not yet linked)</span><br>`;
+                            expandedContent += `<span style="color: #ce9178;">Status: Orphaned (context heap not yet linked)</span><br>`;
                         } else {
-                            expandedContent += `Linked to window: ${message.linked_window_id}<br>`;
+                            expandedContent += `Linked to heap: ${message.linked_heap_id}<br>`;
                         }
                         expandedContent += `</div>`;
                     }
@@ -1322,7 +1438,27 @@
 
                     // Show content (skip for CompactingAction which doesn't have content field)
                     if (message.message_type !== 'CompactingAction' && message.content) {
-                        expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(message.content)}</div>`;
+                        const contentStr = typeof message.content === 'string'
+                            ? message.content
+                            : JSON.stringify(message.content, null, 2);
+                        expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(contentStr)}</div>`;
+                    }
+
+                    // Show raw imported content button if available
+                    if (message.raw_imported_content) {
+                        const rawId = `raw-${message.id}`;
+                        expandedContent += `
+                            <div style="margin: 10px 0;">
+                                <button
+                                    onclick="toggleRawContent('${rawId}')"
+                                    style="padding: 4px 8px; font-size: 11px; cursor: pointer; background: ${buttonBackground}; color: ${buttonText}; border: 1px solid ${buttonBorder}; border-radius: 3px;">
+                                    Show Raw JSONL
+                                </button>
+                                <div id="${rawId}" style="display: none; margin-top: 10px; padding: 10px; background: ${noteBackground}; border: 1px solid ${noteBorderColor}; border-radius: 3px;">
+                                    <pre style="margin: 0; white-space: pre-wrap; font-size: 10px; max-height: 400px; overflow-y: auto;">${escapeHtml(JSON.stringify(message.raw_imported_content, null, 2))}</pre>
+                                </div>
+                            </div>
+                        `;
                     }
 
                     // Add notes if present
@@ -1343,6 +1479,18 @@
                     expandedRow.innerHTML = expandedContent;
                     row.after(expandedRow);
                 }
+            }
+        }
+
+        function toggleRawContent(rawId) {
+            const div = document.getElementById(rawId);
+            const button = event.target;
+            if (div.style.display === 'none') {
+                div.style.display = 'block';
+                button.textContent = 'Hide Raw JSONL';
+            } else {
+                div.style.display = 'none';
+                button.textContent = 'Show Raw JSONL';
             }
         }
 
@@ -1379,6 +1527,7 @@
         document.getElementById('showThinkingFilter').addEventListener('change', renderMessages);
         document.getElementById('flatViewFilter').addEventListener('change', renderMessages);
         document.getElementById('blockheightSpecifiedFilter').addEventListener('change', renderMessages);
+        document.getElementById('heapBoundariesOnlyFilter').addEventListener('change', renderMessages);
 
         function showNotesModal(title, notes) {
             const modal = document.getElementById('notesModal');
