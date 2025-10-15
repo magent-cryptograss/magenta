@@ -350,6 +350,73 @@ class CompactingAction(models.Model):
         heap = f"heap {str(self.context_heap_id)[:8]}" if self.context_heap_id else "orphaned"
         return f"Compact ({trigger}, {tokens} tokens, {heap})"
 
+    def get_boundary_message(self):
+        """Get the message at the compact boundary (leaf message)."""
+        if not self.compact_boundary_message_id:
+            return None
+        try:
+            return Message.objects.get(id=self.compact_boundary_message_id)
+        except Message.DoesNotExist:
+            return None
+
+    def has_post_compact_messages(self):
+        """Check if messages exist after the boundary in the same heap."""
+        if not self.context_heap_id or not self.compact_boundary_message_id:
+            return False
+
+        boundary_msg = self.get_boundary_message()
+        if not boundary_msg or not boundary_msg.message_number:
+            return False
+
+        # Check if any messages exist after the boundary in this heap
+        post_compact_count = Message.objects.filter(
+            context_heap_id=self.context_heap_id,
+            message_number__gt=boundary_msg.message_number
+        ).count()
+
+        return post_compact_count > 0
+
+    def split_heap(self):
+        """
+        Split the heap at the compact boundary.
+
+        Creates a new POST_COMPACTING heap and moves all messages after
+        the boundary to it. Returns the new heap or None if no split needed.
+        """
+        if not self.has_post_compact_messages():
+            return None
+
+        boundary_msg = self.get_boundary_message()
+        old_heap = self.context_heap
+
+        # Get all messages after the boundary
+        post_compact_messages = Message.objects.filter(
+            context_heap_id=old_heap.id,
+            message_number__gt=boundary_msg.message_number
+        ).order_by('message_number')
+
+        if not post_compact_messages.exists():
+            return None
+
+        # Find the first post-compact message to use as the new heap's first_message
+        first_post_compact = post_compact_messages.first()
+
+        # Create new heap
+        new_heap = ContextHeap.objects.create(
+            era=old_heap.era,
+            first_message=first_post_compact,
+            type=ContextHeapType.POST_COMPACTING
+        )
+
+        # Move all post-compact messages to new heap
+        # Reset message numbers starting from 1
+        for i, msg in enumerate(post_compact_messages, start=1):
+            msg.context_heap = new_heap
+            msg.message_number = i
+            msg.save()
+
+        return new_heap
+
 
 # ============================================================================
 # Supporting Models
