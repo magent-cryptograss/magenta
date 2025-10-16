@@ -8,7 +8,6 @@ Usage:
 
 import json
 import uuid as uuid_lib
-import hashlib
 import re
 from pathlib import Path
 from datetime import datetime
@@ -20,24 +19,6 @@ from conversations.models import (
     CompactingAction
 )
 from conversations.utils.retry_detection import RetryDetector
-
-
-def generate_compacting_action_id(summary_data):
-    """
-    Generate deterministic UUID for CompactingAction based on summary data.
-
-    Uses hash of the entire summary object to ensure:
-    - Same summary = same UUID (prevents duplicates on reimport)
-    - Different summaries = different UUIDs
-    """
-    # Create canonical JSON string (sorted keys for consistency)
-    canonical_json = json.dumps(summary_data, sort_keys=True)
-
-    # Hash it
-    hash_digest = hashlib.sha256(canonical_json.encode()).digest()
-
-    # Convert to UUID (use first 16 bytes)
-    return uuid_lib.UUID(bytes=hash_digest[:16])
 
 
 def parse_command_xml(text):
@@ -137,8 +118,31 @@ class Command(BaseCommand):
             if not first_content:
                 first_content = '[Assistant message]'
 
-        # Create first message
+        # Create or get first message
         first_uuid = uuid_lib.UUID(first_msg_data.get('uuid'))
+
+        # Check if this message already exists
+        if Message.objects.filter(id=first_uuid).exists():
+            existing_msg = Message.objects.get(id=first_uuid)
+            existing_heap = existing_msg.context_heap
+
+            # If we're trying to create a FRESH heap but message exists in a heap,
+            # this means we've already imported these messages
+            if heap_type == ContextHeapType.FRESH:
+                self.stdout.write(self.style.WARNING(
+                    f'Skipping heap import - first message {str(first_uuid)[:8]} already exists in heap {str(existing_heap.id)[:8]}'
+                ))
+                return existing_heap, 0, 0
+
+            # If we're trying to create a POST_COMPACTING heap, the message might exist
+            # in the wrong heap (a FRESH heap that wasn't properly split).
+            # We need to create a new heap and move messages from the existing heap.
+            if heap_type == ContextHeapType.POST_COMPACTING:
+                self.stdout.write(self.style.WARNING(
+                    f'First message {str(first_uuid)[:8]} already exists in heap {str(existing_heap.id)[:8]} - '
+                    f'will create new POST_COMPACTING heap and update message references'
+                ))
+                # Don't return - continue to create the new heap and update messages
 
         timestamp_str = first_msg_data.get('timestamp')
         timestamp = None
@@ -147,22 +151,26 @@ class Command(BaseCommand):
             if dt:
                 timestamp = int(dt.timestamp() * 1000)
 
-        first_msg = Message.objects.create(
+        first_msg, msg_created = Message.objects.get_or_create(
             id=first_uuid,
-            message_number=starting_message_number,
-            content=first_content,
-            context_heap=None,  # Set after creating window
-            parent=None,
-            sender=first_sender,
-            timestamp=timestamp,
-            session_id=uuid_lib.UUID(first_msg_data.get('sessionId')) if first_msg_data.get('sessionId') else None,
-            source_file=filename,
-            cwd=first_msg_data.get('cwd'),
-            git_branch=first_msg_data.get('gitBranch'),
-            client_version=first_msg_data.get('version'),
-            is_sidechain=first_msg_data.get('isSidechain', False)
+            defaults={
+                'message_number': starting_message_number,
+                'content': first_content,
+                'context_heap': None,  # Set after creating window
+                'parent': None,
+                'sender': first_sender,
+                'timestamp': timestamp,
+                'session_id': uuid_lib.UUID(first_msg_data.get('sessionId')) if first_msg_data.get('sessionId') else None,
+                'source_file': filename,
+                'cwd': first_msg_data.get('cwd'),
+                'git_branch': first_msg_data.get('gitBranch'),
+                'client_version': first_msg_data.get('version'),
+                'is_sidechain': first_msg_data.get('isSidechain', False),
+                'is_continuation_message': (heap_type == ContextHeapType.POST_COMPACTING)
+            }
         )
-        first_msg.recipients.add(first_recipient)
+        if msg_created:
+            first_msg.recipients.add(first_recipient)
 
         # Create context window
         context_heap = ContextHeap.objects.create(
@@ -171,217 +179,48 @@ class Command(BaseCommand):
             type=heap_type
         )
 
-        # Update first message
-        first_msg.context_heap = context_heap
-        first_msg.save()
+        # Update first message to point to new heap (even if it existed in another heap)
+        if first_msg.context_heap != context_heap:
+            old_heap = first_msg.context_heap
+            first_msg.context_heap = context_heap
+            first_msg.save()
+            if old_heap:
+                self.stdout.write(self.style.WARNING(
+                    f'Moved message {str(first_msg.id)[:8]} from heap {str(old_heap.id)[:8]} to new heap {str(context_heap.id)[:8]}'
+                ))
 
         self.stdout.write(self.style.SUCCESS(f'Created context window {context_heap.id}'))
 
-        # Process remaining messages
+        # Process remaining messages using Message.from_json()
         parent = first_msg
         message_num = starting_message_number + 1
 
         for msg_data in messages_data[1:]:
-            msg_uuid = uuid_lib.UUID(msg_data.get('uuid'))
+            # Determine sender based on message type
             msg_type = msg_data.get('type')
+            sender = justin if msg_type == 'user' else magent
 
-            timestamp_str = msg_data.get('timestamp')
-            timestamp = None
-            if timestamp_str:
-                dt = parse_datetime(timestamp_str)
-                if dt:
-                    timestamp = int(dt.timestamp() * 1000)
+            # Use Message.from_jsonl_claude_code_v2() to handle all polymorphic types
+            results = Message.from_jsonl_claude_code_v2(
+                msg_data,
+                context_heap=context_heap,
+                parent=parent,
+                sender=sender,
+                source_file=filename
+            )
 
-            # Common fields for all message types
-            common = {
-                'context_heap': context_heap,
-                'parent': parent,
-                'timestamp': timestamp,
-                'session_id': uuid_lib.UUID(msg_data.get('sessionId')) if msg_data.get('sessionId') else None,
-                'source_file': filename,
-                'cwd': msg_data.get('cwd'),
-                'git_branch': msg_data.get('gitBranch'),
-                'client_version': msg_data.get('version'),
-                'is_sidechain': msg_data.get('isSidechain', False)
-            }
+            # Update parent and message_number for each created message
+            for message, created in results:
+                if created:
+                    message.message_number = message_num
+                    message.save()
 
-            # Process based on message type
-            if msg_type == 'user':
-                content_items = msg_data.get('message', {}).get('content', [])
+                    # Add recipients
+                    recipient = magent if sender == justin else justin
+                    message.recipients.add(recipient)
 
-                # Check if this is actually a tool_result disguised as user message
-                if isinstance(content_items, list) and len(content_items) == 1:
-                    first_item = content_items[0]
-                    if isinstance(first_item, dict) and first_item.get('type') == 'tool_result':
-                        # This is a tool result, not a user message
-                        result_msg = ToolResult.objects.create(
-                            id=msg_uuid,
-                            message_number=message_num,
-                            content=first_item.get('content', ''),
-                            sender=justin,  # Tool results come from user side
-                            tool_use_id=first_item.get('tool_use_id', ''),
-                            is_error=False,  # Assume not error unless specified
-                            **common
-                        )
-                        result_msg.recipients.add(magent)
-                        parent = result_msg
-                        message_num += 1
-                        continue
-
-                # Regular user message - extract text and parse for command patterns
-                if isinstance(content_items, str):
-                    raw_text = content_items
-                else:
-                    raw_text = ' '.join(
-                        item.get('text', '') for item in content_items if isinstance(item, dict) and item.get('type') == 'text'
-                    )
-
-                # Parse for command patterns (meta caveat, slash commands, command output)
-                content = parse_command_xml(raw_text)
-
-                # Detect continuation messages (system-injected summaries at start of post-compact sessions)
-                is_continuation = isinstance(content, str) and content.startswith("This session is being continued from")
-
-                # Continuation messages are actually from magent to magent, not justin to magent
-                sender = magent if is_continuation else justin
-                recipient = magent if is_continuation else magent
-
-                # If this is a continuation message, create a NEW heap
-                if is_continuation:
-                    self.stdout.write(self.style.SUCCESS(
-                        f'Found continuation message at msg #{message_num} - creating new heap'
-                    ))
-
-                    # Create the message FIRST with no heap (continuation messages have no parent)
-                    msg = Message.objects.create(
-                        id=msg_uuid,
-                        message_number=1,  # New heap starts at 1
-                        content=content,
-                        context_heap=None,  # Will set after creating heap
-                        parent=None,  # Continuation messages have no parent
-                        sender=sender,
-                        timestamp=timestamp,
-                        session_id=common['session_id'],
-                        source_file=common['source_file'],
-                        cwd=common['cwd'],
-                        git_branch=common['git_branch'],
-                        client_version=common['client_version'],
-                        is_sidechain=common['is_sidechain'],
-                        is_continuation_message=True
-                    )
-                    msg.recipients.add(recipient)
-
-                    # Create new heap (POST_COMPACTING type) with this message as first
-                    new_heap = ContextHeap.objects.create(
-                        era=era,
-                        first_message=msg,
-                        type=ContextHeapType.POST_COMPACTING
-                    )
-
-                    # Update the message to point to the heap
-                    msg.context_heap = new_heap
-                    msg.save()
-
-                    # Update context_heap for future messages in this heap
-                    context_heap = new_heap
-                    common['context_heap'] = context_heap
-
-                    # Reset message numbering for new heap
-                    message_num = 2  # Next message will be #2
-
-                else:
-                    # Regular user message
-                    msg = Message.objects.create(
-                        id=msg_uuid,
-                        message_number=message_num,
-                        content=content,
-                        sender=sender,
-                        is_continuation_message=False,
-                        **common
-                    )
-                    msg.recipients.add(recipient)
-
-                parent = msg
+                parent = message
                 message_num += 1
-
-            elif msg_type == 'assistant':
-                content_items = msg_data.get('message', {}).get('content', [])
-
-                # Check if this is a synthetic error response
-                model = msg_data.get('message', {}).get('model', '')
-                is_synthetic = (model == '<synthetic>')
-
-                # Process thinking blocks
-                for item in content_items:
-                    if item.get('type') == 'thinking':
-                        thinking_uuid = uuid_lib.uuid5(msg_uuid, 'thinking')
-                        thinking_msg = Thought.objects.create(
-                            id=thinking_uuid,
-                            message_number=message_num,
-                            content=item.get('thinking', ''),
-                            sender=magent,
-                            signature='',  # JSONL doesn't have signature
-                            **common
-                        )
-                        thinking_msg.recipients.add(justin)
-                        parent = thinking_msg
-                        message_num += 1
-
-                # Process tool uses
-                for item in content_items:
-                    if item.get('type') == 'tool_use':
-                        tool_uuid = uuid_lib.uuid5(msg_uuid, f"tool_use_{item.get('id')}")
-                        tool_msg = ToolUse.objects.create(
-                            id=tool_uuid,
-                            message_number=message_num,
-                            content=item.get('input', {}),
-                            sender=magent,
-                            tool_name=item.get('name', ''),
-                            tool_id=item.get('id', ''),
-                            **common
-                        )
-                        tool_msg.recipients.add(justin)
-                        parent = tool_msg
-                        message_num += 1
-
-                # Process tool results
-                for item in content_items:
-                    if item.get('type') == 'tool_result':
-                        result_uuid = uuid_lib.uuid5(msg_uuid, f"tool_result_{item.get('tool_use_id')}")
-                        result_msg = ToolResult.objects.create(
-                            id=result_uuid,
-                            message_number=message_num,
-                            content=item.get('content', ''),
-                            sender=justin,  # Tool results come from user side
-                            tool_use_id=item.get('tool_use_id', ''),
-                            is_error=item.get('is_error', False),
-                            **common
-                        )
-                        result_msg.recipients.add(magent)
-                        parent = result_msg
-                        message_num += 1
-
-                # Process text content
-                text_content = ''
-                if isinstance(content_items, str):
-                    text_content = content_items
-                else:
-                    for item in content_items:
-                        if isinstance(item, dict) and item.get('type') == 'text':
-                            text_content += item.get('text', '') + '\n'
-
-                if text_content.strip():
-                    text_msg = Message.objects.create(
-                        id=msg_uuid,
-                        message_number=message_num,
-                        content=text_content.strip(),
-                        sender=magent,
-                        is_synthetic_error=is_synthetic,
-                        **common
-                    )
-                    text_msg.recipients.add(justin)
-                    parent = text_msg
-                    message_num += 1
 
         # Detect retries
         all_messages = Message.objects.filter(
@@ -494,36 +333,75 @@ class Command(BaseCommand):
                     # Check if leaf message already exists in database (from earlier import)
                     context_heap = None
                     ending_message_id = None
+                    preceding_message = None
                     try:
                         leaf_msg = Message.objects.get(id=leaf_uuid)
-                        context_heap = leaf_msg.context_heap
+                        existing_heap = leaf_msg.context_heap
                         ending_message_id = leaf_uuid
+                        preceding_message = leaf_msg
+
                         self.stdout.write(self.style.SUCCESS(
-                            f'Found existing leaf message {str(leaf_uuid)[:8]} in heap {str(context_heap.id)[:8]}'
+                            f'Found existing leaf message {str(leaf_uuid)[:8]} in heap {str(existing_heap.id)[:8]}'
                         ))
+
+                        # Check if there are messages AFTER the leaf in the existing heap
+                        # If so, we need to split the heap
+                        messages_after_leaf = Message.objects.filter(
+                            context_heap=existing_heap,
+                            message_number__gt=leaf_msg.message_number
+                        ).order_by('message_number')
+
+                        if messages_after_leaf.exists():
+                            self.stdout.write(self.style.WARNING(
+                                f'Found {messages_after_leaf.count()} messages after leaf in heap {str(existing_heap.id)[:8]} - splitting heap'
+                            ))
+
+                            # Create new POST_COMPACTING heap starting with first message after leaf
+                            first_continuation_msg = messages_after_leaf.first()
+                            new_heap = ContextHeap.objects.create(
+                                era=era,
+                                first_message=first_continuation_msg,
+                                type=ContextHeapType.POST_COMPACTING
+                            )
+
+                            # Move all messages after leaf to the new heap
+                            for msg in messages_after_leaf:
+                                msg.context_heap = new_heap
+                                msg.is_continuation_message = True
+                                msg.save()
+
+                            # Renumber messages in new heap starting from 0
+                            for i, msg in enumerate(Message.objects.filter(context_heap=new_heap).order_by('timestamp')):
+                                msg.message_number = i
+                                msg.save()
+
+                            self.stdout.write(self.style.SUCCESS(
+                                f'Created new heap {str(new_heap.id)[:8]} with {messages_after_leaf.count()} continuation messages'
+                            ))
+
+                            context_heap = new_heap
+                        else:
+                            # No messages after leaf - leaf is at end of heap
+                            # Don't create a new heap, CompactingAction will be orphaned
+                            self.stdout.write(self.style.WARNING(
+                                f'Leaf is at end of heap {str(existing_heap.id)[:8]} - no continuation heap needed'
+                            ))
                     except Message.DoesNotExist:
                         self.stdout.write(self.style.WARNING(
                             f'Leaf message {str(leaf_uuid)[:8]} not found - creating orphaned CA'
                         ))
 
-                    # Generate deterministic ID and use get_or_create to avoid duplicates
-                    ca_id = generate_compacting_action_id(summary_data)
-
-                    compact, created = CompactingAction.objects.get_or_create(
-                        id=ca_id,
-                        defaults={
-                            'context_heap': context_heap,
-                            'ending_message_id': ending_message_id,
-                            'compact_boundary_message_id': leaf_uuid,
-                            'summary': summary_data.get('summary', ''),
-                            'compact_trigger': 'user_initiated',
-                            'pre_compact_tokens': 0
-                        }
+                    # Use CompactingAction.from_jsonl_claude_code_v2() for creation
+                    compact, created = CompactingAction.from_jsonl_claude_code_v2(
+                        summary_data,
+                        context_heap=context_heap,
+                        ending_message_id=ending_message_id,
+                        preceding_message=preceding_message
                     )
 
                     if not created:
                         self.stdout.write(self.style.WARNING(
-                            f'CompactingAction {str(ca_id)[:8]} already exists - skipping'
+                            f'CompactingAction {str(compact.id)[:8]} already exists - skipping'
                         ))
                         return
 
@@ -539,13 +417,8 @@ class Command(BaseCommand):
 
         filename = filepath.name
 
-        # Check for deduplication before doing any work
-        first_msg_uuid = uuid_lib.UUID(lines[0].get('uuid'))
-        if Message.objects.filter(id=first_msg_uuid).exists():
-            self.stdout.write(self.style.WARNING(
-                f'Skipping {filename} - first message {first_msg_uuid} already exists (duplicate session)'
-            ))
-            return
+        # Let message-level deduplication happen naturally via get_or_create
+        # No need to skip entire files - import what we can
 
         # Decide whether to split at compact boundary
         if summary_data:
@@ -578,28 +451,24 @@ class Command(BaseCommand):
                         starting_message_number=0
                     )
 
-                    # Create CompactingAction LINKED to Heap A with deterministic ID
-                    ca_id = generate_compacting_action_id(summary_data)
+                    # Create CompactingAction (will link to continuation heap after it's created)
+                    # Get the preceding message (last message in heap_a, which is the leaf)
+                    preceding_msg = Message.objects.get(id=leaf_uuid)
 
-                    compact, created = CompactingAction.objects.get_or_create(
-                        id=ca_id,
-                        defaults={
-                            'context_heap': heap_a,
-                            'ending_message_id': leaf_uuid,
-                            'compact_boundary_message_id': leaf_uuid,
-                            'summary': summary_data.get('summary', ''),
-                            'compact_trigger': 'user_initiated',
-                            'pre_compact_tokens': 0
-                        }
+                    compact, created = CompactingAction.from_jsonl_claude_code_v2(
+                        summary_data,
+                        context_heap=None,  # Will be set to heap_b after it's created
+                        ending_message_id=leaf_uuid,
+                        preceding_message=preceding_msg
                     )
 
                     if created:
                         self.stdout.write(self.style.SUCCESS(
-                            f'Created CompactingAction {str(ca_id)[:8]} linked to heap {str(heap_a.id)[:8]}'
+                            f'Created CompactingAction {str(compact.id)[:8]} (will link to continuation heap)'
                         ))
                     else:
                         self.stdout.write(self.style.WARNING(
-                            f'CompactingAction {str(ca_id)[:8]} already exists - skipping'
+                            f'CompactingAction {str(compact.id)[:8]} already exists - skipping'
                         ))
 
                     # Heap B: messages after leaf_index
@@ -614,6 +483,13 @@ class Command(BaseCommand):
                             filename,
                             starting_message_number=0  # Renumber from 0
                         )
+
+                        # Link CompactingAction to the continuation heap (Heap B)
+                        compact.context_heap = heap_b
+                        compact.save()
+                        self.stdout.write(self.style.SUCCESS(
+                            f'Linked CompactingAction to continuation heap {str(heap_b.id)[:8]}'
+                        ))
 
                         # Link first continuation message in heap B to the CompactingAction
                         continuation = Message.objects.filter(
@@ -643,13 +519,18 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.WARNING(
                         f'Leaf UUID {str(leaf_uuid)[:8]} not found in messages - creating orphaned CompactingAction'
                     ))
-                    compact = CompactingAction.objects.create(
+                    # Try to find the preceding message by leafUuid (might exist from earlier import)
+                    preceding_msg = None
+                    try:
+                        preceding_msg = Message.objects.get(id=leaf_uuid)
+                    except Message.DoesNotExist:
+                        pass
+
+                    compact, _ = CompactingAction.from_jsonl_claude_code_v2(
+                        summary_data,
                         context_heap=None,
                         ending_message_id=None,
-                        compact_boundary_message_id=leaf_uuid,
-                        summary=summary_data.get('summary', ''),
-                        compact_trigger='user_initiated',
-                        pre_compact_tokens=0
+                        preceding_message=preceding_msg
                     )
                     # Fall through to import all messages as single heap
             else:
