@@ -121,28 +121,8 @@ class Command(BaseCommand):
         # Create or get first message
         first_uuid = uuid_lib.UUID(first_msg_data.get('uuid'))
 
-        # Check if this message already exists
-        if Message.objects.filter(id=first_uuid).exists():
-            existing_msg = Message.objects.get(id=first_uuid)
-            existing_heap = existing_msg.context_heap
-
-            # If we're trying to create a FRESH heap but message exists in a heap,
-            # this means we've already imported these messages
-            if heap_type == ContextHeapType.FRESH:
-                self.stdout.write(self.style.WARNING(
-                    f'Skipping heap import - first message {str(first_uuid)[:8]} already exists in heap {str(existing_heap.id)[:8]}'
-                ))
-                return existing_heap, 0, 0
-
-            # If we're trying to create a POST_COMPACTING heap, the message might exist
-            # in the wrong heap (a FRESH heap that wasn't properly split).
-            # We need to create a new heap and move messages from the existing heap.
-            if heap_type == ContextHeapType.POST_COMPACTING:
-                self.stdout.write(self.style.WARNING(
-                    f'First message {str(first_uuid)[:8]} already exists in heap {str(existing_heap.id)[:8]} - '
-                    f'will create new POST_COMPACTING heap and update message references'
-                ))
-                # Don't return - continue to create the new heap and update messages
+        # Don't skip based on existing messages - let message-level get_or_create handle deduplication
+        # This allows importing files with overlapping messages while still creating proper heap structure
 
         timestamp_str = first_msg_data.get('timestamp')
         timestamp = None
