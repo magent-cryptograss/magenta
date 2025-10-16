@@ -529,7 +529,7 @@ class ToolUse(Message):
     """
 
     tool_name = models.CharField(max_length=100)
-    tool_id = models.CharField(max_length=100, unique=True)  # "toolu_01Eu..."
+    tool_id = models.CharField(max_length=100)  # "toolu_01Eu..." - not globally unique, only unique within conversation
 
     def __str__(self):
         return f"[ToolUse] {self.tool_name} ({self.tool_id})"
