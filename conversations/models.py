@@ -243,6 +243,268 @@ class Message(models.Model):
             descendants.extend(child.get_descendants())
         return descendants
 
+    @classmethod
+    def from_jsonl_claude_code_v2(cls, json_data, **extra_fields):
+        """
+        Create or get Message(s) from Claude Code v2 JSONL format with deduplication.
+
+        **UUID PRESERVATION POLICY:**
+        The original UUID from the JSONL is ALWAYS preserved as a base Message object,
+        even if the message contains only tool_use/thinking blocks with no text content.
+        This ensures CompactingActions and other references can reliably find messages.
+
+        A single JSONL line can produce multiple Message objects:
+        - Base Message with original UUID (ALWAYS created)
+        - Assistant messages with thinking blocks → Thought objects (uuid5-generated IDs)
+        - Assistant messages with tool_use → ToolUse objects (uuid5-generated IDs)
+        - Messages with tool_result → ToolResult objects (uuid5-generated IDs)
+
+        The base Message is always returned first in the list.
+
+        Args:
+            json_data: Dict from JSONL with keys like uuid, type, message, timestamp, etc.
+            **extra_fields: Additional fields to set (context_heap, parent, sender, etc.)
+
+        Returns:
+            list of tuples: [(message_instance, created_bool), ...]
+            First tuple is always the base Message with original UUID.
+
+        Raises:
+            ValueError: If existing message doesn't match new data
+        """
+        import uuid as uuid_lib
+        from django.utils.dateparse import parse_datetime
+
+        msg_uuid = uuid_lib.UUID(json_data.get('uuid'))
+
+        # Check if message already exists
+        try:
+            existing = cls.objects.get(id=msg_uuid)
+
+            # Sanity check: verify critical fields match
+            new_session = uuid_lib.UUID(json_data.get('sessionId')) if json_data.get('sessionId') else None
+            new_timestamp_str = json_data.get('timestamp')
+            new_timestamp = None
+            if new_timestamp_str:
+                from django.utils.dateparse import parse_datetime
+                dt = parse_datetime(new_timestamp_str)
+                if dt:
+                    new_timestamp = int(dt.timestamp() * 1000)
+
+            # Session ID and timestamp can differ - they're client-generated and can't be trusted
+            # Only validate content and sender for data integrity
+
+            # Check sender (from extra_fields)
+            new_sender = extra_fields.get('sender')
+            if new_sender and existing.sender != new_sender:
+                raise ValueError(
+                    f"Message {msg_uuid} already exists with sender {existing.sender.name}, "
+                    f"but JSON has different sender {new_sender.name}"
+                )
+
+            # Check content - extract text content from JSON
+            msg_type = json_data.get('type')
+            content_items = json_data.get('message', {}).get('content', [])
+            new_content = ''
+
+            if isinstance(content_items, str):
+                new_content = content_items
+            else:
+                # Extract text from content items
+                for item in content_items:
+                    if isinstance(item, dict) and item.get('type') == 'text':
+                        new_content += item.get('text', '') + '\n'
+                new_content = new_content.strip()
+
+            # Compare with existing content (convert JSONField to string if needed)
+            existing_content = str(existing.content) if existing.content else ''
+            if new_content and existing_content and new_content != existing_content:
+                raise ValueError(
+                    f"Message {msg_uuid} already exists with different content:\n"
+                    f"Existing: {existing_content[:100]}...\n"
+                    f"New: {new_content[:100]}..."
+                )
+
+            # Message exists and passes sanity checks - return as list
+            return [(existing, False)]
+
+        except cls.DoesNotExist:
+            pass  # Message doesn't exist, create it
+
+        # Parse timestamp once
+        timestamp_str = json_data.get('timestamp')
+        timestamp = None
+        if timestamp_str:
+            dt = parse_datetime(timestamp_str)
+            if dt:
+                timestamp = int(dt.timestamp() * 1000)
+
+        # Common fields for all message types
+        common_fields = {
+            'timestamp': timestamp,
+            'session_id': uuid_lib.UUID(json_data.get('sessionId')) if json_data.get('sessionId') else None,
+            'source_file': json_data.get('source_file'),
+            'cwd': json_data.get('cwd'),
+            'git_branch': json_data.get('gitBranch'),
+            'client_version': json_data.get('version'),
+            'is_sidechain': json_data.get('isSidechain', False),
+            **extra_fields  # context_heap, parent, sender, message_number, etc.
+        }
+
+        # Check if synthetic error
+        model = json_data.get('message', {}).get('model', '')
+        is_synthetic = (model == '<synthetic>')
+
+        # Extract content items
+        msg_type = json_data.get('type')
+        content_items = json_data.get('message', {}).get('content', [])
+
+        # Handle tool_result disguised as user message
+        if msg_type == 'user' and isinstance(content_items, list) and len(content_items) == 1:
+            first_item = content_items[0]
+            if isinstance(first_item, dict) and first_item.get('type') == 'tool_result':
+                # Import ToolResult here to avoid circular import
+                from conversations.models import ToolResult
+
+                result_msg, created = ToolResult.objects.get_or_create(
+                    id=msg_uuid,
+                    defaults={
+                        **common_fields,
+                        'content': first_item.get('content', ''),
+                        'tool_use_id': first_item.get('tool_use_id', ''),
+                        'is_error': first_item.get('is_error', False)
+                    }
+                )
+
+                if created:
+                    cls._store_raw_content(result_msg, json_data, extra_fields)
+
+                return [(result_msg, created)]
+
+        # Collect messages to return
+        messages = []
+
+        # Process assistant message content items (can be multiple)
+        if msg_type == 'assistant':
+            # Process thinking blocks
+            for item in content_items:
+                if isinstance(item, dict) and item.get('type') == 'thinking':
+                    from conversations.models import Thought
+
+                    thinking_uuid = uuid_lib.uuid5(msg_uuid, 'thinking')
+                    thought, created = Thought.objects.get_or_create(
+                        id=thinking_uuid,
+                        defaults={
+                            **common_fields,
+                            'content': item.get('thinking', ''),
+                            'signature': ''  # JSONL doesn't have signature
+                        }
+                    )
+
+                    if created:
+                        cls._store_raw_content(thought, json_data, extra_fields)
+
+                    messages.append((thought, created))
+
+            # Process tool uses
+            for item in content_items:
+                if isinstance(item, dict) and item.get('type') == 'tool_use':
+                    from conversations.models import ToolUse
+
+                    tool_uuid = uuid_lib.uuid5(msg_uuid, f"tool_use_{item.get('id')}")
+                    tool_use, created = ToolUse.objects.get_or_create(
+                        id=tool_uuid,
+                        defaults={
+                            **common_fields,
+                            'content': item.get('input', {}),
+                            'tool_name': item.get('name', ''),
+                            'tool_id': item.get('id', '')
+                        }
+                    )
+
+                    if created:
+                        cls._store_raw_content(tool_use, json_data, extra_fields)
+
+                    messages.append((tool_use, created))
+
+            # Process tool results
+            for item in content_items:
+                if isinstance(item, dict) and item.get('type') == 'tool_result':
+                    from conversations.models import ToolResult
+
+                    result_uuid = uuid_lib.uuid5(msg_uuid, f"tool_result_{item.get('tool_use_id')}")
+                    tool_result, created = ToolResult.objects.get_or_create(
+                        id=result_uuid,
+                        defaults={
+                            **common_fields,
+                            'content': item.get('content', ''),
+                            'tool_use_id': item.get('tool_use_id', ''),
+                            'is_error': item.get('is_error', False)
+                        }
+                    )
+
+                    if created:
+                        cls._store_raw_content(tool_result, json_data, extra_fields)
+
+                    messages.append((tool_result, created))
+
+        # Extract text content (for both user and assistant messages)
+        if isinstance(content_items, str):
+            text_content = content_items
+        else:
+            text_content = ''
+            for item in content_items:
+                if isinstance(item, dict) and item.get('type') == 'text':
+                    text_content += item.get('text', '') + '\n'
+            text_content = text_content.strip()
+
+        # ALWAYS create base Message with original UUID to preserve UUID integrity
+        # This ensures CompactingActions and other references can always find the message
+        # Even if the message only contains tool_use/thinking blocks, we preserve the UUID
+        if not text_content:
+            # Determine appropriate placeholder based on what polymorphic children were created
+            if messages:
+                # Has thinking/tool_use/tool_result children - use placeholder indicating type
+                placeholder = '[Message with attached content]'
+            else:
+                # Truly empty message
+                placeholder = '[Empty message]'
+            text_content = placeholder
+
+        message, created = Message.objects.get_or_create(
+            id=msg_uuid,
+            defaults={
+                **common_fields,
+                'content': text_content,
+                'is_synthetic_error': is_synthetic
+            }
+        )
+
+        if created:
+            cls._store_raw_content(message, json_data, extra_fields)
+
+        # Always insert base message at the beginning of the list
+        # This maintains UUID integrity - the original UUID always exists
+        messages.insert(0, (message, created))
+
+        return messages
+
+    @classmethod
+    def _store_raw_content(cls, message, json_data, extra_fields):
+        """Helper to store raw JSON for a message."""
+        from django.contrib.contenttypes.models import ContentType
+        from conversations.models import RawImportedContent
+        import uuid as uuid_lib
+
+        message_ct = ContentType.objects.get_for_model(message)
+        RawImportedContent.objects.create(
+            id=uuid_lib.uuid4(),
+            content_type=message_ct,
+            object_id=message.id,
+            raw_data=json_data,
+            source_file_id=extra_fields.get('source_file_id')
+        )
+
 
 class Thought(Message):
     """
@@ -329,6 +591,13 @@ class CompactingAction(models.Model):
     )
     ending_message_id = models.UUIDField(null=True, blank=True)  # Last message before compact
     compact_boundary_message_id = models.UUIDField(null=True, blank=True)
+    preceding_message = models.ForeignKey(
+        Message,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='compacting_action_after_this'
+    )  # The last message before the compact happened
     continuation_message = models.ForeignKey(
         Message,
         models.SET_NULL,
@@ -358,6 +627,73 @@ class CompactingAction(models.Model):
             return Message.objects.get(id=self.compact_boundary_message_id)
         except Message.DoesNotExist:
             return None
+
+    @classmethod
+    def from_jsonl_claude_code_v2(cls, summary_data, **extra_fields):
+        """
+        Create or get CompactingAction from Claude Code v2 summary data with deduplication.
+
+        Generates deterministic UUID from summary data hash to prevent duplicates on reimport.
+
+        Args:
+            summary_data: Dict with keys like:
+                - summary: Text summary of the compact
+                - leafUuid: UUID of the compact boundary message
+                - type: Should be 'summary'
+            **extra_fields: Additional fields like context_heap, ending_message_id, continuation_message
+
+        Returns:
+            tuple: (compacting_action, created_bool)
+
+        Example summary_data:
+            {
+                "type": "summary",
+                "summary": "Discussion about memory systems and...",
+                "leafUuid": "00000000-0000-0000-0000-000000000003"
+            }
+        """
+        import json
+        import hashlib
+        import uuid as uuid_lib
+
+        # Generate deterministic ID from hash of summary data
+        canonical_json = json.dumps(summary_data, sort_keys=True)
+        hash_digest = hashlib.sha256(canonical_json.encode()).digest()
+        ca_id = uuid_lib.UUID(bytes=hash_digest[:16])
+
+        # Extract fields from summary_data
+        leaf_uuid = summary_data.get('leafUuid')
+        if leaf_uuid:
+            leaf_uuid = uuid_lib.UUID(leaf_uuid)
+
+        # Build defaults with provided extra_fields
+        defaults = {
+            'summary': summary_data.get('summary', ''),
+            'compact_boundary_message_id': leaf_uuid,
+            'compact_trigger': 'user_initiated',
+            'pre_compact_tokens': 0,
+            **extra_fields
+        }
+
+        # Use get_or_create for deduplication
+        compact, created = cls.objects.get_or_create(
+            id=ca_id,
+            defaults=defaults
+        )
+
+        # Store raw JSONL data for debugging (only on creation)
+        if created:
+            from django.contrib.contenttypes.models import ContentType
+            compact_ct = ContentType.objects.get_for_model(compact)
+            RawImportedContent.objects.create(
+                id=uuid_lib.uuid4(),
+                content_type=compact_ct,
+                object_id=compact.id,
+                raw_data=summary_data,
+                source_file_id=extra_fields.get('source_file_id')
+            )
+
+        return compact, created
 
     def has_post_compact_messages(self):
         """Check if messages exist after the boundary in the same heap."""
