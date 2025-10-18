@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     ThinkingEntity,
     Era,
-    ContextWindow,
+    ContextHeap,
     Message,
     Thought,
     ToolUse,
@@ -27,8 +27,8 @@ class EraAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'created_at')
 
 
-@admin.register(ContextWindow)
-class ContextWindowAdmin(admin.ModelAdmin):
+@admin.register(ContextHeap)
+class ContextHeapAdmin(admin.ModelAdmin):
     list_display = ('id', 'era', 'type', 'first_message', 'created_at')
     list_filter = ('era', 'type')
     search_fields = ('id',)
@@ -93,7 +93,7 @@ class ToolResultAdmin(admin.ModelAdmin):
 
 @admin.register(CompactingAction)
 class CompactingActionAdmin(admin.ModelAdmin):
-    list_display = ('context_window', 'ending_message_id', 'compact_trigger', 'created_at')
+    list_display = ('context_heap', 'ending_message_id', 'compact_trigger', 'created_at')
     readonly_fields = ('created_at',)
 
 

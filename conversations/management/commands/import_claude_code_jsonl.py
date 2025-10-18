@@ -13,6 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from conversations.models import (
     Era, ContextHeap, ContextHeapType,
     Message, Thought, ToolUse, ToolResult, ThinkingEntity,
@@ -61,168 +62,91 @@ def parse_command_xml(text):
 class Command(BaseCommand):
     help = 'Import single Claude Code JSONL conversation file'
 
-    def import_messages_into_heap(
-        self,
-        messages_data,
-        era,
-        heap_type,
-        justin,
-        magent,
-        filename,
-        starting_message_number=0
-    ):
+    def handle_summary(self, event, era, filename):
         """
-        Import a slice of messages into a new ContextHeap.
+        Handle all summaries in the file - whether messages exist or not.
+
+        For each summary:
+        1. Try to find the leaf message (compact boundary)
+        2. If found, get its heap and look for continuation messages
+        3. If not found, try to find the preceding message (message before the leaf)
+        4. Create/update CompactingAction with links to heap and continuation
 
         Args:
-            messages_data: List of message dicts from JSONL
-            era: Era to attach heap to
-            heap_type: ContextHeapType (FRESH or POST_COMPACTING)
+            summary_data_by_leaf: Dict mapping leaf UUIDs to summary info
+                Each value is a dict with:
+                - 'summary_data': the actual summary object from JSONL
+                - 'preceding_message_uuid': UUID of message before this summary (or None)
+            messages: List of message dicts from JSONL
+            era: Era to import into
             justin, magent: ThinkingEntity objects
-            filename: Source filename for messages
-            starting_message_number: What message_number to start from (default 0)
+            filename: Source filename
 
         Returns:
-            tuple: (context_heap, message_count, retry_count)
+            tuple: (found_list, created_list) - lists of CompactingAction objects found vs created
         """
-        if not messages_data:
-            return None, 0, 0
+        leaf_uuid = uuid_lib.UUID(event['leafUuid'])
+        summary_text = event['summary']
 
-        first_msg_data = messages_data[0]
+        # Try to find the leaf message in the database
+        try:
+            leaf_msg = Message.objects.get(id=leaf_uuid)
+            heap = leaf_msg.context_heap
 
-        # Determine first message details
-        if first_msg_data.get('type') == 'user':
-            first_sender = justin
-            first_recipient = magent
-            content_items = first_msg_data.get('message', {}).get('content', [])
-            if isinstance(content_items, str):
-                raw_text = content_items
+            self.stdout.write(self.style.SUCCESS(
+                f'Found leaf message {str(leaf_uuid)[:8]} in heap {str(heap.id)[:8]}'
+            ))
+
+            # Create or update CompactingAction
+            # Link to the continuation heap (where the compact leads TO), not the leaf's heap
+            compacting_action, created = CompactingAction.from_jsonl_claude_code_v2(
+                event,
+                ending_message=leaf_msg,
+            )
+
+        except Message.DoesNotExist:
+            # Leaf message doesn't exist yet - try to find preceding message
+            preceding_msg = None
+            if preceding_message_uuid_str:
+                try:
+                    preceding_uuid = uuid_lib.UUID(preceding_message_uuid_str)
+                    preceding_msg = Message.objects.get(id=preceding_uuid)
+                    self.stdout.write(self.style.SUCCESS(
+                        f'Leaf {str(leaf_uuid)[:8]} not found, but found preceding message {str(preceding_uuid)[:8]}'
+                    ))
+                except Message.DoesNotExist:
+                    self.stdout.write(self.style.WARNING(
+                        f'Leaf {str(leaf_uuid)[:8]} AND preceding message {str(preceding_uuid)[:8]} not found'
+                    ))
+
+            self.stdout.write(self.style.WARNING(
+                f'Creating orphaned CompactingAction for leaf {str(leaf_uuid)[:8]}'
+            ))
+
+            compact, created = CompactingAction.from_jsonl_claude_code_v2(
+                summary_data,
+                context_heap=None,
+                ending_message_id=leaf_uuid,
+                preceding_message=preceding_msg  # Will be None if not found
+            )
+
+            if created:
+                created_list.append(compact)
+                if preceding_msg:
+                    self.stdout.write(self.style.WARNING(
+                        f'Created orphaned CompactingAction {str(compact.id)[:8]} with preceding message {str(preceding_msg.id)[:8]}'
+                    ))
+                else:
+                    self.stdout.write(self.style.WARNING(
+                        f'Created orphaned CompactingAction {str(compact.id)[:8]} (no preceding message found)'
+                    ))
             else:
-                raw_text = ' '.join(
-                    item.get('text', '') for item in content_items
-                    if isinstance(item, dict) and item.get('type') == 'text'
-                )
-            first_content = parse_command_xml(raw_text)
-        else:
-            first_sender = magent
-            first_recipient = justin
-            content_items = first_msg_data.get('message', {}).get('content', [])
-            first_content = ''
-            if isinstance(content_items, str):
-                first_content = content_items
-            else:
-                for item in content_items:
-                    if isinstance(item, dict) and item.get('type') == 'text':
-                        first_content = item.get('text', '')
-                        break
-            if not first_content:
-                first_content = '[Assistant message]'
-
-        # Create or get first message
-        first_uuid = uuid_lib.UUID(first_msg_data.get('uuid'))
-
-        # Don't skip based on existing messages - let message-level get_or_create handle deduplication
-        # This allows importing files with overlapping messages while still creating proper heap structure
-
-        timestamp_str = first_msg_data.get('timestamp')
-        timestamp = None
-        if timestamp_str:
-            dt = parse_datetime(timestamp_str)
-            if dt:
-                timestamp = int(dt.timestamp() * 1000)
-
-        first_msg, msg_created = Message.objects.get_or_create(
-            id=first_uuid,
-            defaults={
-                'message_number': starting_message_number,
-                'content': first_content,
-                'context_heap': None,  # Set after creating window
-                'parent': None,
-                'sender': first_sender,
-                'timestamp': timestamp,
-                'session_id': uuid_lib.UUID(first_msg_data.get('sessionId')) if first_msg_data.get('sessionId') else None,
-                'source_file': filename,
-                'cwd': first_msg_data.get('cwd'),
-                'git_branch': first_msg_data.get('gitBranch'),
-                'client_version': first_msg_data.get('version'),
-                'is_sidechain': first_msg_data.get('isSidechain', False),
-                'is_continuation_message': (heap_type == ContextHeapType.POST_COMPACTING)
-            }
-        )
-        if msg_created:
-            first_msg.recipients.add(first_recipient)
-
-        # Create context window
-        context_heap = ContextHeap.objects.create(
-            era=era,
-            first_message=first_msg,
-            type=heap_type
-        )
-
-        # Update first message to point to new heap (even if it existed in another heap)
-        if first_msg.context_heap != context_heap:
-            old_heap = first_msg.context_heap
-            first_msg.context_heap = context_heap
-            first_msg.save()
-            if old_heap:
+                found_list.append(compact)
                 self.stdout.write(self.style.WARNING(
-                    f'Moved message {str(first_msg.id)[:8]} from heap {str(old_heap.id)[:8]} to new heap {str(context_heap.id)[:8]}'
+                    f'Orphaned CompactingAction {str(compact.id)[:8]} already exists'
                 ))
 
-        self.stdout.write(self.style.SUCCESS(f'Created context window {context_heap.id}'))
-
-        # Process remaining messages using Message.from_json()
-        parent = first_msg
-        message_num = starting_message_number + 1
-
-        for msg_data in messages_data[1:]:
-            # Determine sender based on message type
-            msg_type = msg_data.get('type')
-            sender = justin if msg_type == 'user' else magent
-
-            # Use Message.from_jsonl_claude_code_v2() to handle all polymorphic types
-            results = Message.from_jsonl_claude_code_v2(
-                msg_data,
-                context_heap=context_heap,
-                parent=parent,
-                sender=sender,
-                source_file=filename
-            )
-
-            # Update parent and message_number for each created message
-            for message, created in results:
-                if created:
-                    message.message_number = message_num
-                    message.save()
-
-                    # Add recipients
-                    recipient = magent if sender == justin else justin
-                    message.recipients.add(recipient)
-
-                parent = message
-                message_num += 1
-
-        # Detect retries
-        all_messages = Message.objects.filter(
-            context_heap=context_heap
-        ).select_related('sender').order_by('message_number')
-
-        detector = RetryDetector()
-        retry_count = 0
-
-        for msg in all_messages:
-            is_retry = detector.is_retry(
-                sender=msg.sender.name,
-                content=str(msg.content),
-                is_synthetic_error=msg.is_synthetic_error
-            )
-
-            if is_retry:
-                msg.is_retry = True
-                msg.save()
-                retry_count += 1
-
-        return context_heap, message_num - starting_message_number, retry_count
+        return compacting_action, created
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -237,16 +161,161 @@ class Command(BaseCommand):
             required=True,
             help='UUID of the Era to import into',
         )
-        parser.add_argument(
-            '--dry-run',
-            action='store_true',
-            help='Preview without importing',
-        )
+    
+    def import_line_from_claude_code_v2(self, line, era, filename):
+
+        # Get entities
+        # TODO: #12
+        justin = ThinkingEntity.objects.get(name='justin')
+        magent = ThinkingEntity.objects.get(name='magent')
+
+        event_type, event = Message.detect_event_type_claude_code_v2(line)
+
+        if event_type == "summary":
+                compacting_action, created = self.handle_summary(event, era, filename)
+
+                # We're likely reached the end of this heap.  TODO: Have we?  Let's handle it.
+                return compacting_action, created
+        
+        # Get UUID
+        msg_uuid = uuid_lib.UUID(event['uuid'])
+
+        # Create appropriate message type based on event_type
+        if event_type == "thought":
+            sender = magent  # TODO: #12
+            content = event['message']['content']
+            signature = content[0]['signature']
+            message, created = Thought.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': sender,
+                    'source_file': filename,
+                    'content': content,
+                    'signature': signature,
+                    'created_at': timezone.now(),
+                }
+            )
+        elif event_type == "tool use":
+            if event['type'] == "assistant" and event['userType'] == "external":
+                sender = magent
+            else:
+                assert False
+            message, created = ToolUse.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': sender,
+                    'source_file': filename,
+                    'tool_name': event.get('name', ''),
+                    'tool_id': event.get('id', ''),
+                    'content': event.get('input', {}),
+                    'created_at': timezone.now(),
+                }
+            )
+        elif event_type == "tool result":
+            # TODO: #12
+            if event['type'] == "user" and event['userType'] == "external":
+                # TODO: This one is particularly strange - this result is coming _from_ the tool, not from a thinking entity at all.
+                sender = magent
+            else:
+                assert False
+            message, created = ToolResult.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': sender,
+                    'source_file': filename,
+                    'content': event.get('content', ''),
+                    'is_error': event.get('is_error', False),
+                    'tool_use_id': event.get('tool_use_id', ''),
+                    'created_at': timezone.now(),
+                }
+            )
+        elif event_type == "continuation":
+            # sender and recipient are both magent, like a thought.
+            message, created = Message.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': magent,
+                    'source_file': filename,
+                    'content': event['message']['content'],
+                    'is_continuation_message': True,
+                    'created_at': timezone.now(),
+                }
+            )
+        elif event_type == "regular message":
+            role = event['message']['role']
+            content = event['message']['content']
+
+            #### This block is clearly broken - we need real logic for this.
+            if role == 'user':
+                sender = justin
+            elif role == 'assistant':
+                sender = magent
+            else:
+                assert False
+
+            message, created = Message.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': sender,
+                    'source_file': filename,
+                    'content': content,
+                    'created_at': timezone.now(),
+                }
+            )
+        elif event_type == "uncertain message":
+            # TODO: #12
+            role = event['message']['role']
+            content = event['message']['content']
+            if role == "user":
+                sender = justin
+            else:
+                assert False # Not sure what this can be?
+            
+            # TODO: Gracefully handle these situations (which probably arise from client errors or network problems)
+            message, created = Message.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': sender,
+                    'source_file': filename,
+                    'content': content,
+                    'created_at': timezone.now(),
+                }
+            )
+        elif event_type == "caveat":
+            message, created = Message.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': magent,
+                    'source_file': filename,
+                    'content': event.get('content', ''),
+                    'is_continuation_message': (event_type == "continuation"),
+                    'created_at': timezone.now(),
+                }
+            )
+            message.recipients.add(magent)
+        elif event_type in ("command", "command result - success"):
+            # Parse command XML from event content
+            text_content = event.get('message', {}).get('content', [{}])[0].get('text', '')
+            parsed_content = parse_command_xml(text_content)
+
+            message, created = Message.objects.get_or_create(
+                id=msg_uuid,
+                defaults={
+                    'sender': magent,  # Command metadata is from system
+                    'source_file': filename,
+                    'content': parsed_content,
+                }
+            )
+
+        else:
+            assert False
+            self.stdout.write(self.style.WARNING(f'Unknown event type: {event_type}'))
+        return message, created
+
 
     def handle(self, *args, **options):
         filepath = Path(options['file'])
         era_id = options['era_id']
-        dry_run = options['dry_run']
 
         if not filepath.exists():
             self.stdout.write(self.style.ERROR(f'File not found: {filepath}'))
@@ -265,270 +334,26 @@ class Command(BaseCommand):
 
         # Parse JSONL
         self.stdout.write(f'Parsing {filepath.name}...')
-        lines = []
-        summary_data = None
+        events = []
+        summary_data_by_leaf = {}
+        previous_event = None
+        filename = filepath.name
+        last_known_compacting_action = None
+
         with open(filepath) as f:
             for line in f:
-                if not line.strip():
-                    continue
-                try:
-                    data = json.loads(line)
-                    if data.get('type') == 'summary':
-                        summary_data = data
-                    else:
-                        lines.append(data)
-                except json.JSONDecodeError:
-                    pass
+                event, created = self.import_line_from_claude_code_v2(line, era, filename)
 
-        self.stdout.write(f'Found {len(lines)} messages')
-        if summary_data:
-            self.stdout.write(f'Found summary: {summary_data.get("summary", "")[:60]}...')
+                ##### Heap, summary, and continuation (ie, collection-level) handling 
+                if event.__class__ == CompactingAction:
+                    last_compact, last_compact_created = event, created
 
-        if dry_run:
-            self.stdout.write('\nFirst 5 messages:')
-            for i, msg_data in enumerate(lines[:5]):
-                msg_type = msg_data.get('type')
-                timestamp = msg_data.get('timestamp', 'no-timestamp')
-                content = msg_data.get('message', {}).get('content', [])
-
-                preview = ''
-                if msg_type == 'user' and content:
-                    preview = content[0].get('text', '')[:60]
-                elif msg_type == 'assistant' and content:
-                    for item in content:
-                        if item.get('type') == 'text':
-                            preview = item.get('text', '')[:60]
-                            break
-
-                self.stdout.write(f'  {i}. [{msg_type}] {timestamp} - {preview}...')
-            return
-
-        # Handle files with summary but no messages (already compacted session)
-        if len(lines) == 0:
-            if summary_data:
-                leaf_uuid_str = summary_data.get('leafUuid')
-                if leaf_uuid_str:
-                    leaf_uuid = uuid_lib.UUID(leaf_uuid_str)
-
-                    # Check if leaf message already exists in database (from earlier import)
-                    context_heap = None
-                    ending_message_id = None
-                    preceding_message = None
-                    try:
-                        leaf_msg = Message.objects.get(id=leaf_uuid)
-                        existing_heap = leaf_msg.context_heap
-                        ending_message_id = leaf_uuid
-                        preceding_message = leaf_msg
-
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Found existing leaf message {str(leaf_uuid)[:8]} in heap {str(existing_heap.id)[:8]}'
-                        ))
-
-                        # Check if there are messages AFTER the leaf in the existing heap
-                        # If so, we need to split the heap
-                        messages_after_leaf = Message.objects.filter(
-                            context_heap=existing_heap,
-                            message_number__gt=leaf_msg.message_number
-                        ).order_by('message_number')
-
-                        if messages_after_leaf.exists():
-                            self.stdout.write(self.style.WARNING(
-                                f'Found {messages_after_leaf.count()} messages after leaf in heap {str(existing_heap.id)[:8]} - splitting heap'
-                            ))
-
-                            # Create new POST_COMPACTING heap starting with first message after leaf
-                            first_continuation_msg = messages_after_leaf.first()
-                            new_heap = ContextHeap.objects.create(
-                                era=era,
-                                first_message=first_continuation_msg,
-                                type=ContextHeapType.POST_COMPACTING
-                            )
-
-                            # Move all messages after leaf to the new heap
-                            for msg in messages_after_leaf:
-                                msg.context_heap = new_heap
-                                msg.is_continuation_message = True
-                                msg.save()
-
-                            # Renumber messages in new heap starting from 0
-                            for i, msg in enumerate(Message.objects.filter(context_heap=new_heap).order_by('timestamp')):
-                                msg.message_number = i
-                                msg.save()
-
-                            self.stdout.write(self.style.SUCCESS(
-                                f'Created new heap {str(new_heap.id)[:8]} with {messages_after_leaf.count()} continuation messages'
-                            ))
-
-                            context_heap = new_heap
+                if event.__class__ == Message and event.is_continuation_message:
+                    if last_compact.continuation_message:
+                        if last_compact.continuation_message == event:
+                            # The continuation message is already set to this one.  We're fine.
+                            pass
                         else:
-                            # No messages after leaf - leaf is at end of heap
-                            # Don't create a new heap, CompactingAction will be orphaned
-                            self.stdout.write(self.style.WARNING(
-                                f'Leaf is at end of heap {str(existing_heap.id)[:8]} - no continuation heap needed'
-                            ))
-                    except Message.DoesNotExist:
-                        self.stdout.write(self.style.WARNING(
-                            f'Leaf message {str(leaf_uuid)[:8]} not found - creating orphaned CA'
-                        ))
-
-                    # Use CompactingAction.from_jsonl_claude_code_v2() for creation
-                    compact, created = CompactingAction.from_jsonl_claude_code_v2(
-                        summary_data,
-                        context_heap=context_heap,
-                        ending_message_id=ending_message_id,
-                        preceding_message=preceding_message
-                    )
-
-                    if not created:
-                        self.stdout.write(self.style.WARNING(
-                            f'CompactingAction {str(compact.id)[:8]} already exists - skipping'
-                        ))
-                        return
-
-                    if context_heap:
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Linked CompactingAction to heap {str(context_heap.id)[:8]}'
-                        ))
+                            raise RuntimeError("We already have a continuation for this compacting action.")
                     else:
-                        self.stdout.write(self.style.WARNING(
-                            f'Created orphaned CompactingAction: {compact.summary[:60]}...'
-                        ))
-            return
-
-        filename = filepath.name
-
-        # Let message-level deduplication happen naturally via get_or_create
-        # No need to skip entire files - import what we can
-
-        # Decide whether to split at compact boundary
-        if summary_data:
-            leaf_uuid_str = summary_data.get('leafUuid')
-            if leaf_uuid_str:
-                leaf_uuid = uuid_lib.UUID(leaf_uuid_str)
-
-                # Find leaf position in messages
-                leaf_index = None
-                for i, msg_data in enumerate(lines):
-                    if uuid_lib.UUID(msg_data.get('uuid')) == leaf_uuid:
-                        leaf_index = i
-                        break
-
-                if leaf_index is not None:
-                    # SPLIT: Import as two separate heaps
-                    self.stdout.write(self.style.SUCCESS(
-                        f'Found compact boundary at message {leaf_index} - splitting into two heaps'
-                    ))
-
-                    # Heap A: messages 0 to leaf_index (inclusive)
-                    messages_before_compact = lines[:leaf_index + 1]
-                    heap_a, count_a, retries_a = self.import_messages_into_heap(
-                        messages_before_compact,
-                        era,
-                        ContextHeapType.FRESH,
-                        justin,
-                        magent,
-                        filename,
-                        starting_message_number=0
-                    )
-
-                    # Create CompactingAction (will link to continuation heap after it's created)
-                    # Get the preceding message (last message in heap_a, which is the leaf)
-                    preceding_msg = Message.objects.get(id=leaf_uuid)
-
-                    compact, created = CompactingAction.from_jsonl_claude_code_v2(
-                        summary_data,
-                        context_heap=None,  # Will be set to heap_b after it's created
-                        ending_message_id=leaf_uuid,
-                        preceding_message=preceding_msg
-                    )
-
-                    if created:
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Created CompactingAction {str(compact.id)[:8]} (will link to continuation heap)'
-                        ))
-                    else:
-                        self.stdout.write(self.style.WARNING(
-                            f'CompactingAction {str(compact.id)[:8]} already exists - skipping'
-                        ))
-
-                    # Heap B: messages after leaf_index
-                    if leaf_index + 1 < len(lines):
-                        messages_after_compact = lines[leaf_index + 1:]
-                        heap_b, count_b, retries_b = self.import_messages_into_heap(
-                            messages_after_compact,
-                            era,
-                            ContextHeapType.POST_COMPACTING,
-                            justin,
-                            magent,
-                            filename,
-                            starting_message_number=0  # Renumber from 0
-                        )
-
-                        # Link CompactingAction to the continuation heap (Heap B)
-                        compact.context_heap = heap_b
-                        compact.save()
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Linked CompactingAction to continuation heap {str(heap_b.id)[:8]}'
-                        ))
-
-                        # Link first continuation message in heap B to the CompactingAction
-                        continuation = Message.objects.filter(
-                            context_heap=heap_b,
-                            is_continuation_message=True
-                        ).order_by('message_number').first()
-
-                        if continuation:
-                            compact.continuation_message = continuation
-                            compact.save()
-                            self.stdout.write(self.style.SUCCESS(
-                                f'Linked continuation message {str(continuation.id)[:8]} to CompactingAction'
-                            ))
-
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Imported {len(lines)} messages total: '
-                            f'{count_a} in heap A (pre-compact), {count_b} in heap B (post-compact)'
-                        ))
-                    else:
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Imported {count_a} messages (compact at end, no post-compact heap)'
-                        ))
-
-                    return
-                else:
-                    # Leaf not found in messages - create orphaned CA
-                    self.stdout.write(self.style.WARNING(
-                        f'Leaf UUID {str(leaf_uuid)[:8]} not found in messages - creating orphaned CompactingAction'
-                    ))
-                    # Try to find the preceding message by leafUuid (might exist from earlier import)
-                    preceding_msg = None
-                    try:
-                        preceding_msg = Message.objects.get(id=leaf_uuid)
-                    except Message.DoesNotExist:
-                        pass
-
-                    compact, _ = CompactingAction.from_jsonl_claude_code_v2(
-                        summary_data,
-                        context_heap=None,
-                        ending_message_id=None,
-                        preceding_message=preceding_msg
-                    )
-                    # Fall through to import all messages as single heap
-            else:
-                self.stdout.write(self.style.WARNING('Summary has no leafUuid'))
-
-        # NO SPLIT: Import all messages as single FRESH heap
-        heap, count, retries = self.import_messages_into_heap(
-            lines,
-            era,
-            ContextHeapType.FRESH,
-            justin,
-            magent,
-            filename,
-            starting_message_number=0
-        )
-
-        self.stdout.write(self.style.SUCCESS(
-            f'Imported {count} messages into {era.name}, window {str(heap.id)[:8]}'
-        ))
-        if retries > 0:
-            self.stdout.write(self.style.WARNING(f'Marked {retries} messages as retries'))
+                        last_compact.continuation_message = message
