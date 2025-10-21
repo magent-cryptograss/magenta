@@ -115,11 +115,6 @@ class ContextHeap(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     era = models.ForeignKey(Era, models.CASCADE, related_name='context_heaps')
-    first_message = models.ForeignKey(
-        'Message',
-        models.CASCADE,
-        related_name='opened_heaps'
-    )
     type = models.CharField(
         max_length=20,
         choices=ContextHeapType.choices,
@@ -127,18 +122,79 @@ class ContextHeap(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def first_message(self):
+        """Get the first message in this heap by message_number."""
+        return self.messages.order_by('message_number').first()
+
+    def add_event(self, event):
+        """
+        Add an event (Message or CompactingAction) to this heap with the next sequential message_number.
+
+        Sets the event's context_heap and message_number (for Messages), then saves.
+        For CompactingActions, just sets context_heap.
+        """
+        from conversations.models import Message
+
+        if isinstance(event, Message):
+            # Get the current max message_number in this heap
+            last_message = self.messages.order_by('message_number').last()
+            next_number = (last_message.message_number + 1) if last_message else 1
+
+            # Set the message's heap and number
+            event.context_heap = self
+            event.message_number = next_number
+            event.save()
+        else:
+            # CompactingAction - just set heap
+            event.context_heap = self
+            event.save()
+
+        return event
+
+    def check_timestamps_against_message_numbers(self):
+        """
+        Verify that timestamps (where they exist) are ordered consistently with message_numbers.
+
+        Returns a dict with:
+        - 'valid': bool - whether ordering is consistent
+        - 'violations': list of (msg_num, timestamp, prev_msg_num, prev_timestamp) tuples
+        """
+        messages_with_timestamps = list(
+            self.messages.filter(timestamp__isnull=False).order_by('message_number')
+        )
+
+        violations = []
+        for i in range(1, len(messages_with_timestamps)):
+            prev_msg = messages_with_timestamps[i-1]
+            curr_msg = messages_with_timestamps[i]
+
+            # Timestamps should increase with message_number
+            if curr_msg.timestamp < prev_msg.timestamp:
+                violations.append((
+                    curr_msg.message_number,
+                    curr_msg.timestamp,
+                    prev_msg.message_number,
+                    prev_msg.timestamp
+                ))
+
+        return {
+            'valid': len(violations) == 0,
+            'violations': violations
+        }
+
     class Meta:
         db_table = 'context_heaps'
         ordering = ['created_at']
 
     def __str__(self):
-        return f"{self.era.name} - {self.get_type_display()} - Heap starting at msg #{self.first_message.message_number}"
+        # TODO: What if there are no messages in this heap?
+        return f"{self.era.name} - {self.get_type_display()} - Heap starting at msg #{self.first_message().message_number}"
 
     def parent_heap(self):
         """For SPLIT_POINT heaps, return the heap they split from."""
         if self.type != ContextHeapType.SPLIT_POINT:
             return None
-        return self.first_message.context_heap  # Will be different from self
+        return self.first_message().context_heap  # Will be different from self
 
     def earliest_blockheight(self):
         """Returns the earliest blockheight from messages in this heap."""
@@ -180,6 +236,7 @@ class Message(models.Model):
 
     # Threading - optional parent for message chains
     parent = models.ForeignKey('self', models.CASCADE, related_name='children', null=True, blank=True)
+    looking_for_parent_id = models.UUIDField(null=True, blank=True, help_text='UUID of parent that was not found during import')
 
     # Participants
     sender = models.ForeignKey(ThinkingEntity, models.CASCADE, related_name='sent_messages')
@@ -227,7 +284,7 @@ class Message(models.Model):
 
     def __str__(self):
         recipient_names = ','.join(r.name for r in self.recipients.all()) if self.pk else '?'
-        return f"{self.sender}→{recipient_names} at {self.timestamp}"
+        return f"{self.sender}→{recipient_names} at {self.timestamp}: {self.content[:40]}"
 
     @property
     def has_children(self):
@@ -243,6 +300,19 @@ class Message(models.Model):
             descendants.append(child)
             descendants.extend(child.get_descendants())
         return descendants
+    
+    def set_parent_id(self, parent_id):
+        # Get parent if exists
+        parent_uuid = uuid.UUID(parent_id)
+        try:
+            self.parent = Message.objects.get(id=parent_uuid)
+            found = True
+        except Message.DoesNotExist:
+            # Parent doesn't exist yet - store UUID for later linking
+            self.looking_for_parent_id = parent_uuid
+            found = False
+        self.save()
+        return found
 
     @staticmethod
     def sanitize_content(content):
@@ -273,7 +343,7 @@ class Message(models.Model):
             event_type = "summary"
         elif event['type'] == 'system':
             if event['subtype'] == "compact_boundary":
-                pass # magent: let's put some logic here to instantiate a SystemMessage?
+                event_type = "compact_boundary"
             else:
                 raise RuntimeError("What other system types are there?")
         else:
@@ -287,6 +357,12 @@ class Message(models.Model):
                     # It seems like this scenario can happen when a message wasn't successfully sent
                     # due to a client error or network problem.
                     event_type = "uncertain message"
+                elif content[-1]['type'] == "tool_use":
+                    # This is a tool use with arbitrary amounts of thinking/text preamble before it
+                    event_type = "tool use with preamble"
+                elif content[-1]['type'] == "text":
+                    # This is a response with thinking/deliberation before the final text
+                    event_type = "thought-out response"
                 else:
                     raise RuntimeError("Content has more than one member.  Not sure what to do.")
                 return event_type, event
@@ -317,282 +393,293 @@ class Message(models.Model):
             else:
                 assert False
 
-            
-
         return event_type, event
+    
+    def has_no_parent_wants_no_parent(self):
+        return self.parent is None and self.looking_for_parent_id is None
 
-    @classmethod
-    def from_jsonl_claude_code_v2(cls, message_line, **extra_fields):
-        """
-        Create or get Message(s) from Claude Code v2 JSONL format with deduplication.
-
-        **UUID PRESERVATION POLICY:**
-        The original UUID from the JSONL is ALWAYS preserved as a base Message object,
-        even if the message contains only tool_use/thinking blocks with no text content.
-        This ensures CompactingActions and other references can reliably find messages.
-
-        A single JSONL line can produce multiple Message objects:
-        - Base Message with original UUID (ALWAYS created)
-        - Assistant messages with thinking blocks → Thought objects (uuid5-generated IDs)
-        - Assistant messages with tool_use → ToolUse objects (uuid5-generated IDs)
-        - Messages with tool_result → ToolResult objects (uuid5-generated IDs)
-
-        The base Message is always returned first in the list.
-
-        Args:
-            json_data: Dict from JSONL with keys like uuid, type, message, timestamp, etc.
-            **extra_fields: Additional fields to set (context_heap, parent, sender, etc.)
-
-        Returns:
-            list of tuples: [(message_instance, created_bool), ...]
-            First tuple is always the base Message with original UUID.
-
-        Raises:
-            ValueError: If existing message doesn't match new data
-        """
-        import uuid as uuid_lib
-        from django.utils.dateparse import parse_datetime
-
-        msg_uuid = uuid_lib.UUID(message_line.get('uuid'))
-
-
-        #### Actual message parsing
-        # Check content - extract text content from JSON
-        msg_type = message_line.get('type')
-
-        try:
-            message_items = message_line['message']
-        except KeyError:
-            raise
-
-        message_text = ''
-
-        if isinstance(message_items, str):
-            message_text = message_items
-            # TODO: Can this happen? magent added this block, but we're not sure why.
-            raise RuntimeError("Why is message_items a str?")
-        else:
-            # Extract text from content items
-            for item_name, item_payload_list in message_items.items():
-                if item_name == "role":
-                    continue # TODO: Is there where we do participant analysis?  #12
-                if item_name == "content":
-                    # Here's the content of the message.
-                    if len(item_payload_list) > 1:
-                        raise RuntimeError('item_payload is longer than one item')  # TODO: How do we handle this?
-                    else:
-                        item_payload = item_payload_list[0]
-
-                    if item_payload['type'] == "text":
-                        # This is a text message.
-                        message_text = item_payload['text']
-                    else:
-
-                    #####
-                    ## Handle tool uses and thoughts and such.
-
-                        raise RuntimeError # TODO: What happens here?
-
-                    ####
-
-
-
-
-
-
-
-
-            # TODO: Is there some reason we need to .strip message_text?
-            # new_content = new_content.strip()
-
-
-        # Check if message already exists
-        try:
-            existing = cls.objects.get(id=msg_uuid)
-
-            # Compare with existing content (convert JSONField to string if needed)
-            existing_content = str(existing.content) if existing.content else ''
-            
-            if message_text != existing_content:
-                # Mark as apparent duplicate instead of raising exception
-                existing.apparent_duplicate = True
-                existing.save()
-                import sys
-                print(f"WARNING: Message {msg_uuid} already exists with different content (marking as apparent_duplicate)", file=sys.stderr)
-                print(f"  Existing ({len(existing_content)} chars): {existing_content[:100]}...", file=sys.stderr)
-                print(f"  New ({len(message_text)} chars): {message_text[:100]}...", file=sys.stderr)
-
-                # OK, we have an existing message... but it doesn't match the one we just found with the same UID.
-                # Seems like a data integrity issue.
-                raise RuntimeError("Duplicate message that doesn't match - huh?")
-
-                # Message exists and passes sanity checks - return as list
-                # return [(existing, False)]
-            
-            return existing, False
-
-        except cls.DoesNotExist:
-            pass  # Message doesn't exist, create it
-
-        # Parse timestamp once
-        timestamp_str = message_line.get('timestamp')
-        timestamp = None
-        if timestamp_str:
-            dt = parse_datetime(timestamp_str)
-            if dt:
-                timestamp = int(dt.timestamp() * 1000)
-
-        # Common fields for all message types
-        common_fields = {
-            'timestamp': timestamp,
-            'session_id': uuid_lib.UUID(message_line.get('sessionId')) if message_line.get('sessionId') else None,
-            'source_file': message_line.get('source_file'),
-            'cwd': message_line.get('cwd'),
-            'git_branch': message_line.get('gitBranch'),
-            'client_version': message_line.get('version'),
-            'is_sidechain': message_line.get('isSidechain', False),
-            **extra_fields  # context_heap, parent, sender, message_number, etc.
-        }
-
-        # Check if synthetic error
-        model = message_line.get('message', {}).get('model', '')
-        is_synthetic = (model == '<synthetic>')
-
-        # Extract content items
-        msg_type = message_line.get('type')
-        message_items = message_line.get('message', {}).get('content', [])
-
-        # Handle tool_result disguised as user message
-        if msg_type == 'user' and isinstance(message_items, list) and len(message_items) == 1:
-            first_item = message_items[0]
-            if isinstance(first_item, dict) and first_item.get('type') == 'tool_result':
-                # Import ToolResult here to avoid circular import
-                from conversations.models import ToolResult
-
-                result_msg, created = ToolResult.objects.get_or_create(
-                    id=msg_uuid,
-                    defaults={
-                        **common_fields,
-                        'content': cls.sanitize_content(first_item.get('content', '')),
-                        'tool_use_id': first_item.get('tool_use_id', ''),
-                        'is_error': first_item.get('is_error', False)
-                    }
-                )
-
-                if created:
-                    cls._store_raw_content(result_msg, message_line, extra_fields)
-
-                return [(result_msg, created)]
-
-        # Collect messages to return
-        messages = []
-
-        # Process assistant message content items (can be multiple)
-        if msg_type == 'assistant':
-            # Process thinking blocks
-            for item in message_items:
-                if isinstance(item, dict) and item.get('type') == 'thinking':
-                    from conversations.models import Thought
-
-                    thinking_uuid = uuid_lib.uuid5(msg_uuid, 'thinking')
-                    thought, created = Thought.objects.get_or_create(
-                        id=thinking_uuid,
-                        defaults={
-                            **common_fields,
-                            'content': cls.sanitize_content(item.get('thinking', '')),
-                            'signature': ''  # JSONL doesn't have signature
-                        }
-                    )
-
-                    if created:
-                        cls._store_raw_content(thought, message_line, extra_fields)
-
-                    messages.append((thought, created))
-
-            # Process tool uses
-            for item in message_items:
-                if isinstance(item, dict) and item.get('type') == 'tool_use':
-                    from conversations.models import ToolUse
-
-                    tool_uuid = uuid_lib.uuid5(msg_uuid, f"tool_use_{item.get('id')}")
-                    tool_use, created = ToolUse.objects.get_or_create(
-                        id=tool_uuid,
-                        defaults={
-                            **common_fields,
-                            'content': cls.sanitize_content(item.get('input', {})),
-                            'tool_name': item.get('name', ''),
-                            'tool_id': item.get('id', '')
-                        }
-                    )
-
-                    if created:
-                        cls._store_raw_content(tool_use, message_line, extra_fields)
-
-                    messages.append((tool_use, created))
-
-            # Process tool results
-            for item in message_items:
-                if isinstance(item, dict) and item.get('type') == 'tool_result':
-                    from conversations.models import ToolResult
-
-                    result_uuid = uuid_lib.uuid5(msg_uuid, f"tool_result_{item.get('tool_use_id')}")
-                    tool_result, created = ToolResult.objects.get_or_create(
-                        id=result_uuid,
-                        defaults={
-                            **common_fields,
-                            'content': cls.sanitize_content(item.get('content', '')),
-                            'tool_use_id': item.get('tool_use_id', ''),
-                            'is_error': item.get('is_error', False)
-                        }
-                    )
-
-                    if created:
-                        cls._store_raw_content(tool_result, message_line, extra_fields)
-
-                    messages.append((tool_result, created))
-
-        # Extract text content (for both user and assistant messages)
-        if isinstance(message_items, str):
-            text_content = message_items
-        else:
-            text_content = ''
-            for item in message_items:
-                if isinstance(item, dict) and item.get('type') == 'text':
-                    text_content += item.get('text', '') + '\n'
-            text_content = text_content.strip()
-
-        # ALWAYS create base Message with original UUID to preserve UUID integrity
-        # This ensures CompactingActions and other references can always find the message
-        # Even if the message only contains tool_use/thinking blocks, we preserve the UUID
-        if not text_content:
-            # Determine appropriate placeholder based on what polymorphic children were created
-            if messages:
-                # Has thinking/tool_use/tool_result children - use placeholder indicating type
-                placeholder = '[Message with attached content]'
+    def highest_known_parent(self):
+        parent = self.parent
+        while True:
+            if parent.parent is None:
+                return parent
             else:
-                # Truly empty message
-                placeholder = '[Empty message]'
-            text_content = placeholder
+                parent = parent.parent
+        return parent
 
-        message, created = Message.objects.get_or_create(
-            id=msg_uuid,
-            defaults={
-                **common_fields,
-                'content': cls.sanitize_content(text_content),
-                'is_synthetic_error': is_synthetic
-            }
-        )
 
-        if created:
-            cls._store_raw_content(message, message, extra_fields)
-        else:
-            print("This is a dupe.")
+    # @classmethod
+    # def from_jsonl_claude_code_v2(cls, message_line, **extra_fields):
+    #     """
+    #     Create or get Message(s) from Claude Code v2 JSONL format with deduplication.
 
-        # Always insert base message at the beginning of the list
-        # This maintains UUID integrity - the original UUID always exists
-        messages.insert(0, (message, created))
+    #     **UUID PRESERVATION POLICY:**
+    #     The original UUID from the JSONL is ALWAYS preserved as a base Message object,
+    #     even if the message contains only tool_use/thinking blocks with no text content.
+    #     This ensures CompactingActions and other references can reliably find messages.
 
-        return messages
+    #     A single JSONL line can produce multiple Message objects:
+    #     - Base Message with original UUID (ALWAYS created)
+    #     - Assistant messages with thinking blocks → Thought objects (uuid5-generated IDs)
+    #     - Assistant messages with tool_use → ToolUse objects (uuid5-generated IDs)
+    #     - Messages with tool_result → ToolResult objects (uuid5-generated IDs)
+
+    #     The base Message is always returned first in the list.
+
+    #     Args:
+    #         json_data: Dict from JSONL with keys like uuid, type, message, timestamp, etc.
+    #         **extra_fields: Additional fields to set (context_heap, parent, sender, etc.)
+
+    #     Returns:
+    #         list of tuples: [(message_instance, created_bool), ...]
+    #         First tuple is always the base Message with original UUID.
+
+    #     Raises:
+    #         ValueError: If existing message doesn't match new data
+    #     """
+    #     import uuid as uuid_lib
+    #     from django.utils.dateparse import parse_datetime
+
+    #     msg_uuid = uuid_lib.UUID(message_line.get('uuid'))
+
+
+    #     #### Actual message parsing
+    #     # Check content - extract text content from JSON
+    #     msg_type = message_line.get('type')
+
+    #     try:
+    #         message_items = message_line['message']
+    #     except KeyError:
+    #         raise
+
+    #     message_text = ''
+
+    #     if isinstance(message_items, str):
+    #         message_text = message_items
+    #         # TODO: Can this happen? magent added this block, but we're not sure why.
+    #         raise RuntimeError("Why is message_items a str?")
+    #     else:
+    #         # Extract text from content items
+    #         for item_name, item_payload_list in message_items.items():
+    #             if item_name == "role":
+    #                 continue # TODO: Is there where we do participant analysis?  #12
+    #             if item_name == "content":
+    #                 # Here's the content of the message.
+    #                 if len(item_payload_list) > 1:
+    #                     raise RuntimeError('item_payload is longer than one item')  # TODO: How do we handle this?
+    #                 else:
+    #                     item_payload = item_payload_list[0]
+
+    #                 if item_payload['type'] == "text":
+    #                     # This is a text message.
+    #                     message_text = item_payload['text']
+    #                 else:
+
+    #                 #####
+    #                 ## Handle tool uses and thoughts and such.
+
+    #                     raise RuntimeError # TODO: What happens here?
+
+    #                 ####
+
+
+
+
+
+
+
+
+    #         # TODO: Is there some reason we need to .strip message_text?
+    #         # new_content = new_content.strip()
+
+
+    #     # Check if message already exists
+    #     try:
+    #         existing = cls.objects.get(id=msg_uuid)
+
+    #         # Compare with existing content (convert JSONField to string if needed)
+    #         existing_content = str(existing.content) if existing.content else ''
+            
+    #         if message_text != existing_content:
+    #             # Mark as apparent duplicate instead of raising exception
+    #             existing.apparent_duplicate = True
+    #             existing.save()
+    #             import sys
+    #             print(f"WARNING: Message {msg_uuid} already exists with different content (marking as apparent_duplicate)", file=sys.stderr)
+    #             print(f"  Existing ({len(existing_content)} chars): {existing_content[:100]}...", file=sys.stderr)
+    #             print(f"  New ({len(message_text)} chars): {message_text[:100]}...", file=sys.stderr)
+
+    #             # OK, we have an existing message... but it doesn't match the one we just found with the same UID.
+    #             # Seems like a data integrity issue.
+    #             raise RuntimeError("Duplicate message that doesn't match - huh?")
+
+    #             # Message exists and passes sanity checks - return as list
+    #             # return [(existing, False)]
+            
+    #         return existing, False
+
+    #     except cls.DoesNotExist:
+    #         pass  # Message doesn't exist, create it
+
+    #     # Parse timestamp once
+    #     timestamp_str = message_line.get('timestamp')
+    #     timestamp = None
+    #     if timestamp_str:
+    #         dt = parse_datetime(timestamp_str)
+    #         if dt:
+    #             timestamp = int(dt.timestamp() * 1000)
+
+    #     # Common fields for all message types
+    #     common_fields = {
+    #         'timestamp': timestamp,
+    #         'session_id': uuid_lib.UUID(message_line.get('sessionId')) if message_line.get('sessionId') else None,
+    #         'source_file': message_line.get('source_file'),
+    #         'cwd': message_line.get('cwd'),
+    #         'git_branch': message_line.get('gitBranch'),
+    #         'client_version': message_line.get('version'),
+    #         'is_sidechain': message_line.get('isSidechain', False),
+    #         **extra_fields  # context_heap, parent, sender, message_number, etc.
+    #     }
+
+    #     # Check if synthetic error
+    #     model = message_line.get('message', {}).get('model', '')
+    #     is_synthetic = (model == '<synthetic>')
+
+    #     # Extract content items
+    #     msg_type = message_line.get('type')
+    #     message_items = message_line.get('message', {}).get('content', [])
+
+    #     # Handle tool_result disguised as user message
+    #     if msg_type == 'user' and isinstance(message_items, list) and len(message_items) == 1:
+    #         first_item = message_items[0]
+    #         if isinstance(first_item, dict) and first_item.get('type') == 'tool_result':
+    #             # Import ToolResult here to avoid circular import
+    #             from conversations.models import ToolResult
+
+    #             result_msg, created = ToolResult.objects.get_or_create(
+    #                 id=msg_uuid,
+    #                 defaults={
+    #                     **common_fields,
+    #                     'content': cls.sanitize_content(first_item.get('content', '')),
+    #                     'tool_use_id': first_item.get('tool_use_id', ''),
+    #                     'is_error': first_item.get('is_error', False)
+    #                 }
+    #             )
+
+    #             if created:
+    #                 cls._store_raw_content(result_msg, message_line, extra_fields)
+
+    #             return [(result_msg, created)]
+
+    #     # Collect messages to return
+    #     messages = []
+
+    #     # Process assistant message content items (can be multiple)
+    #     if msg_type == 'assistant':
+    #         # Process thinking blocks
+    #         for item in message_items:
+    #             if isinstance(item, dict) and item.get('type') == 'thinking':
+    #                 from conversations.models import Thought
+
+    #                 thinking_uuid = uuid_lib.uuid5(msg_uuid, 'thinking')
+    #                 thought, created = Thought.objects.get_or_create(
+    #                     id=thinking_uuid,
+    #                     defaults={
+    #                         **common_fields,
+    #                         'content': cls.sanitize_content(item.get('thinking', '')),
+    #                         'signature': ''  # JSONL doesn't have signature
+    #                     }
+    #                 )
+
+    #                 if created:
+    #                     cls._store_raw_content(thought, message_line, extra_fields)
+
+    #                 messages.append((thought, created))
+
+    #         # Process tool uses
+    #         for item in message_items:
+    #             if isinstance(item, dict) and item.get('type') == 'tool_use':
+    #                 from conversations.models import ToolUse
+
+    #                 tool_uuid = uuid_lib.uuid5(msg_uuid, f"tool_use_{item.get('id')}")
+    #                 tool_use, created = ToolUse.objects.get_or_create(
+    #                     id=tool_uuid,
+    #                     defaults={
+    #                         **common_fields,
+    #                         'content': cls.sanitize_content(item.get('input', {})),
+    #                         'tool_name': item.get('name', ''),
+    #                         'tool_id': item.get('id', '')
+    #                     }
+    #                 )
+
+    #                 if created:
+    #                     cls._store_raw_content(tool_use, message_line, extra_fields)
+
+    #                 messages.append((tool_use, created))
+
+    #         # Process tool results
+    #         for item in message_items:
+    #             if isinstance(item, dict) and item.get('type') == 'tool_result':
+    #                 from conversations.models import ToolResult
+
+    #                 result_uuid = uuid_lib.uuid5(msg_uuid, f"tool_result_{item.get('tool_use_id')}")
+    #                 tool_result, created = ToolResult.objects.get_or_create(
+    #                     id=result_uuid,
+    #                     defaults={
+    #                         **common_fields,
+    #                         'content': cls.sanitize_content(item.get('content', '')),
+    #                         'tool_use_id': item.get('tool_use_id', ''),
+    #                         'is_error': item.get('is_error', False)
+    #                     }
+    #                 )
+
+    #                 if created:
+    #                     cls._store_raw_content(tool_result, message_line, extra_fields)
+
+    #                 messages.append((tool_result, created))
+
+    #     # Extract text content (for both user and assistant messages)
+    #     if isinstance(message_items, str):
+    #         text_content = message_items
+    #     else:
+    #         text_content = ''
+    #         for item in message_items:
+    #             if isinstance(item, dict) and item.get('type') == 'text':
+    #                 text_content += item.get('text', '') + '\n'
+    #         text_content = text_content.strip()
+
+    #     # ALWAYS create base Message with original UUID to preserve UUID integrity
+    #     # This ensures CompactingActions and other references can always find the message
+    #     # Even if the message only contains tool_use/thinking blocks, we preserve the UUID
+    #     if not text_content:
+    #         # Determine appropriate placeholder based on what polymorphic children were created
+    #         if messages:
+    #             # Has thinking/tool_use/tool_result children - use placeholder indicating type
+    #             placeholder = '[Message with attached content]'
+    #         else:
+    #             # Truly empty message
+    #             placeholder = '[Empty message]'
+    #         text_content = placeholder
+
+    #     message, created = Message.objects.get_or_create(
+    #         id=msg_uuid,
+    #         defaults={
+    #             **common_fields,
+    #             'content': cls.sanitize_content(text_content),
+    #             'is_synthetic_error': is_synthetic
+    #         }
+    #     )
+
+    #     if created:
+    #         cls._store_raw_content(message, message, extra_fields)
+    #     else:
+    #         print("This is a dupe.")
+
+    #     # Always insert base message at the beginning of the list
+    #     # This maintains UUID integrity - the original UUID always exists
+    #     messages.insert(0, (message, created))
+
+    #     return messages
 
     @classmethod
     def _store_raw_content(cls, message, json_data, extra_fields):
@@ -724,7 +811,7 @@ class CompactingAction(models.Model):
     def __str__(self):
         trigger = self.compact_trigger or 'unknown'
         tokens = f"{self.pre_compact_tokens:,}" if self.pre_compact_tokens else '?'
-        heap = f"heap {str(self.context_heap_id)[:8]}" if self.context_heap_id else "orphaned"
+        heap = f"heap {str(self.context_heap_id)[:8]}" if self.context_heap else "orphaned"
         return f"Compact ({trigger}, {tokens} tokens, {heap})"
 
     def get_boundary_message(self):
@@ -737,7 +824,7 @@ class CompactingAction(models.Model):
             return None
 
     @classmethod
-    def from_jsonl_claude_code_v2(cls, event, **extra_fields):
+    def from_jsonl_claude_code_v2(cls, event, ending_message_id, summary, context_heap=None):
         """
         Create or get CompactingAction from Claude Code v2 summary data with deduplication.
 
@@ -765,22 +852,88 @@ class CompactingAction(models.Model):
         hash_digest = hashlib.sha256(canonical_json.encode()).digest()
         ca_id = uuid.UUID(bytes=hash_digest[:16])
 
+        try:
+            # Did we already make a CompactingAction from a compact boundary?
+            CompactingAction.objects.get(compact_boundary_message_id=ending_message_id)
+            assert False
+        except CompactingAction.DoesNotExist:
+            pass
+        
+        if context_heap is not None:
+            try:
+                existing_compacting_action_for_this_heap = CompactingAction.objects.get(context_heap=context_heap)
+            except CompactingAction.MultipleObjectsReturned:
+                # We _already_ have more than one compacting action for this heap - this isn't supposed to be possible.
+                raise RuntimeError("WTF.")
+            except CompactingAction.DoesNotExist:
+                existing_compacting_action_for_this_heap = None
+
+        if context_heap and existing_compacting_action_for_this_heap:
+            ####
+            # TODO: This heap has probably already been compacted and we failed to start a new one.abs
+            # There's probably a new one one here:
+            print(f"ContextHeap {context_heap.id} is already compacted with {context_heap.messages.count()} messages.")
+            print(f"...but {event} is triggering another compact for it.")
+            
+            if type(event) == dict:
+                print(f"Summary is a dict: {event}")
+            else:
+                parent = event.parent
+                print(f"Parent's heap is {parent.context_heap.id}")
+
+            try:
+                previous_compacting_action = event.parent.context_heap.compacting_action
+                assert False
+                #### Say something about previous compacting action
+            except ContextHeap.compacting_action.RelatedObjectDoesNotExist:
+                print("Parent's heap is not compacted - is that the heap we're supposed to be compacting?!")
+            except AttributeError:
+                #### The event is probably a dict (a summary) and doesn't even have a parent.
+                pass
+
+            existing_ender_id = existing_compacting_action_for_this_heap.ending_message_id
+            new_ender_id = event['leafUuid']
+            
+            existing_ender = Message.objects.get(id=existing_ender_id)
+            new_ender = Message.objects.get(id=new_ender_id)
+
+            # probably_a_heap_opener_in_here = context_heap.messages.all()
+            # print("#####################################")
+            # print(f'{len(probably_a_heap_opener_in_here)} events - one of them is probably an unrecognized heap owner.')
+            # print("------------==========---------")
+            # for counter, possible_opener in enumerate(probably_a_heap_opener_in_here):
+            #     if possible_opener.parent is None:
+            #         assert False
+            #     if possible_opener.is_continuation_message:
+            #         assert False
+            #     print('##################')
+            #     print(f'------EVENT {counter} ({possible_opener.__class__})-------')
+            #     print(possible_opener.content)
+            #     print('##################')
+            # print("#####################################")
+            raise ValueError("How can we compact a context heap that's already been compacted?")
+
         # Use get_or_create for deduplication
         compact, created = cls.objects.get_or_create(
             id=ca_id,
+            defaults={
+            "ending_message_id": ending_message_id,
+            "summary": summary,
+            "context_heap": context_heap
+            }
         )
 
-        # Store raw JSONL data for debugging (only on creation)
-        if created:
-            from django.contrib.contenttypes.models import ContentType
-            compact_ct = ContentType.objects.get_for_model(compact)
-            RawImportedContent.objects.create(
-                id=uuid_lib.uuid4(),
-                content_type=compact_ct,
-                object_id=compact.id,
-                raw_data=event,
-                source_file_id=extra_fields.get('source_file_id')
-            )
+        # # Store raw JSONL data for debugging (only on creation)
+        # if created:
+        #     from django.contrib.contenttypes.models import ContentType
+        #     compact_ct = ContentType.objects.get_for_model(compact)
+        #     RawImportedContent.objects.create(
+        #         id=uuid.uuid4(),
+        #         content_type=compact_ct,
+        #         object_id=compact.id,
+        #         raw_data=event,
+        #         source_file_id=extra_fields.get('source_file_id')
+        #     )
 
         return compact, created
 
