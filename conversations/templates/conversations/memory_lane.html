@@ -551,9 +551,9 @@
                         allMessages.push({
                             id: compact.id,
                             message_type: 'CompactingAction',
-                            summary: compact.summary,
+                            // summary removed - see Summary model
                             compact_trigger: compact.compact_trigger,
-                            compact_boundary_message_id: compact.compact_boundary_message_id,
+                            ending_message_id: compact.ending_message_id,
                             is_orphaned: true,
                             raw_imported_content: compact.raw_imported_content,
                             created_at: compact.created_at
@@ -717,13 +717,8 @@
                                 continue;
                             }
 
-                            // Add this message's content
-                            let msgText = '';
-                            if (typeof msg.content === 'string') {
-                                msgText = msg.content;
-                            } else if (typeof msg.content === 'object' && msg.content) {
-                                msgText = JSON.stringify(msg.content);
-                            }
+                            // Parse and add this message's content
+                            const msgText = parseContentForDisplay(msg.content);
 
                             if (msgText) {
                                 if (messagePreview) {
@@ -1000,15 +995,15 @@
 
                 if (!orphanedCollapsed) {
                     eraData.orphaned_compacting_actions.forEach(compact => {
-                        const boundaryPreview = compact.compact_boundary_message_id
-                            ? compact.compact_boundary_message_id.substring(0, 8)
+                        const boundaryPreview = compact.ending_message_id
+                            ? compact.ending_message_id.substring(0, 8)
                             : 'unknown';
                         const compactPseudoMsg = {
                             id: compact.id,
                             message_type: 'CompactingAction',
-                            summary: compact.summary,
+                            // summary removed - see Summary model
                             compact_trigger: compact.compact_trigger,
-                            compact_boundary_message_id: compact.compact_boundary_message_id,
+                            ending_message_id: compact.ending_message_id,
                             is_orphaned: true,
                             raw_imported_content: compact.raw_imported_content,
                             created_at: compact.created_at

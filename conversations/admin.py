@@ -8,6 +8,7 @@ from .models import (
     ToolUse,
     ToolResult,
     CompactingAction,
+    Summary,
     Topic,
     Note
 )
@@ -93,8 +94,19 @@ class ToolResultAdmin(admin.ModelAdmin):
 
 @admin.register(CompactingAction)
 class CompactingActionAdmin(admin.ModelAdmin):
-    list_display = ('context_heap', 'ending_message_id', 'compact_trigger', 'created_at')
+    list_display = ('context_heap', 'ending_message', 'compact_trigger', 'created_at')
     readonly_fields = ('created_at',)
+
+
+@admin.register(Summary)
+class SummaryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'summary_preview', 'leaf_message', 'looking_for_leaf_message', 'created_at')
+    search_fields = ('summary_text',)
+    readonly_fields = ('id', 'created_at')
+
+    def summary_preview(self, obj):
+        return obj.summary_text[:80] + '...' if len(obj.summary_text) > 80 else obj.summary_text
+    summary_preview.short_description = 'Summary'
 
 
 @admin.register(Topic)

@@ -765,6 +765,104 @@ class ToolResult(Message):
 # Compacting Action
 # ============================================================================
 
+class CompactingActionManager(models.Manager):
+    """Custom manager for CompactingAction with smart lookup methods."""
+
+    def get_or_create_by_id_or_message(self, id_or_message, **defaults):
+        """
+        Get or create a CompactingAction by either a UUID or Message object.
+
+        This method intelligently searches for an existing CompactingAction:
+        1. If a Message object is provided, checks if it has a related CompactingAction
+        2. If a UUID is provided, checks for CAs with that ending_message or looking_for_ending_message
+        3. If found and orphaned (looking_for_ending_message set), links the message
+        4. If not found, creates a new CA with the provided defaults
+
+        Args:
+            id_or_message: Either a UUID object or a Message instance
+            **defaults: Default field values for creating new CompactingAction
+
+        Returns:
+            tuple: (CompactingAction instance, created_bool)
+
+        Examples:
+            # By Message object
+            ca, created = CompactingAction.objects.get_or_create_by_id_or_message(
+                message_obj,
+                compact_trigger='manual'
+            )
+
+            # By UUID
+            ca, created = CompactingAction.objects.get_or_create_by_id_or_message(
+                uuid.UUID('...'),
+                compact_trigger='auto'
+            )
+        """
+        from uuid import UUID
+
+        if type(id_or_message) == str:
+            id_or_message = UUID(id_or_message)
+
+        # Determine if we have a Message or UUID
+        if isinstance(id_or_message, Message):
+            message = id_or_message
+            message_id = message.id
+        elif isinstance(id_or_message, UUID):
+            message_id = id_or_message
+            try:
+                message = Message.objects.get(id=message_id)
+            except Message.DoesNotExist:
+                message = None
+        else:
+            raise TypeError(f"Expected Message or UUID, got {type(id_or_message)}")
+
+        # Try to find existing CompactingAction
+        existing_ca = None
+
+        # First, check if there's a CA with this as its ending_message FK
+        if message:
+            try:
+                existing_ca = self.get(ending_message=message)
+            except self.model.DoesNotExist:
+                pass
+
+        # Second, check if there's an orphaned CA looking for this message ID
+        if not existing_ca:
+            try:
+                existing_ca = self.get(looking_for_ending_message=message_id)
+            except self.model.DoesNotExist:
+                pass
+
+        # If we found an orphaned CA and now have the message, link it
+        if existing_ca and message and existing_ca.looking_for_ending_message and not existing_ca.ending_message:
+            existing_ca.ending_message = message
+            existing_ca.looking_for_ending_message = None  # Clear the orphan flag  # TODO: Do we want this?  Are we looking it up anywhere?
+            existing_ca.context_heap = message.context_heap  # TODO: This doesn't seem DRY.  Not sure what else to do yet.
+            existing_ca.save(update_fields=['ending_message', 'looking_for_ending_message'])
+            return existing_ca, False
+
+        # If we found a CA (orphaned or not), return it
+        if existing_ca:
+            return existing_ca, False
+
+        # No existing CA found - create a new one
+        create_kwargs = defaults.copy()
+
+        if message:
+            # We have the message, set the FK
+            create_kwargs['ending_message'] = message
+        else:
+            # Message doesn't exist yet, mark as looking for it
+            create_kwargs['looking_for_ending_message'] = message_id
+
+        new_ca = self.create(**create_kwargs)
+
+        # if new_ca.ending_message_id is None:
+        #     raise TypeError("Don't want this.")
+
+        return new_ca, True
+
+
 class CompactingAction(models.Model):
     """
     Records when a context heap was closed via compacting.
@@ -784,15 +882,17 @@ class CompactingAction(models.Model):
         blank=True,
         related_name='compacting_action'
     )
-    ending_message_id = models.UUIDField(null=True, blank=True)  # Last message before compact
-    compact_boundary_message_id = models.UUIDField(null=True, blank=True)
-    preceding_message = models.ForeignKey(
+
+    ending_message = models.OneToOneField(
         Message,
         models.SET_NULL,
         null=True,
         blank=True,
-        related_name='compacting_action_after_this'
-    )  # The last message before the compact happened
+        related_name='compacting_action_ending_here',
+        db_column='ending_message_fk_id'  # Temporary name to avoid conflict during migration
+    )
+    looking_for_ending_message = models.UUIDField(null=True, blank=True, help_text='UUID of ending message that was not found during import')
+
     continuation_message = models.ForeignKey(
         Message,
         models.SET_NULL,
@@ -800,10 +900,11 @@ class CompactingAction(models.Model):
         blank=True,
         related_name='continuation_for_compacting_action'
     )  # The system-injected summary message at start of next heap
-    summary = models.TextField(null=True, blank=True)
     compact_trigger = models.CharField(max_length=50, null=True, blank=True)
     pre_compact_tokens = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = CompactingActionManager()
 
     class Meta:
         db_table = 'compacting_actions'
@@ -864,7 +965,28 @@ class CompactingAction(models.Model):
                 existing_compacting_action_for_this_heap = CompactingAction.objects.get(context_heap=context_heap)
             except CompactingAction.MultipleObjectsReturned:
                 # We _already_ have more than one compacting action for this heap - this isn't supposed to be possible.
-                raise RuntimeError("WTF.")
+                existing_cas = CompactingAction.objects.filter(context_heap=context_heap)
+                print(f"\n{'='*60}")
+                print(f"ERROR: Heap {str(context_heap.id)[:8]} already has {existing_cas.count()} CompactingActions!")
+                print(f"{'='*60}")
+                for existing_ca in existing_cas:
+                    print(f"  Existing CA {str(existing_ca.id)[:8]}:")
+                    print(f"    ending_message_id: {str(existing_ca.ending_message_id)[:8] if existing_ca.ending_message_id else 'None'}")
+                    print(f"    compact_boundary_message_id: {str(existing_ca.compact_boundary_message_id)[:8] if existing_ca.compact_boundary_message_id else 'None'}")
+                    print(f"    summary: {existing_ca.summary[:80] if existing_ca.summary else 'None'}...")
+                print(f"\nTrying to create NEW CA:")
+                print(f"  ending_message_id: {str(ending_message_id)[:8] if ending_message_id else 'None'}")
+                print(f"  summary from event: {event.get('summary', 'N/A')[:80]}...")
+                print(f"\nHeap info:")
+                print(f"  Messages in heap: {context_heap.messages.count()}")
+                first = context_heap.first_message()
+                last = context_heap.messages.order_by('message_number').last()
+                if first:
+                    print(f"  First message: {str(first.id)[:8]} (msg #{first.message_number})")
+                if last:
+                    print(f"  Last message: {str(last.id)[:8]} (msg #{last.message_number})")
+                print(f"{'='*60}\n")
+                raise RuntimeError("Multiple CompactingActions for same heap - see debug output above")
             except CompactingAction.DoesNotExist:
                 existing_compacting_action_for_this_heap = None
 
@@ -893,24 +1015,53 @@ class CompactingAction(models.Model):
 
             existing_ender_id = existing_compacting_action_for_this_heap.ending_message_id
             new_ender_id = event['leafUuid']
-            
+
             existing_ender = Message.objects.get(id=existing_ender_id)
             new_ender = Message.objects.get(id=new_ender_id)
 
-            # probably_a_heap_opener_in_here = context_heap.messages.all()
-            # print("#####################################")
-            # print(f'{len(probably_a_heap_opener_in_here)} events - one of them is probably an unrecognized heap owner.')
-            # print("------------==========---------")
-            # for counter, possible_opener in enumerate(probably_a_heap_opener_in_here):
-            #     if possible_opener.parent is None:
-            #         assert False
-            #     if possible_opener.is_continuation_message:
-            #         assert False
-            #     print('##################')
-            #     print(f'------EVENT {counter} ({possible_opener.__class__})-------')
-            #     print(possible_opener.content)
-            #     print('##################')
-            # print("#####################################")
+            probably_a_heap_opener_in_here = context_heap.messages.all()
+
+            # Check if both enders are in this heap
+            existing_ender_in_heap = existing_ender in probably_a_heap_opener_in_here
+            new_ender_in_heap = new_ender in probably_a_heap_opener_in_here
+
+            print("#####################################")
+            print(f"EXISTING ENDER: {str(existing_ender_id)[:8]} - msg #{existing_ender.message_number if existing_ender_in_heap else 'NOT IN HEAP'}")
+            print(f"NEW ENDER:      {str(new_ender_id)[:8]} - msg #{new_ender.message_number if new_ender_in_heap else 'NOT IN HEAP'}")
+
+            if existing_ender_in_heap and new_ender_in_heap:
+                if existing_ender.message_number < new_ender.message_number:
+                    print(f"EXISTING ENDER comes FIRST (msg #{existing_ender.message_number} < #{new_ender.message_number})")
+                    print(f"→ New ender should probably start a new heap")
+                else:
+                    print(f"NEW ENDER comes FIRST (msg #{new_ender.message_number} < #{existing_ender.message_number})")
+                    print(f"→ Existing ender should probably start a new heap")
+            elif existing_ender_in_heap:
+                print(f"Only EXISTING ENDER is in this heap")
+            elif new_ender_in_heap:
+                print(f"Only NEW ENDER is in this heap")
+            else:
+                print(f"NEITHER ender is in this heap?!")
+
+            print(f"\n{len(probably_a_heap_opener_in_here)} events in heap - one of them is probably an unrecognized heap opener.")
+            print("------------==========---------")
+            for counter, possible_opener in enumerate(probably_a_heap_opener_in_here):
+                marker = ""
+                if possible_opener.id == existing_ender_id:
+                    marker = " ← EXISTING ENDER"
+                elif possible_opener.id == new_ender_id:
+                    marker = " ← NEW ENDER"
+
+                if possible_opener.parent is None:
+                    marker += " [NO PARENT - POSSIBLE OPENER]"
+                if possible_opener.is_continuation_message:
+                    marker += " [CONTINUATION MSG]"
+
+                # print('##################')
+                # print(f'------EVENT {counter} ({possible_opener.__class__}) msg #{possible_opener.message_number}{marker}-------')
+                # print(possible_opener.content)
+                # print('##################')
+            print("#####################################")
             raise ValueError("How can we compact a context heap that's already been compacted?")
 
         # Use get_or_create for deduplication
@@ -994,6 +1145,45 @@ class CompactingAction(models.Model):
             msg.save()
 
         return new_heap
+
+
+# ============================================================================
+# Summary Model
+# ============================================================================
+
+class Summary(models.Model):
+    """
+    A summary generated during conversation compacting.
+
+    These are separate from CompactingActions - they're just the AI-generated
+    text summaries that appear in the JSONL export, stored for reference.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    summary_text = models.TextField()
+
+    # Link to the actual leaf message if it exists
+    leaf_message = models.ForeignKey(
+        Message,
+        models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='summaries_ending_here'
+    )
+    looking_for_leaf_message = models.UUIDField(
+        null=True,
+        blank=True,
+        help_text='UUID of the leaf message that was not found during import (from leafUuid)'
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'summaries'
+        verbose_name_plural = 'summaries'
+
+    def __str__(self):
+        return f"Summary: {self.summary_text[:50]}..." if len(self.summary_text) > 50 else f"Summary: {self.summary_text}"
 
 
 # ============================================================================
