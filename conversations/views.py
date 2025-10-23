@@ -57,10 +57,45 @@ def all_messages(request):
             } for note in era_notes]
         }
 
-        # Get all heaps for this era, sorted by first message timestamp
-        all_heaps = list(era.context_heaps.select_related('first_message').all())
-        # Sort by first message timestamp (handle null timestamps)
-        all_heaps.sort(key=lambda h: h.first_message.timestamp if h.first_message and h.first_message.timestamp else 0)
+        # Get all heaps and annotate with first message info for sorting
+        from django.db.models import Prefetch, Min, F, Case, When, Value, IntegerField
+
+        # Get all heaps with their first message's timestamp for sorting
+        all_heaps = list(era.context_heaps.annotate(
+            first_msg_timestamp=Min('messages__timestamp'),
+            first_msg_created=Min('messages__created_at')
+        ).all())
+
+        # Sort by first message timestamp, falling back to created_at
+        def heap_sort_key(h):
+            if h.first_msg_timestamp:
+                return (0, h.first_msg_timestamp)
+            elif h.first_msg_created:
+                return (1, h.first_msg_created.timestamp() * 1000)
+            else:
+                return (2, h.created_at.timestamp() * 1000)
+
+        all_heaps.sort(key=heap_sort_key)
+
+        # Now prefetch first messages for display (separate from sorting)
+        first_messages_prefetch = Prefetch(
+            'messages',
+            queryset=Message.objects.order_by('message_number').only('id', 'timestamp', 'message_number', 'context_heap')[:1],
+            to_attr='prefetched_first_message'
+        )
+
+        # Re-fetch with prefetch (Django will use cached objects)
+        all_heaps_with_prefetch = list(era.context_heaps.prefetch_related(first_messages_prefetch).all())
+
+        # Build mapping by ID to preserve sort order
+        heap_by_id = {h.id: h for h in all_heaps_with_prefetch}
+        all_heaps = [heap_by_id[h.id] for h in all_heaps]
+
+        # Build cache from prefetched data
+        first_message_cache = {}
+        for heap in all_heaps:
+            first_msg = heap.prefetched_first_message[0] if heap.prefetched_first_message else None
+            first_message_cache[heap.id] = first_msg
 
         # Build hierarchy: find root heaps (non-split) and their children (splits)
         def serialize_heap(heap):
@@ -74,26 +109,35 @@ def all_messages(request):
             compacting_action = None
             if hasattr(heap, 'compacting_action') and heap.compacting_action:
                 ca = heap.compacting_action
+                # Get ending message ID from either FK or looking_for field
+                ending_msg_id = None
+                if ca.ending_message_id:
+                    ending_msg_id = str(ca.ending_message_id)
+                elif ca.looking_for_ending_message:
+                    ending_msg_id = str(ca.looking_for_ending_message)
+
                 compacting_action = {
                     'id': str(ca.id),
-                    'summary': ca.summary,
-                    'compact_boundary_message_id': str(ca.compact_boundary_message_id) if ca.compact_boundary_message_id else None,
+                    'ending_message_id': ending_msg_id,
                     'compact_trigger': ca.compact_trigger,
                     'continuation_message_id': str(ca.continuation_message_id) if ca.continuation_message_id else None
                 }
 
-            # Get first message timestamp
-            first_message = heap.first_message
+            # Get first message from cache
+            first_message = first_message_cache.get(heap.id)
             first_message_timestamp = None
-            if first_message and first_message.timestamp:
-                from datetime import datetime
-                first_message_timestamp = datetime.fromtimestamp(first_message.timestamp / 1000).isoformat()
+            first_message_id = None
+            if first_message:
+                first_message_id = str(first_message.id)
+                if first_message.timestamp:
+                    from datetime import datetime
+                    first_message_timestamp = datetime.fromtimestamp(first_message.timestamp / 1000).isoformat()
 
             heap_data = {
                 'id': str(heap.id),
                 'type': heap.type,
                 'type_display': heap.get_type_display(),
-                'first_message_id': str(heap.first_message_id),
+                'first_message_id': first_message_id,
                 'first_message_timestamp': first_message_timestamp,
                 'created_at': heap.created_at.isoformat(),
                 'earliest_blockheight': heap.earliest_blockheight(),
@@ -110,14 +154,16 @@ def all_messages(request):
                 } for note in heap_notes]
             }
 
-            # Build lookup of CompactingActions by their leaf message UUID
+            # Build lookup of CompactingActions by their ending message UUID
             # This includes both linked CAs (for this heap or others) and orphaned ones
             all_compacting_actions = CompactingAction.objects.all()
-            compacting_action_by_leaf_uuid = {
-                action.compact_boundary_message_id: action
-                for action in all_compacting_actions
-                if action.compact_boundary_message_id
-            }
+            compacting_action_by_leaf_uuid = {}
+            for action in all_compacting_actions:
+                # Get the ending message ID from either the FK or the looking_for field
+                if action.ending_message_id:
+                    compacting_action_by_leaf_uuid[action.ending_message_id] = action
+                elif action.looking_for_ending_message:
+                    compacting_action_by_leaf_uuid[action.looking_for_ending_message] = action
 
             # Get messages for this heap
             messages = heap.messages.select_related('thought', 'tooluse', 'toolresult').order_by('message_number')
@@ -194,14 +240,20 @@ def all_messages(request):
                         object_id=compacting_action.id
                     ).first()
 
+                    # Get ending message ID
+                    ending_msg_id = None
+                    if compacting_action.ending_message_id:
+                        ending_msg_id = str(compacting_action.ending_message_id)
+                    elif compacting_action.looking_for_ending_message:
+                        ending_msg_id = str(compacting_action.looking_for_ending_message)
+
                     # Add a pseudo-message representing the compacting action
                     heap_data['messages'].append({
                         'id': str(compacting_action.id),
                         'message_type': 'CompactingAction',
-                        'summary': compacting_action.summary,
+                        'ending_message_id': ending_msg_id,
                         'compact_trigger': compacting_action.compact_trigger,
                         'pre_compact_tokens': compacting_action.pre_compact_tokens,
-                        'compact_boundary_message_id': str(compacting_action.compact_boundary_message_id),
                         'is_orphaned': compacting_action.context_heap_id is None,
                         'linked_heap_id': str(compacting_action.context_heap_id) if compacting_action.context_heap_id else None,
                         'raw_imported_content': raw_content.raw_data if raw_content else None
@@ -234,10 +286,16 @@ def all_messages(request):
             object_id=compact.id
         ).first()
 
+        # Get ending message ID
+        ending_msg_id = None
+        if compact.ending_message_id:
+            ending_msg_id = str(compact.ending_message_id)
+        elif compact.looking_for_ending_message:
+            ending_msg_id = str(compact.looking_for_ending_message)
+
         data['orphaned_compacting_actions'].append({
             'id': str(compact.id),
-            'summary': compact.summary,
-            'compact_boundary_message_id': str(compact.compact_boundary_message_id) if compact.compact_boundary_message_id else None,
+            'ending_message_id': ending_msg_id,
             'compact_trigger': compact.compact_trigger,
             'created_at': compact.created_at.isoformat(),
             'raw_imported_content': raw_content.raw_data if raw_content else None

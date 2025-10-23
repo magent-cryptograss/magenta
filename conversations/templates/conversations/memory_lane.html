@@ -1013,7 +1013,7 @@
                             <tr id="${msgId}" onclick="toggleRow('${compact.id}')" data-message-id="${compact.id}" style="cursor: pointer; background: #3a1a1a;">
                                 <td class="expand-icon">►</td>
                                 <td colspan="8" style="padding-left: 30px; color: #d4a574;">
-                                    📋 <strong>${compact.summary || '(no summary)'}</strong><br>
+                                    📋 <strong>(compact action)</strong><br>
                                     <span style="font-size: 10px; color: #858585;">
                                         Boundary: ${boundaryPreview} ·
                                         Trigger: ${compact.compact_trigger || 'unknown'} ·
@@ -1214,7 +1214,7 @@
             // Special rendering for CompactingAction pseudo-messages
             if (m.message_type === 'CompactingAction') {
                 const orphanedIndicator = m.is_orphaned ? ' (orphaned)' : '';
-                const preview = `📋 COMPACTING: ${m.summary || '(no summary)'}`;
+                const preview = `📋 COMPACTING: (compact action)`;
                 const uuid = m.id ? m.id.substring(0, 8) : '';
                 const rowNumDisplay = rowNumber !== null ? rowNumber : '';
 
@@ -1257,22 +1257,9 @@
             const typeMarker = m.message_type === 'ToolUse' ? '<span title="Tool use">🔧</span> ' :
                              m.message_type === 'ToolResult' ? '<span title="Tool result">✓</span> ' : '';
 
-            // Handle command content specially
-            let preview = '';
-            if (m.content && typeof m.content === 'object') {
-                if (m.content.type === 'meta_caveat') {
-                    preview = '⚠️ Caveat: System-generated messages below';
-                } else if (m.content.type === 'slash_command') {
-                    preview = `🔧 Command: ${m.content.command_name}`;
-                } else if (m.content.type === 'command_output') {
-                    const stdout = m.content.stdout || '';
-                    preview = `📤 Output: ${stdout.length > 50 ? stdout.substring(0, 50) + '...' : stdout}`;
-                } else {
-                    preview = JSON.stringify(m.content).substring(0, 200);
-                }
-            } else if (m.content) {
-                preview = m.content.length > 200 ? m.content.substring(0, 200) + '...' : m.content;
-            }
+            // Parse content for display
+            const parsedContent = parseContentForDisplay(m.content);
+            const preview = parsedContent.length > 200 ? parsedContent.substring(0, 200) + '...' : parsedContent;
 
             const indentClass = ''; // Removed indent since we removed hierarchy columns
             const uuid = m.id ? m.id.substring(0, 8) : '';
@@ -1423,12 +1410,12 @@
                     if (message.message_type === 'CompactingAction') {
                         expandedContent += `<div style="font-size: 12px; color: ${noteHeaderColor}; margin-bottom: 8px;">`;
                         expandedContent += `<strong>COMPACTING ACTION</strong><br>`;
-                        expandedContent += `Summary: ${escapeHtml(message.summary || '(no summary)')}<br>`;
+                        expandedContent += `Summary: (compact action)<br>`;
                         expandedContent += `Trigger: ${message.compact_trigger || 'unknown'}<br>`;
                         if (message.pre_compact_tokens) {
                             expandedContent += `Pre-compact tokens: ${message.pre_compact_tokens.toLocaleString()}<br>`;
                         }
-                        expandedContent += `Leaf message (last before compact): ${message.compact_boundary_message_id}<br>`;
+                        expandedContent += `Leaf message (last before compact): ${message.ending_message_id}<br>`;
                         if (message.is_orphaned) {
                             expandedContent += `<span style="color: #ce9178;">Status: Orphaned (context heap not yet linked)</span><br>`;
                         } else {
@@ -1477,10 +1464,24 @@
 
                     // Show content (skip for CompactingAction which doesn't have content field)
                     if (message.message_type !== 'CompactingAction' && message.content) {
-                        const contentStr = typeof message.content === 'string'
+                        // Parse content - but for expanded view, show both parsed and raw if different
+                        const parsedContent = parseContentForDisplay(message.content);
+                        const rawContent = typeof message.content === 'string'
                             ? message.content
                             : JSON.stringify(message.content, null, 2);
-                        expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(contentStr)}</div>`;
+
+                        // If parsed is different from raw (meaning it's structured), show both
+                        if (parsedContent !== rawContent && typeof message.content === 'object') {
+                            expandedContent += `<div style="margin-bottom: 10px;">`;
+                            expandedContent += `<div style="color: ${noteHeaderColor}; font-size: 11px; margin-bottom: 4px;">Parsed content:</div>`;
+                            expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(parsedContent)}</div>`;
+                            expandedContent += `<div style="color: ${noteHeaderColor}; font-size: 11px; margin-bottom: 4px;">Raw structure:</div>`;
+                            expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; opacity: 0.7;">${escapeHtml(rawContent)}</div>`;
+                            expandedContent += `</div>`;
+                        } else {
+                            // Just show content as-is if it's simple
+                            expandedContent += `<div style="white-space: pre-wrap; font-family: monospace; margin-bottom: 10px;">${escapeHtml(parsedContent)}</div>`;
+                        }
                     }
 
                     // Show raw imported content button if available (skip for CompactingAction - already shown above)
@@ -1531,6 +1532,90 @@
                 div.style.display = 'none';
                 button.textContent = 'Show Raw JSONL';
             }
+        }
+
+        function parseContentForDisplay(content) {
+            // Parse message content intelligently for display
+            // Plain string - return as-is
+            if (typeof content === 'string') {
+                return content;
+            }
+
+            // Not an object - convert to string
+            if (typeof content !== 'object' || content === null) {
+                return String(content);
+            }
+
+            // Dict with 'text' key - extract the text
+            if ('text' in content) {
+                return content.text;
+            }
+
+            // Meta command pattern
+            if (content.is_meta) {
+                const metaType = content.type || 'unknown';
+                if (metaType === 'meta_caveat') {
+                    return `[Caveat: ${content.text || ''}]`;
+                } else if (metaType === 'slash_command') {
+                    const cmdName = content.command_name || '';
+                    const cmdArgs = content.command_args || '';
+                    return `[Command: ${cmdName} ${cmdArgs}]`.trim();
+                } else if (metaType === 'command_output') {
+                    const stdout = content.stdout || '';
+                    return `[Output: ${stdout.length > 100 ? stdout.substring(0, 100) + '...' : stdout}]`;
+                }
+            }
+
+            // Tool use pattern
+            if ('tool_name' in content) {
+                return `[Tool: ${content.tool_name}]`;
+            }
+
+            // Preamble pattern (tool use with preamble, thought-out response)
+            if ('preamble' in content && Array.isArray(content.preamble)) {
+                const preambleParts = [];
+                for (const item of content.preamble) {
+                    if (typeof item === 'object' && item !== null) {
+                        if (item.type === 'thinking') {
+                            const thinking = item.thinking || '';
+                            preambleParts.push(`[Thinking: ${thinking.substring(0, 50)}...]`);
+                        } else if (item.type === 'text') {
+                            preambleParts.push(item.text || '');
+                        }
+                    }
+                }
+
+                const mainText = content.text || '';
+                if (mainText) {
+                    preambleParts.push(mainText);
+                }
+
+                return preambleParts.join(' ');
+            }
+
+            // List/array - extract text from each item
+            if (Array.isArray(content)) {
+                const textParts = [];
+                for (const item of content) {
+                    if (typeof item === 'object' && item !== null) {
+                        if (item.type === 'text') {
+                            textParts.push(item.text || '');
+                        } else if (item.type === 'thinking') {
+                            const thinking = item.thinking || '';
+                            textParts.push(`[Thinking: ${thinking.substring(0, 50)}...]`);
+                        } else if (item.type === 'tool_use') {
+                            textParts.push(`[Tool: ${item.name || 'unknown'}]`);
+                        }
+                    } else if (typeof item === 'string') {
+                        textParts.push(item);
+                    }
+                }
+
+                return textParts.length > 0 ? textParts.join(' ') : JSON.stringify(content);
+            }
+
+            // Fall back to JSON representation for unrecognized dict structure
+            return JSON.stringify(content);
         }
 
         function escapeHtml(text) {
