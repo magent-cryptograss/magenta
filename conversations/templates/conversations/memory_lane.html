@@ -134,6 +134,18 @@
             background: #fff4e8;
             font-style: italic;
         }
+        tr.tool {
+            background: #2a2531;
+        }
+        body.light-mode tr.tool {
+            background: #f5e8ff;
+        }
+        tr.system {
+            background: #252a2e;
+        }
+        body.light-mode tr.system {
+            background: #e8f0f8;
+        }
         tr.child {
             opacity: 0.85;
         }
@@ -1250,8 +1262,17 @@
                 rowClass = 'justin';
             } else if (m.sender === 'magent') {
                 rowClass = 'magent';
+            } else if (m.sender_type === 'tool') {
+                rowClass = 'tool';
+            } else if (m.sender_type === 'system') {
+                rowClass = 'system';
             }
             if (depth > 0) rowClass += ' child';
+
+            // Participant type icons
+            const participantIcon = m.sender_type === 'tool' ? '<span title="Tool">🔧</span> ' :
+                                   m.sender_type === 'system' ? '<span title="System">📟</span> ' :
+                                   m.sender_type === 'oracle' ? '<span title="Oracle">🔮</span> ' : '';
 
             const thinkingIcon = m.message_type === 'Thought' ? '<span title="Thought">💭</span> ' : '';
             const typeMarker = m.message_type === 'ToolUse' ? '<span title="Tool use">🔧</span> ' :
@@ -1264,21 +1285,30 @@
             const indentClass = ''; // Removed indent since we removed hierarchy columns
             const uuid = m.id ? m.id.substring(0, 8) : '';
 
-            // For Thought/ToolUse/ToolResult, show tool info instead of recipients
+            // Display sender and recipients
             let senderDisplay = m.sender;
             let recipientsDisplay;
 
-            if (m.message_type === 'ToolUse') {
-                recipientsDisplay = m.tool_name || '(tool)';
-            } else if (m.message_type === 'ToolResult') {
-                // Show as "ToolName → magent"
-                senderDisplay = m.tool_name || '(tool)';
-                recipientsDisplay = 'magent';
-            } else if (m.message_type === 'Thought') {
-                recipientsDisplay = '(thinking)';
-            } else {
+            // DEBUG: Log what we're receiving
+            console.log(`Msg ${m.id ? m.id.substring(0,8) : 'no-id'}: recipients=`, m.recipients, 'type=', typeof m.recipients, 'length=', m.recipients?.length, 'isArray=', Array.isArray(m.recipients));
+
+            // Use actual recipients from database
+            if (m.recipients && m.recipients.length > 0) {
                 recipientsDisplay = Array.isArray(m.recipients) ? m.recipients.join(', ') : m.recipients;
+            } else {
+                // Fallback for messages without recipients
+                if (m.message_type === 'ToolUse') {
+                    recipientsDisplay = m.tool_name || '(tool)';
+                } else if (m.message_type === 'ToolResult') {
+                    recipientsDisplay = 'magent';
+                } else if (m.message_type === 'Thought') {
+                    recipientsDisplay = '(thinking)';
+                } else {
+                    recipientsDisplay = '';
+                }
             }
+
+            console.log(`  → recipientsDisplay set to: "${recipientsDisplay}"`);
 
             const sourceFile = m.source_file ? (m.source_file.length > 15 ? '...' + m.source_file.substring(m.source_file.length - 12) : m.source_file) : '';
             const rowNumDisplay = rowNumber !== null ? rowNumber : '';
@@ -1300,7 +1330,7 @@
                     <td class="blockheight">${blockheight}</td>
                     <td class="num">${m.message_number || '?'}</td>
                     <td class="importance">${m.message_type}</td>
-                    <td class="from ${indentClass}">${thinkingIcon}${typeMarker}${senderDisplay}</td>
+                    <td class="from ${indentClass}">${participantIcon}${thinkingIcon}${typeMarker}${senderDisplay}</td>
                     <td class="arrow">→</td>
                     <td class="to">${recipientsDisplay}</td>
                     <td class="content">${noteIcons}${escapeHtml(preview)}</td>

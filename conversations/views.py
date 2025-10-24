@@ -166,7 +166,7 @@ def all_messages(request):
                     compacting_action_by_leaf_uuid[action.looking_for_ending_message] = action
 
             # Get messages for this heap
-            messages = heap.messages.select_related('thought', 'tooluse', 'toolresult').order_by('message_number')
+            messages = heap.messages.select_related('thought', 'tooluse', 'toolresult').prefetch_related('recipients').order_by('message_number')
             for msg in messages:
                 # Get the actual polymorphic instance
                 if hasattr(msg, 'thought'):
@@ -189,7 +189,9 @@ def all_messages(request):
                     'message_number': actual_msg.message_number,
                     'message_type': actual_msg.__class__.__name__,
                     'sender': msg.sender.name,
+                    'sender_type': msg.sender.participant_type,
                     'recipients': [r.name for r in msg.recipients.all()],
+                    'recipient_types': [r.participant_type for r in msg.recipients.all()],
                     'content': msg.content,  # JSONField - keep as dict/str, JsonResponse will serialize properly
                     'timestamp': msg.timestamp,
                     'eth_blockheight': msg.eth_blockheight,

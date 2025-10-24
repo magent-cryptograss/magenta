@@ -20,26 +20,56 @@ import uuid, json, hashlib
 
 
 # ============================================================================
-# Thinking Entity Model
+# Conversation Participant Models
 # ============================================================================
 
-class ThinkingEntity(models.Model):
+class ConversationParticipant(models.Model):
     """
-    A thinking entity - human or AI.
+    Base model for anyone/anything that can send or receive messages.
 
-    Most details about an entity come from inward-pointing relationships
+    Participants include:
+    - Thinking entities (humans, AI) - have deliberation and intention
+    - Tools (slash commands, APIs) - just I/O machines
+    - Oracles (blockchain data sources) - provide information
+    - System components (compilers, linters, stdout) - automated responses
+
+    Most details about a participant come from inward-pointing relationships
     from other models (messages sent, messages received, etc).
     """
 
+    class ParticipantType(models.TextChoices):
+        HUMAN = 'human', 'Human'
+        AI = 'ai', 'AI'
+        TOOL = 'tool', 'Tool'
+        ORACLE = 'oracle', 'Oracle'
+        SYSTEM = 'system', 'System'
+
     name = models.CharField(max_length=50, unique=True, primary_key=True)
+    participant_type = models.CharField(
+        max_length=20,
+        choices=ParticipantType.choices,
+        default=ParticipantType.HUMAN
+    )
+
+    class Meta:
+        db_table = 'conversation_participants'
+
+    def __str__(self):
+        return self.name
+
+
+class ThinkingEntity(ConversationParticipant):
+    """
+    A thinking entity - human or AI.
+
+    Distinguished from other participants by having deliberation and intention.
+    """
+
     is_biological_human = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'thinking_entities'
         verbose_name_plural = 'thinking entities'
-
-    def __str__(self):
-        return self.name
 
 
 # ============================================================================
@@ -239,8 +269,8 @@ class Message(models.Model):
     looking_for_parent_id = models.UUIDField(null=True, blank=True, help_text='UUID of parent that was not found during import')
 
     # Participants
-    sender = models.ForeignKey(ThinkingEntity, models.CASCADE, related_name='sent_messages')
-    recipients = models.ManyToManyField(ThinkingEntity, related_name='received_messages')
+    sender = models.ForeignKey(ConversationParticipant, models.CASCADE, related_name='sent_messages')
+    recipients = models.ManyToManyField(ConversationParticipant, related_name='received_messages')
 
     # Session context
     session_id = models.UUIDField(null=True, blank=True)
@@ -350,14 +380,23 @@ class Message(models.Model):
             message = event['message']
             role = message['role']
             content = message['content']
-            
-            # Sanity check - what does it mean if content has more than one member?
-            if len(content) > 1:
-                if type(content) == str:
+
+            # Check if content is a string (command messages, uncertain messages)
+            if type(content) == str:
+                # Check if it's a command pattern
+                if content.startswith("<command"):
+                    event_type = "command"
+                elif content.startswith("<local-command-stdout"):
+                    event_type = "command result - success"
+                else:
                     # It seems like this scenario can happen when a message wasn't successfully sent
                     # due to a client error or network problem.
                     event_type = "uncertain message"
-                elif content[-1]['type'] == "tool_use":
+                return event_type, event
+
+            # Content is an array - check if it has multiple items
+            if len(content) > 1:
+                if content[-1]['type'] == "tool_use":
                     # This is a tool use with arbitrary amounts of thinking/text preamble before it
                     event_type = "tool use with preamble"
                 elif content[-1]['type'] == "text":
@@ -366,7 +405,7 @@ class Message(models.Model):
                 else:
                     raise RuntimeError("Content has more than one member.  Not sure what to do.")
                 return event_type, event
-            
+
             first_content = content[0]
 
             if first_content['type'] == 'text':
