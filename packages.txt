@@ -1,5 +1,6 @@
 curl
 git
+jq
 nodejs
 npm
 python3
@@ -10,7 +11,6 @@ nano
 ripgrep
 npm
 openssh-server
-postgresql
 postgresql-client
 postgresql-contrib
 cron
@@ -33,3 +33,5 @@ ca-certificates
 gnupg
 sudo
 tree
+netcat-openbsd
+iproute2
