@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(Path(__file__).resolve().parent.parent / '.env')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,11 +81,11 @@ WSGI_APPLICATION = 'memory_viewer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'magenta_memories',
-        'USER': 'magent',
-        'PASSWORD': '',  # Trust authentication on ai-sandbox
-        'HOST': 'ai-sandbox',
-        'PORT': '5432',
+        'NAME': os.getenv('POSTGRES_DB', 'magenta_memory'),
+        'USER': os.getenv('POSTGRES_USER', 'magent'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'changeme'),
+        'HOST': 'postgres',
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 
