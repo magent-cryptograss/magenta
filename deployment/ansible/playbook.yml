@@ -1,0 +1,48 @@
+---
+- name: Setup Magenta Multi-User Development Environment
+  hosts: hunter
+  become: yes
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Ensure base directory exists
+      file:
+        path: "{{ base_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Include Security role (SSH hardening, fail2ban, firewall)
+      include_role:
+        name: security
+
+    - name: Include Docker role
+      include_role:
+        name: docker
+
+    - name: Build magenta-arthel base image
+      include_role:
+        name: build-image
+
+    - name: Include PostgreSQL role
+      include_role:
+        name: postgres
+
+    - name: Include data-migration role
+      include_role:
+        name: data-migration
+
+    - name: Include Caddy role for reverse proxy
+      include_role:
+        name: caddy
+
+    - name: Include SSH router role
+      include_role:
+        name: ssh-router
+
+    - name: Include user-instance role for each user
+      include_role:
+        name: user-instance
+      loop: "{{ users }}"
+      loop_control:
+        loop_var: user

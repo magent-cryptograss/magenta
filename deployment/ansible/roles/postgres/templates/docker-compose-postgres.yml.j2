@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: magenta-postgres
+    environment:
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_USER: magent
+    volumes:
+      - {{ base_dir }}/postgres-data:/var/lib/postgresql/data
+    networks:
+      - magenta-net
+    restart: unless-stopped
+
+networks:
+  magenta-net:
+    name: magenta-net
+    driver: bridge

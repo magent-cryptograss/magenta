@@ -1,0 +1,90 @@
+version: '3.8'
+
+# Local development setup - single user (justin) with all services
+# For hunter deployment, use docker-compose.services.yml instead
+
+services:
+  # Local development container with code-server
+  dev-workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: magenta-dev
+    ports:
+      - "2222:22"         # SSH
+      - "8080:8080"       # code-server
+      - "4000:4000"       # arthel dev server (justinholmes.com)
+      - "4050:4050"       # arthel dev server (cryptograss.live)
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - magent-home:/home/magent
+    environment:
+      - GH_TOKEN=${GH_TOKEN}
+    networks:
+      - magenta-net
+    depends_on:
+      - postgres
+
+  # PostgreSQL database
+  postgres:
+    image: postgres:16
+    container_name: magenta-postgres-local
+    environment:
+      POSTGRES_DB: magenta_memory
+      POSTGRES_USER: magent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - magenta-net
+
+  # Memory Lane UI
+  memory-lane:
+    build:
+      context: .
+      dockerfile: Dockerfile.services
+    container_name: memory-lane-local
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=magenta_memory
+      - POSTGRES_USER=magent
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - DJANGO_SETTINGS_MODULE=memory_viewer.settings
+    ports:
+      - "3000:3000"
+    networks:
+      - magenta-net
+    command: python manage.py runserver 0.0.0.0:3000
+
+  # Optional: PgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-local
+    environment:
+      PGADMIN_DEFAULT_EMAIL: justin@justinholmes.com
+      PGADMIN_DEFAULT_PASSWORD: cryptograss
+      PGADMIN_LISTEN_PORT: 80
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    ports:
+      - "8081:80"
+    volumes:
+      - ../ai_sandbox_things/pgadmin-servers.json:/pgadmin4/servers.json:ro
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - magenta-net
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-data:
+  pgadmin-data:
+  magent-home:
+
+networks:
+  magenta-net:
+    driver: bridge

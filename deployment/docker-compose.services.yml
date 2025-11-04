@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  magenta-postgres:
+    image: postgres:16
+    container_name: magenta-postgres
+    environment:
+      POSTGRES_DB: magenta_memory
+      POSTGRES_USER: magent
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  memory-lane:
+    build:
+      context: .
+      dockerfile: Dockerfile.services
+    container_name: memory-lane
+    depends_on:
+      - magenta-postgres
+    environment:
+      - POSTGRES_HOST=magenta-postgres
+      - POSTGRES_DB=magenta_memory
+      - POSTGRES_USER=magent
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - DJANGO_SETTINGS_MODULE=memory_viewer.settings
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    command: gunicorn --bind 0.0.0.0:3000 --workers 2 --access-logfile - memory_viewer.wsgi:application
+
+  watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile.services
+    container_name: watcher
+    depends_on:
+      - magenta-postgres
+    environment:
+      - POSTGRES_HOST=magenta-postgres
+      - POSTGRES_DB=magenta_memory
+      - POSTGRES_USER=magent
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - DJANGO_SETTINGS_MODULE=memory_viewer.settings
+      # Colon-separated list of directories to watch
+      - CLAUDE_LOGS_DIR=/project-logs/justin:/project-logs/rj:/project-logs/skyler
+      - WATCHER_ERA_NAME=Live Conversations
+    volumes:
+      # Mount all users' Claude Code logs
+      - /opt/magenta/justin/.claude/projects:/project-logs/justin:ro
+      - /opt/magenta/rj/.claude/projects:/project-logs/rj:ro
+      - /opt/magenta/skyler/.claude/projects:/project-logs/skyler:ro
+      - watcher-logs:/app/logs
+    restart: unless-stopped
+    command: python watcher/conversation_watcher.py
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.services
+    container_name: mcp-server
+    depends_on:
+      - magenta-postgres
+    environment:
+      - POSTGRES_HOST=magenta-postgres
+      - POSTGRES_DB=magenta_memory
+      - POSTGRES_USER=magent
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - DJANGO_SETTINGS_MODULE=memory_viewer.settings
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    command: python manage.py run_mcp_server
+
+volumes:
+  postgres-data:
+  watcher-logs:

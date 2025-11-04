@@ -1,0 +1,35 @@
+---
+- name: Create SSH router user
+  user:
+    name: sshrouter
+    shell: /bin/bash
+    create_home: yes
+    state: present
+
+- name: Create .ssh directory for router
+  file:
+    path: /home/sshrouter/.ssh
+    state: directory
+    owner: sshrouter
+    group: sshrouter
+    mode: '0700'
+
+- name: Create SSH routing script
+  template:
+    src: route-ssh.sh.j2
+    dest: /usr/local/bin/route-ssh
+    mode: '0755'
+
+- name: Generate authorized_keys for router
+  template:
+    src: authorized_keys.j2
+    dest: /home/sshrouter/.ssh/authorized_keys
+    owner: sshrouter
+    group: sshrouter
+    mode: '0600'
+
+- name: Add sshrouter to docker group for container access
+  user:
+    name: sshrouter
+    groups: docker
+    append: yes

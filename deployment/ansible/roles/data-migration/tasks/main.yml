@@ -1,0 +1,46 @@
+---
+# Data migration - restore database from provided dump file
+# Usage: ansible-playbook ... -e "db_dump_file=/path/to/backup.dump"
+
+- name: Fail if database dump file was not provided
+  fail:
+    msg: "Database dump file is required. Run with: ansible-playbook ... -e 'db_dump_file=/path/to/backup.dump'"
+  when: db_dump_file is not defined
+
+- name: Copy database dump to hunter
+  copy:
+    src: "{{ db_dump_file }}"
+    dest: /tmp/magenta_memory.dump
+    mode: '0600'
+
+- name: Wait for postgres container to be ready
+  shell: docker exec magenta-postgres pg_isready -U magent
+  register: pg_ready
+  until: pg_ready.rc == 0
+  retries: 30
+  delay: 2
+
+- name: Check if database already has data
+  shell: docker exec magenta-postgres psql -U magent -d magenta_memory -t -c "SELECT COUNT(*) FROM conversations_message;"
+  register: existing_data
+  ignore_errors: yes
+
+- name: Restore database dump (only if database is empty)
+  shell: |
+    docker cp /tmp/magenta_memory.dump magenta-postgres:/tmp/
+    docker exec magenta-postgres pg_restore -U magent -d magenta_memory -c -F c /tmp/magenta_memory.dump
+  when: existing_data.stdout | trim | int == 0 or existing_data.failed
+  register: restore_result
+  ignore_errors: yes
+
+- name: Display migration results
+  debug:
+    msg: |
+      Database migration status:
+      - Existing messages: {{ existing_data.stdout | trim if not existing_data.failed else 'N/A' }}
+      - Restore result: {{ 'SUCCESS' if (restore_result is defined and restore_result.rc is defined and restore_result.rc == 0) else 'SKIPPED (data already exists)' if existing_data.stdout | default('') | trim | int > 0 else 'FAILED' if restore_result is defined else 'SKIPPED' }}
+
+- name: Clean up dump file on hunter
+  file:
+    path: /tmp/magenta_memory.dump
+    state: absent

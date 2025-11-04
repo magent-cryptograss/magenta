@@ -1,0 +1,10 @@
+---
+# PostgreSQL password for shared database
+vault_postgres_password: "!NsBkPqFB5CzDq@9"
+
+# Code-server password for Justin
+vault_justin_password: "low-priority-password"
+
+# Passwords for other users (add when ready)
+# vault_rj_password: "change-me-rj"
+# vault_skyler_password: "change-me-skyler"

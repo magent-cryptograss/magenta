@@ -1,0 +1,15 @@
+version: '3.8'
+
+# This builds the shared base image that all user instances will use
+# Run once: docker-compose -f docker-compose-build.yml build
+
+services:
+  magenta-base:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ARTHEL_REPO_URL: https://github.com/jMyles/arthel.git
+    image: magenta-arthel:latest
+    # We don't actually run this, just build the image
+    command: /bin/true

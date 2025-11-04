@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  {{ user.name }}-arthel:
+    image: magenta-arthel:latest  # Uses pre-built image, no build step
+    container_name: {{ user.name }}-arthel
+    ports:
+      - "{{ user.ssh_port }}:22"
+      # Port range: {{ user.port_range_start }}-{{ user.port_range_start + 9 }}
+      # Maps to container ports 4000-4009
+      - "{{ user.port_range_start }}-{{ user.port_range_start + 9 }}:4000-4009"
+    volumes:
+      - {{ base_dir }}/{{ user.name }}/.claude:/home/magent/.claude
+      - {{ base_dir }}/{{ user.name }}/.ssh:/home/magent/.ssh:ro
+      - {{ base_dir }}/{{ user.name }}/.gitconfig:/home/magent/.gitconfig:ro
+      - {{ base_dir }}/{{ user.name }}/.config/gh:/home/magent/.config/gh
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Mount Claude Code project logs for live conversation watching
+      - /home/{{ user.name }}/.claude/projects/-home-{{ user.name }}-projects-JustinHolmesMusic-arthel:/home/magent/.claude/project-logs:ro
+    networks:
+      - magenta-net
+    environment:
+      - DEVELOPER_NAME={{ user.name }}
+      - DEVELOPER_FULL_NAME={{ user.full_name }}
+      - DEVELOPER_EMAIL={{ user.email }}
+      - DEVELOPER_GITHUB={{ user.github_username }}
+      - POSTGRES_HOST=magenta-postgres
+      - POSTGRES_DB={{ postgres_db }}
+      - POSTGRES_USER=magent
+      - POSTGRES_PASSWORD={{ postgres_password }}
+      - CODE_SERVER_PASSWORD={{ user.code_server_password }}
+      - GH_TOKEN={{ user.github_token | default('') }}
+      - DJANGO_SECRET_KEY={{ user.django_secret_key | default('') }}
+    restart: unless-stopped
+
+networks:
+  magenta-net:
+    external: true
+    name: magenta-net
