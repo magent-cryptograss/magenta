@@ -28,7 +28,7 @@
 - name: Restore database dump (only if database is empty)
   shell: |
     docker cp /tmp/magenta_memory.dump magenta-postgres:/tmp/
-    docker exec magenta-postgres pg_restore -U magent -d magenta_memory -c -F c /tmp/magenta_memory.dump
+    docker exec magenta-postgres pg_restore -U magent -d magenta_memory --if-exists -c -F c /tmp/magenta_memory.dump
   when: existing_data.stdout | trim | int == 0 or existing_data.failed
   register: restore_result
   ignore_errors: yes
