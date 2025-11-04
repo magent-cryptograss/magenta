@@ -12,6 +12,7 @@ from conversations.models import (
     ConversationParticipant,
     CompactingAction
 )
+from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
 
 
 def get_or_create_participant(name, participant_type):
@@ -132,11 +133,6 @@ def extract_timestamp(event):
 
 def import_line_from_claude_code_v2(line, era, filename):
         
-        # If we find messages that "reunite" a CompactingAction or another message, we'll track that here and return it.
-        # Most often, this will be only one member, but it's possible that we'll find
-        # a single message that reunites a CompactingAction and a regular message.
-        orphans_reunited = set()
-
         # Get entities
         # TODO: #12
         justin = ThinkingEntity.objects.get(name='justin')
@@ -144,19 +140,15 @@ def import_line_from_claude_code_v2(line, era, filename):
 
         event_type, event = Message.detect_event_type_claude_code_v2(line)
 
+        if event_type == EVENT_TYPE_WE_DO_NOT_HANDLE_YET:
+            return EVENT_TYPE_WE_DO_NOT_HANDLE_YET, False
+
         # Extract timestamp (common to all message types)
         timestamp = extract_timestamp(event)
 
         if event_type == "summary":
-                try:
-                    if event["summary"] == 'Cryptograss Ticket Stub Claim Page & Plaque Development':
-                        assert True
-                except KeyError:
-                    pass
-
-                summary, created = handle_summary(event, filename)
-
-                return summary, created, orphans_reunited
+                compacting_action, created = handle_summary(event, filename)
+                return compacting_action, created
 
         if event_type == "compact_boundary":
             # Extract compact metadata
@@ -165,20 +157,14 @@ def import_line_from_claude_code_v2(line, era, filename):
             logical_parent_uuid = event.get('logicalParentUuid')
 
             # Create or update CompactingAction
-            # TODO: Does this close a heap?
-            try:
-                # Did we already make a CompactingAction from a summary?
-                CompactingAction.objects.get(ending_message_id=boundary_uuid)
-                assert False
-            except CompactingAction.DoesNotExist:
-                pass
-            summary, created = CompactingAction.objects.get_or_create_by_id_or_message(
+            # TODO: Does this close a heap?  TODO: This is probably resolved by the logic of the caller.  Is it?
+            compacting_action, created = CompactingAction.objects.get_or_create_by_id_or_message(
                 id_or_message=logical_parent_uuid,
                 compact_trigger = compact_metadata.get('trigger'),
                 pre_compact_tokens = compact_metadata.get('preTokens'),
             )
 
-            return summary, created, orphans_reunited
+            return compacting_action, created
 
         # Get UUID
         msg_uuid = uuid_lib.UUID(event['uuid'])
@@ -273,6 +259,10 @@ def import_line_from_claude_code_v2(line, era, filename):
 
         elif event_type == "thought-out response":
             if event['type'] == "assistant" and event['userType'] == "external":
+                # Earlier format - with type as assistant?
+                sender = magent
+            elif event['type'] == "user" and event['userType'] == "external":
+                # TODO: What's different here that caused this to be "user" - still seems to be a thought and response.
                 sender = magent
             else:
                 assert False
@@ -459,7 +449,12 @@ def import_line_from_claude_code_v2(line, era, filename):
             # Add recipient
             if created:
                 message.recipients.add(recipient)
-
+        elif event_type == 'file-history-snapshot':
+            pass # TODO: Preserve this somehow.
+            return EVENT_TYPE_WE_DO_NOT_HANDLE_YET, False
+        elif event_type == 'local_command':
+            pass # TODO: Preserve this somehow.
+            return EVENT_TYPE_WE_DO_NOT_HANDLE_YET, False
         else:
             assert False
             self.stdout.write(self.style.WARNING(f'Unknown event type: {event_type}'))
@@ -468,29 +463,4 @@ def import_line_from_claude_code_v2(line, era, filename):
         if apparent_parent_id is not None:
             message.set_parent_id(apparent_parent_id)
 
-        # Add message to heap if it was just created and we have a heap
-        #########
-        # TODO: Can't we move this to the outside of the function?
-        ##########
-        # if not message.context_heap:
-        #     # if heap:
-        #     #     heap.add_event(message)
-        #     # elif message.is_continuation_message:
-        #     #     # TODO: Are we leaving the previous heap unclosed (ie, with no matching CompactingAction)?
-        #     #     heap = ContextHeap.objects.create(era=era, type=ContextHeapType.POST_COMPACTING)
-        #     #     heap.add_event(message)
-        #     # elif message.parent is None:
-        #     #     # Seems like a freshy?
-        #     #     heap = ContextHeap.objects.create(era=era)
-        #     #     heap.add_event(message)
-        #     # elif message.parent.context_heap:
-        #     #     message.context_heap = message.parent.context_heap
-        #     # else:
-        #         assert False # What other situations are heapless?
-        # if not message.context_heap:
-        #     assert False
-        #################
-
-
-
-        return message, created, orphans_reunited
+        return message, created

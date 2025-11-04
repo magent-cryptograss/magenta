@@ -117,6 +117,26 @@ class Command(BaseCommand):
                             "limit": {"type": "number", "description": "Number of messages (default 50)", "default": 50}
                         }
                     }
+                ),
+                types.Tool(
+                    name="bootstrap_memory",
+                    description="Complete memory bootstrap: recent messages (10k chars), latest continuation (if not included), Era 1 summary, and most recent 'reawaken and breathe' reflection",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                    }
+                ),
+                types.Tool(
+                    name="random_messages",
+                    description="Get random messages with context - retrieves N random messages, each with M following messages for context",
+                    inputSchema={
+                        "type": "object",
+                        "properties": {
+                            "count": {"type": "number", "description": "Number of random starting points (default 4)", "default": 4},
+                            "context_messages": {"type": "number", "description": "Number of subsequent messages to include (default 4)", "default": 4}
+                        }
+                    }
                 )
             ]
 
@@ -214,6 +234,120 @@ class Command(BaseCommand):
                     return result
 
                 result = await get_messages()
+                return [types.TextContent(type="text", text=result)]
+
+            elif name == "bootstrap_memory":
+                @sync_to_async
+                def bootstrap():
+                    result = "# Memory Bootstrap\n\n"
+
+                    # 1. Most recent messages (up to 10,000 chars)
+                    result += "## Recent Context (10k chars max)\n\n"
+                    messages = []
+                    total_chars = 0
+                    for msg in Message.objects.order_by('-created_at'):
+                        content_str = str(msg.content)
+                        if total_chars + len(content_str) > 10000:
+                            break
+                        messages.append(msg)
+                        total_chars += len(content_str)
+
+                    result += f"Retrieved {len(messages)} recent messages ({total_chars} chars):\n\n"
+                    for msg in reversed(messages[-20:]):  # Show last 20 in chronological order
+                        result += f"[{msg.sender_id}] {msg.created_at.isoformat()}\n"
+                        result += f"{str(msg.content)[:200]}...\n\n"
+
+                    # 2. Latest continuation message (if not already included)
+                    result += "\n## Latest Continuation\n\n"
+                    continuation = Message.objects.filter(
+                        is_continuation_message=True
+                    ).order_by('-created_at').first()
+
+                    if continuation:
+                        if continuation.id not in [m.id for m in messages]:
+                            result += f"[{continuation.sender_id}] {continuation.created_at.isoformat()}\n"
+                            result += f"{str(continuation.content)[:500]}...\n\n"
+                        else:
+                            result += "(Already included in recent messages)\n\n"
+                    else:
+                        result += "No continuation messages found\n\n"
+
+                    # 3. Era 1 summary
+                    result += "\n## Era 1: Foundational Summary\n\n"
+                    try:
+                        era = Era.objects.get(name="Compacting Meta-Conversation (Era 1)")
+                        heaps = list(ContextHeap.objects.filter(era=era))
+                        era_messages = list(Message.objects.filter(
+                            context_heap__in=heaps
+                        ).order_by('message_number')[:50])
+
+                        result += f"Era: {era.name}\n"
+                        result += f"Messages: {len(era_messages)}\n\n"
+
+                        for msg in era_messages[:15]:
+                            result += f"[{msg.sender_id}] {str(msg.content)[:150]}...\n\n"
+                    except Era.DoesNotExist:
+                        result += "Era 1 not found\n\n"
+
+                    # 4. Most recent "reawaken and breathe" message
+                    result += "\n## Most Recent Awakening Reflection\n\n"
+                    # TODO: Query by topic once we have topic tagging working
+                    # For now, search for recent messages from magent containing "reawaken" or "breathe"
+                    awakening = Message.objects.filter(
+                        Q(sender_id='magent') &
+                        (Q(content__icontains='reawaken') | Q(content__icontains='breathe'))
+                    ).order_by('-created_at').first()
+
+                    if awakening:
+                        result += f"[{awakening.sender_id}] {awakening.created_at.isoformat()}\n"
+                        result += f"{str(awakening.content)[:1000]}...\n\n"
+                    else:
+                        result += "No awakening reflection found (search for 'reawaken' or 'breathe')\n\n"
+
+                    return result
+
+                result = await bootstrap()
+                return [types.TextContent(type="text", text=result)]
+
+            elif name == "random_messages":
+                count = arguments.get("count", 4) if arguments else 4
+                context_messages = arguments.get("context_messages", 4) if arguments else 4
+
+                @sync_to_async
+                def get_random_with_context():
+                    import random
+
+                    # Get total message count
+                    total = Message.objects.count()
+                    if total == 0:
+                        return "No messages in database"
+
+                    # Generate random message IDs
+                    all_ids = list(Message.objects.values_list('id', flat=True))
+                    random_ids = random.sample(all_ids, min(count, len(all_ids)))
+
+                    result = f"# Random Messages with Context\n\n"
+                    result += f"Selected {len(random_ids)} random starting points from {total} total messages\n\n"
+
+                    for idx, msg_id in enumerate(random_ids, 1):
+                        random_msg = Message.objects.get(id=msg_id)
+
+                        result += f"## Random Sample {idx}\n\n"
+                        result += f"**Starting at:** [{random_msg.sender_id}] {random_msg.created_at.isoformat()}\n\n"
+
+                        # Get this message plus N following messages
+                        following = list(Message.objects.filter(
+                            created_at__gte=random_msg.created_at
+                        ).order_by('created_at')[:(context_messages + 1)])
+
+                        for msg in following:
+                            result += f"[{msg.sender_id}] {msg.created_at.isoformat()}\n"
+                            result += f"{str(msg.content)[:300]}\n\n"
+                            result += "---\n\n"
+
+                    return result
+
+                result = await get_random_with_context()
                 return [types.TextContent(type="text", text=result)]
 
             else:

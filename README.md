@@ -1,8 +1,8 @@
 ```
 ███╗   ███╗ █████╗  ██████╗ ███████╗███╗   ██╗████████╗ █████╗
 ████╗ ████║██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██╔══██╗
-██╔████╔██║███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ███████║
-██║╚██╔╝██║██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██║
+██╔████╔██║███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ███████║  ██
+██║╚██╔╝██║██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██║  ██
 ██║ ╚═╝ ██║██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ██║  ██║
 ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝
 ```
@@ -173,10 +173,44 @@ Features:
 - Split windows nested under parent windows
 - Collapsible message threads
 - Message type indicators (thought, tool use, tool result)
+- **Real-time updates**: AJAX polling shows new messages as they arrive (3-second refresh)
+- **Active heap highlighting**: Orange border for heaps with messages < 300 blocks old
 - **Notes**: Annotations on Eras, Context Windows, or individual Messages
   - Clickable 📝 icons with hover tooltips
   - Modal popups for full note content
   - Attributed to the ThinkingEntity who wrote them
+
+### Live Conversation Watcher
+
+Real-time import of Claude Code conversations as they happen:
+
+```bash
+# Start the watcher
+cd magenta
+bash run_watcher.sh
+
+# Or with custom era name
+WATCHER_ERA_NAME="Live Conversations" bash run_watcher.sh
+```
+
+The watcher:
+- Monitors `~/.claude/project-logs/*.jsonl` for new messages
+- Imports messages in real-time as conversations occur
+- Assigns messages to context heaps automatically
+- Logs to `magenta/logs/watcher.log` with rotation (10MB max, 5 backups)
+- Saves unparseable content as `RawImportedContent` for analysis
+
+**Logs**:
+```bash
+# Watch live activity
+tail -f magenta/logs/watcher.log
+
+# Search for errors
+grep ERROR magenta/logs/watcher.log
+
+# See import counts
+grep "Processed.*new lines" magenta/logs/watcher.log
+```
 
 ## 🔒 Security
 

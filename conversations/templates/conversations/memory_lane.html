@@ -461,6 +461,8 @@
         </div>
         <div class="filters">
             <button class="theme-toggle" onclick="toggleTheme()">☀️ Light Mode</button>
+            <button id="autoRefreshBtn" onclick="toggleAutoRefresh()" style="background: #2a5a2a;">🔄 Auto-Refresh: ON</button>
+            <span id="newMessageIndicator" style="display: none; color: #4CAF50; font-weight: bold;">● New messages!</span>
             <input type="text" id="searchFilter" placeholder="Search content..." style="min-width: 200px;">
             <input type="text" id="uuidFilter" placeholder="Search UUID..." style="min-width: 200px;">
             <input type="number" id="minLengthFilter" placeholder="Min length" style="width: 100px;">
@@ -675,11 +677,12 @@
 
                 if (!eraCollapsed) {
                     // Recursive function to render a window and its child splits
-                    function renderWindow(window, depth = 0, parentIndent = 20) {
+                    function renderWindow(window, depth = 0, parentIndent = 20, heapIndex = null) {
                         const windowCollapsed = collapsedWindows.has(window.id);
                         const windowIcon = windowCollapsed ? '►' : '▼';
                         const childCount = window.child_heaps ? window.child_heaps.length : 0;
                         const childSuffix = childCount > 0 ? ` · ${childCount} splits` : '';
+                        const heapNumber = heapIndex !== null ? `Heap ${heapIndex} · ` : '';
 
                         // Build window note icons
                         let windowNoteIcons = '';
@@ -753,6 +756,18 @@
                             messagePreview = escapeHtml(messagePreview) + '...';
                         }
 
+                        // Check if this heap is active (has messages < 300 blocks old)
+                        const currentBlock = 23659305; // Updated periodically
+                        const activeThreshold = 300;
+                        let isActiveHeap = false;
+
+                        if (window.latest_blockheight) {
+                            const blockAge = currentBlock - window.latest_blockheight;
+                            isActiveHeap = blockAge < activeThreshold;
+                        }
+
+                        const activeStyle = isActiveHeap ? 'border-left: 3px solid #ff8800;' : '';
+
                         // Build compacting action display
                         let compactingInfo = '';
                         if (window.compacting_action) {
@@ -791,16 +806,16 @@
                         }
 
                         const headerRow = `
-                            <tr class="window-header" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
+                            <tr class="window-header ${isActiveHeap ? 'active-heap' : ''}" onclick="event.stopPropagation(); toggleWindow('${window.id}')" style="${activeStyle}">
                                 <td class="expand-icon" rowspan="2">${windowIcon}</td>
                                 <td colspan="7" style="padding: 4px 6px; padding-left: ${parentIndent}px; border-bottom: none;">
-                                    <div style="font-weight: bold;">${shortType} ${window.messages.length}${splitInfo} ${windowBlockheightRange}</div>
+                                    <div style="font-weight: bold;">${heapNumber}${shortType} ${window.messages.length}${splitInfo} ${windowBlockheightRange}</div>
                                     ${windowTimestamp ? `<div style="font-size: 10px; color: #858585; font-weight: normal;">${windowTimestamp}</div>` : ''}
                                     ${compactingInfo}
                                 </td>
                                 <td class="window-uuid" rowspan="2" style="padding: 6px; text-align: right; vertical-align: top;">${windowUuid}</td>
                             </tr>
-                            <tr class="window-header window-preview" onclick="event.stopPropagation(); toggleWindow('${window.id}')">
+                            <tr class="window-header window-preview ${isActiveHeap ? 'active-heap' : ''}" onclick="event.stopPropagation(); toggleWindow('${window.id}')" style="${activeStyle}">
                                 <td colspan="7" style="padding: 0 6px 4px 6px; padding-left: ${parentIndent}px; border-top: none; font-size: 10px;">
                                     <span class="window-preview-text">"${messagePreview}"</span>${windowNoteIcons}
                                 </td>
@@ -885,9 +900,10 @@
                                 }
 
                                 // Render child split windows as siblings to main flow (same indent)
+                                // Child heaps don't get numbered - only top-level heaps
                                 if (window.child_heaps) {
                                     window.child_heaps.forEach(childWindow => {
-                                        const childResult = renderWindow(childWindow, depth + 1, mainFlowIndent);
+                                        const childResult = renderWindow(childWindow, depth + 1, mainFlowIndent, null);
                                         windowHtml += childResult.html;
                                         windowVisibleCount += childResult.count;
                                     });
@@ -960,8 +976,8 @@
                         }
                     }
 
-                    era.context_heaps.forEach(window => {
-                        const result = renderWindow(window);
+                    era.context_heaps.forEach((window, heapIdx) => {
+                        const result = renderWindow(window, 0, 20, heapIdx);
                         eraWindowsHtml += result.html;
                         eraVisibleCount += result.count;
                     });
@@ -1277,6 +1293,7 @@
             const thinkingIcon = m.message_type === 'Thought' ? '<span title="Thought">💭</span> ' : '';
             const typeMarker = m.message_type === 'ToolUse' ? '<span title="Tool use">🔧</span> ' :
                              m.message_type === 'ToolResult' ? '<span title="Tool result">✓</span> ' : '';
+            const continuationIcon = m.is_continuation_message ? '<span title="Continuation after compact" style="color: #ff6b35; font-weight: bold;">🔄</span> ' : '';
 
             // Parse content for display
             const parsedContent = parseContentForDisplay(m.content);
@@ -1329,7 +1346,7 @@
                 <tr class="${rowClass}" onclick="toggleRow('${m.id}')" data-message-id="${m.id}">
                     <td class="blockheight">${blockheight}</td>
                     <td class="num">${m.message_number || '?'}</td>
-                    <td class="importance">${m.message_type}</td>
+                    <td class="importance">${continuationIcon}${m.message_type}</td>
                     <td class="from ${indentClass}">${participantIcon}${thinkingIcon}${typeMarker}${senderDisplay}</td>
                     <td class="arrow">→</td>
                     <td class="to">${recipientsDisplay}</td>
@@ -1732,6 +1749,139 @@
             }
         }
 
+        // Auto-refresh functionality
+        let autoRefreshEnabled = true;
+        let lastMessageNumber = 0;
+        let refreshInterval = null;
+
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            const button = document.getElementById('autoRefreshBtn');
+
+            if (autoRefreshEnabled) {
+                button.textContent = '🔄 Auto-Refresh: ON';
+                button.style.background = '#2a5a2a';
+                startAutoRefresh();
+            } else {
+                button.textContent = '⏸️ Auto-Refresh: OFF';
+                button.style.background = '#5a2a2a';
+                stopAutoRefresh();
+            }
+        }
+
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(checkForNewMessages, 3000); // Check every 3 seconds
+        }
+
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+                refreshInterval = null;
+            }
+        }
+
+        // Find highest message_number currently in eraData
+        function getLastMessageNumber() {
+            // Guard against null eraData before initial load
+            if (!eraData || !eraData.eras) {
+                return 0;
+            }
+
+            let maxNum = 0;
+            eraData.eras.forEach(era => {
+                era.context_heaps.forEach(heap => {
+                    heap.messages.forEach(msg => {
+                        if (msg.message_number > maxNum) {
+                            maxNum = msg.message_number;
+                        }
+                    });
+                });
+            });
+            return maxNum;
+        }
+
+        async function checkForNewMessages() {
+            if (!autoRefreshEnabled) return;
+
+            try {
+                // Get the last message we know about
+                const currentLastNum = getLastMessageNumber();
+
+                if (currentLastNum === 0) {
+                    // No messages yet, can't poll
+                    return;
+                }
+
+                // Guard against race condition where data not loaded yet
+                if (!eraData || !eraData.eras) {
+                    return;
+                }
+
+                // Find the message with highest number to use as anchor
+                let lastMessageId = null;
+                eraData.eras.forEach(era => {
+                    era.context_heaps.forEach(heap => {
+                        heap.messages.forEach(msg => {
+                            if (msg.message_number === currentLastNum) {
+                                lastMessageId = msg.id;
+                            }
+                        });
+                    });
+                });
+
+                if (!lastMessageId) return;
+
+                const response = await fetch(`/api/messages_since/${lastMessageId}/`);
+                const data = await response.json();
+
+                if (data.messages && data.messages.length > 0) {
+                    // Show indicator
+                    document.getElementById('newMessageIndicator').style.display = 'inline';
+
+                    // Add new messages to eraData
+                    data.messages.forEach(msg => {
+                        // Find or create era
+                        let era = eraData.eras.find(e => e.id === msg.era_id);
+                        if (!era) {
+                            // Need to reload to get new era structure
+                            console.log('New era detected, reloading...');
+                            location.reload();
+                            return;
+                        }
+
+                        // Find or create heap
+                        let heap = era.context_heaps.find(h => h.id === msg.heap_id);
+                        if (!heap) {
+                            // Need to reload to get new heap structure
+                            console.log('New heap detected, reloading...');
+                            location.reload();
+                            return;
+                        }
+
+                        // Add message to heap's messages array
+                        heap.messages.push(msg);
+                    });
+
+                    // Re-render messages (this will append new rows)
+                    renderMessages();
+
+                    // Flash new messages
+                    data.messages.forEach(msg => {
+                        const row = document.querySelector(`tr[data-message-id="${msg.id}"]`);
+                        if (row) {
+                            row.style.background = '#2a5a2a';
+                            setTimeout(() => {
+                                row.style.background = '';
+                            }, 2000);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking for new messages:', error);
+            }
+        }
+
         // Restore theme preference on load
         function restoreTheme() {
             const savedTheme = localStorage.getItem('theme');
@@ -1746,6 +1896,7 @@
         // Load on page load
         restoreTheme();
         loadMessages();
+        startAutoRefresh(); // Start checking for new messages
     </script>
 </body>
 </html>

@@ -20,6 +20,7 @@
   - File: `ansible/inventory.yml` lines 24, 33, 42
 
 - [ ] **GitHub Personal Access Tokens** - Required for gh CLI authentication
+  - **URGENT**: Cycle token `ghp_REDACTED` (exposed in chat Nov 3, 2025)
   - Solution: Create PATs for each user, store in Ansible Vault
   - Permissions needed: `repo`, `read:org`, `gist`, `workflow`
   - Add to vault: `vault_justin_github_token`, `vault_rj_github_token`, etc.

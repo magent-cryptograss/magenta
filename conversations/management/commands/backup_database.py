@@ -42,14 +42,27 @@ class Command(BaseCommand):
         try:
             # Navigate from magenta/ to arthel/src/build_logic/
             script_path = Path(__file__).parent.parent.parent.parent.parent / 'src' / 'build_logic' / 'get_current_blockheight.js'
+
+            # Pass environment variables including ALCHEMY_API_KEY
+            env = os.environ.copy()
+
+            # Change to arthel directory so dotenv finds .env file
+            arthel_dir = Path(__file__).parent.parent.parent.parent.parent
+
             result = subprocess.run(
                 ['node', str(script_path)],
                 capture_output=True,
                 text=True,
+                env=env,
+                cwd=str(arthel_dir),
             )
             if result.returncode == 0:
-                data = json.loads(result.stdout.strip())
-                return data.get('blockNumber', 'unknown')
+                # Parse the output to extract just the block number
+                for line in result.stdout.split('\n'):
+                    if line.startswith('Current Ethereum Block Height:'):
+                        block_str = line.split(':')[1].strip()
+                        return block_str
+                return 'unknown'
             else:
                 return 'unknown'
         except Exception:

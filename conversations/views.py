@@ -13,6 +13,71 @@ def memory_lane(request):
     return render(request, 'conversations/memory_lane.html')
 
 
+def messages_since(request, message_id):
+    """
+    Get all messages created after the specified message_id.
+    Returns messages with their heap context for proper placement.
+    """
+    from .models import Message, ContextHeap, Era
+    from django.contrib.contenttypes.models import ContentType
+    import uuid as uuid_lib
+
+    try:
+        last_msg = Message.objects.get(id=uuid_lib.UUID(message_id))
+        last_msg_number = last_msg.message_number
+    except Message.DoesNotExist:
+        return JsonResponse({'error': 'Message not found'}, status=404)
+
+    # Get all messages with message_number > last
+    new_messages = Message.objects.filter(
+        message_number__gt=last_msg_number
+    ).select_related(
+        'thought', 'tooluse', 'toolresult', 'sender', 'context_heap'
+    ).prefetch_related('recipients').order_by('message_number')
+
+    message_ct = ContentType.objects.get(app_label='conversations', model='message')
+
+    messages_data = []
+    for msg in new_messages:
+        # Get the actual polymorphic instance
+        if hasattr(msg, 'thought'):
+            actual_msg = msg.thought
+        elif hasattr(msg, 'tooluse'):
+            actual_msg = msg.tooluse
+        elif hasattr(msg, 'toolresult'):
+            actual_msg = msg.toolresult
+        else:
+            actual_msg = msg
+
+        msg_dict = {
+            'id': str(actual_msg.id),
+            'message_number': actual_msg.message_number,
+            'message_type': actual_msg.__class__.__name__,
+            'sender': msg.sender.name,
+            'recipients': [r.name for r in msg.recipients.all()],
+            'content': msg.content,
+            'timestamp': msg.timestamp,
+            'eth_blockheight': msg.eth_blockheight,
+            'parent_id': str(msg.parent_id) if msg.parent_id else None,
+            'heap_id': str(msg.context_heap.id) if msg.context_heap else None,
+            'era_id': str(msg.context_heap.era.id) if msg.context_heap else None,
+        }
+
+        # Add type-specific fields
+        if hasattr(msg, 'tooluse'):
+            msg_dict['tool_name'] = msg.tooluse.tool_name
+        elif hasattr(msg, 'toolresult'):
+            msg_dict['is_error'] = msg.toolresult.is_error
+            if msg.parent and hasattr(msg.parent, 'tooluse'):
+                msg_dict['tool_name'] = msg.parent.tooluse.tool_name
+        elif hasattr(msg, 'thought'):
+            msg_dict['signature'] = msg.thought.signature
+
+        messages_data.append(msg_dict)
+
+    return JsonResponse({'messages': messages_data})
+
+
 def all_messages(request):
     """Messages grouped by Era and ContextHeap."""
     # Get all context heaps with their eras

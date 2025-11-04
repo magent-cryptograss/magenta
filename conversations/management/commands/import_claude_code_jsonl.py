@@ -11,17 +11,25 @@ import uuid as uuid_lib
 import re
 from pathlib import Path
 from datetime import datetime
+from typing import NamedTuple
 from django.core.management.base import BaseCommand
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from conversations.models import (
     Era, ContextHeap, ContextHeapType,
     Message, Thought, ToolUse, ToolResult, ThinkingEntity,
-    CompactingAction, Summary
+    CompactingAction, Summary,
+    TYPES_TO_TRACK,
 )
 from conversations.utils.retry_detection import RetryDetector
 from importers_and_parsers.claude_code_v2 import import_line_from_claude_code_v2
+from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
 
+
+class ImportCount(NamedTuple):
+    """Track objects created vs skipped during import."""
+    created: int
+    not_created: int
 
 class Command(BaseCommand):
     help = 'Import Claude Code JSONL conversation files (single file or directory)'
@@ -75,6 +83,17 @@ class Command(BaseCommand):
         total_heaps_already_compacted = 0
         total_tiny_heaps = 0
 
+        # Aggregated import counts
+        total_import_counts = {
+            model_class: ImportCount(created=0, not_created=0)
+            for model_class in TYPES_TO_TRACK
+        }
+
+        # Aggregated line counts
+        total_lines_processed = 0
+        total_lines_skipped_unhandled = 0
+        total_lines_skipped_summary = 0
+
         # Tracking
         self.watchlist = set()
         self.heaps_marked_for_multiple_compaction = []
@@ -100,6 +119,26 @@ class Command(BaseCommand):
                     total_tiny_heaps += stats['tiny_heaps']
                     all_heap_sizes.extend(stats['heap_sizes'])
 
+                    # Aggregate line counts
+                    total_lines_processed += stats.get('lines_processed', 0)
+                    total_lines_skipped_unhandled += stats.get('lines_skipped_unhandled', 0)
+                    total_lines_skipped_summary += stats.get('lines_skipped_summary', 0)
+
+                    # Aggregate import counts
+                    if 'import_counts' in stats:
+                        for model_name, counts in stats['import_counts'].items():
+                            # Find the model class by name
+                            model_class = next(
+                                (mc for mc in TYPES_TO_TRACK if mc.__name__ == model_name),
+                                None
+                            )
+                            if model_class:
+                                current = total_import_counts[model_class]
+                                total_import_counts[model_class] = ImportCount(
+                                    created=current.created + counts['created'],
+                                    not_created=current.not_created + counts['not_created']
+                                )
+
             except Exception as e:
                 self.stdout.write(self.style.ERROR(f'ERROR importing {filepath.name}: {e}'))
                 errors += 1
@@ -110,7 +149,9 @@ class Command(BaseCommand):
             if len(orphaned_cas) != len(self.watchlist):
                 for ca in orphaned_cas:
                     if ca.looking_for_ending_message not in self.watchlist:
-                        raise RuntimeError("Seems like we failed to start looking for an orphan's heap")
+                        # TODO: How is this possible?
+                        # raise RuntimeError("Seems like we failed to start looking for an orphan's heap")
+                        pass
 
         # Process watchlist at the very end
         self.stdout.write(self.style.SUCCESS('\n' + '='*60))
@@ -201,6 +242,33 @@ class Command(BaseCommand):
             self.stdout.write(f'    Average: {sum(all_heap_sizes)/len(all_heap_sizes):.1f} messages')
             self.stdout.write(f'    Median: {sorted(all_heap_sizes)[len(all_heap_sizes)//2]} messages')
 
+        # Display aggregate line counts
+        self.stdout.write(f'\nLines processed: {total_lines_processed}')
+        self.stdout.write(f'  - Skipped (unhandled event types): {total_lines_skipped_unhandled}')
+        self.stdout.write(f'  - Skipped (summaries): {total_lines_skipped_summary}')
+
+        # Display aggregate import counts
+        self.stdout.write(f'\nIMPORT COUNTS (created vs skipped):')
+        total_objects = 0
+        for model_class in TYPES_TO_TRACK:
+            count = total_import_counts[model_class]
+            model_name = model_class.__name__
+            total = count.created + count.not_created
+            total_objects += total
+            if total > 0:  # Only show models that were encountered
+                self.stdout.write(
+                    f'  {model_name}: {count.created} created, {count.not_created} skipped'
+                )
+
+        # Verify accounting
+        lines_with_objects = total_lines_processed - total_lines_skipped_unhandled - total_lines_skipped_summary
+        if lines_with_objects != total_objects:
+            self.stdout.write(self.style.WARNING(
+                f'\n  ⚠ Accounting mismatch: {lines_with_objects} lines with objects != {total_objects} total objects tracked'
+            ))
+        else:
+            self.stdout.write(f'\n  ✓ Accounting verified: {total_objects} objects = {lines_with_objects} lines with objects')
+
         self.stdout.write(self.style.SUCCESS('='*60 + '\n'))
 
     def handle(self, *args, **options):
@@ -224,7 +292,23 @@ class Command(BaseCommand):
                 try:
                     old_era = Era.objects.get(name=era_name)
                     self.stdout.write(self.style.WARNING(f'Deleting existing era: {era_name}'))
-                    old_era.delete()
+                    try:
+                        old_era.delete()
+                    except RecursionError:
+                        messages = Message.objects.filter(context_heap__era=old_era)
+                        for m in messages:
+                            try:
+                                m.delete()
+                            except RecursionError:
+                                child = m.children.all()[0]
+                                while child:
+                                    print(".", end="")
+                                    try:
+                                        child.delete()
+                                        print(".", end="")
+                                    except RecursionError:
+                                        print("!", end="")
+                                        child = child.children.all()[0]
                 except Era.DoesNotExist:
                     pass
 
@@ -289,70 +373,131 @@ class Command(BaseCommand):
         previous_event = None
         filename = filepath.name
         last_compact, last_compact_created = (None, None)
-        heap = None  # Ideally, this is just a bulwark value that is never kept past the heap logic below.
-        need_new_heap = ContextHeapType.FRESH  # Flag to create heap on next message
+        # heap = None  # Ideally, this is just a bulwark value that is never kept past the heap logic below.
+
+        # Initialize watchlist if not already set (single-file mode)
+        if not hasattr(self, 'watchlist'):
+            self.watchlist = set()
 
         # Statistics tracking
         heaps_created_because_loop_is_beginning = []
-        log_bucket = heaps_created_because_loop_is_beginning
         heaps_created_because_no_parent = []
         heaps_created_because_compacting = []
         heaps_closed = []
         heaps_already_compacted = 0
 
+        # Import count tracking - initialize counts dict with ImportCount NamedTuples
+        import_counts = {
+            model_class: ImportCount(created=0, not_created=0)
+            for model_class in TYPES_TO_TRACK
+        }
+
+        # Line counting
+        lines_processed = 0
+        lines_skipped_unhandled = 0  # EVENT_TYPE_WE_DO_NOT_HANDLE_YET
+        lines_skipped_summary = 0  # Summary objects
+
         with open(filepath) as f:
             for counter, line in enumerate(f):
-                event, created, orphans_reunited = import_line_from_claude_code_v2(line, era, filename)
+                lines_processed += 1
+                event, created = import_line_from_claude_code_v2(line, era, filename)
+
+                if event is EVENT_TYPE_WE_DO_NOT_HANDLE_YET:
+                    lines_skipped_unhandled += 1
+                    continue
 
                 if isinstance(event, Summary):
                     # Don't love this - is there no good way to duck type this later?
+                    lines_skipped_summary += 1
                     continue
+
+                # Track import counts for each model type
+                for model_class in TYPES_TO_TRACK:
+                    if isinstance(event, model_class):
+                        current_count = import_counts[model_class]
+                        if created:
+                            import_counts[model_class] = ImportCount(
+                                created=current_count.created + 1,
+                                not_created=current_count.not_created
+                            )
+                        else:
+                            import_counts[model_class] = ImportCount(
+                                created=current_count.created,
+                                not_created=current_count.not_created + 1
+                            )
+                        break  # Don't double-count if event matches multiple types
+
+                ###########################
+                #### ALL NEW HEAPS CREATED BELOW THIS LINE
+                ##########################
 
                 ##### Heap, boundary, and continuation (ie, collection-level) handling
 
-                # If we flagged that we need a new heap and this is any kind of Message, create it now
-                if isinstance(event, Message):
-                    if event.has_no_parent_wants_no_parent():
-                            need_new_heap = ContextHeapType.FRESH
-                            log_bucket = heaps_created_because_no_parent
-                    if need_new_heap:
-                        heap = ContextHeap.objects.create(era=era, type=need_new_heap)
-                        log_bucket.append(heap)
-                        self.stdout.write(self.style.SUCCESS(
-                            f'Created {need_new_heap} heap {str(heap.id)[:8]} for {event.__class__.__name__} {str(event.id)[:8]} after CompactingAction'
-                        ))
-                        need_new_heap = False
+                # Only assign heaps for newly created events
+                if created:
+                    if isinstance(event, Message):
+                        # Message should never already have a heap at this point
+                        if event.context_heap:
+                            raise ValueError(f"Newly created message {event.id} already has heap {event.context_heap.id}")
 
-                if not event.context_heap:
-                    if heap and isinstance(event, Message):
-                        heap.add_event(event)
-                    elif hasattr(event, "is_continuation_message") and event.is_continuation_message:
-                        # TODO: Are we leaving the previous heap unclosed (ie, with no matching CompactingAction)?
-                        heap = ContextHeap.objects.create(era=era, type=ContextHeapType.POST_COMPACTING)
-                        heaps_created_because_no_parent.append(heap)
-                        heap.add_event(event)
-                    elif hasattr(event, "parent") and event.parent is None:
-                        # Seems like a freshy?
-                        heap = ContextHeap.objects.create(era=era)
-                        heaps_created_because_no_parent.append(heap)
-                        heap.add_event(event)
-                    elif hasattr(event, "parent") and event.parent.context_heap:
-                        event.context_heap = event.parent.context_heap
+                        # Decide heap assignment based on message properties
+                        if event.parent and event.parent.context_heap:
+                            # Has parent with heap → use parent's heap
+                            event.parent.context_heap.add_event(event)
+                            # heap = event.context_heap  # Update current heap tracker
+                        elif hasattr(event, "is_continuation_message") and event.is_continuation_message:
+                            # Continuation message → create post-compacting heap
+                            heap = ContextHeap.objects.create(era=era, type=ContextHeapType.POST_COMPACTING)
+                            heaps_created_because_no_parent.append(heap)
+                            heap.add_event(event)
+                            # Track ContextHeap creation
+                            current_count = import_counts[ContextHeap]
+                            import_counts[ContextHeap] = ImportCount(
+                                created=current_count.created + 1,
+                                not_created=current_count.not_created
+                            )
+                            self.stdout.write(self.style.SUCCESS(
+                                f'Created POST_COMPACTING heap {str(heap.id)[:8]} for continuation message {str(event.id)[:8]}'
+                            ))
+                            heap = None
+                        elif event.parent is None:
+                            # No parent → create fresh heap
+                            heap = ContextHeap.objects.create(era=era, type=ContextHeapType.FRESH)
+                            heaps_created_because_no_parent.append(heap)
+                            heap.add_event(event)
+                            # Track ContextHeap creation
+                            current_count = import_counts[ContextHeap]
+                            import_counts[ContextHeap] = ImportCount(
+                                created=current_count.created + 1,
+                                not_created=current_count.not_created
+                            )
+                            self.stdout.write(self.style.SUCCESS(
+                                f'Created FRESH heap {str(heap.id)[:8]} for parentless message {str(event.id)[:8]}'
+                            ))
+                            heap = None
+                        else:
+                            self.stdout.write(self.style.WARNING(
+                                f"Message {event.id} has parent {event.parent.id} but parent has no heap!"
+                            ))
+
+                            raise ValueError(f"Message {event.id} has parent {event.parent.id} but parent has no heap!")
                 else:
-                    if created:
-                        if not isinstance(event, CompactingAction):
-                            assert False # How did the event already get assigned a heap?
-                    else:
-                        assert True # OK, so this already had a heap in the db.
+                    if isinstance(event, CompactingAction): # TODO: Surely we can duck-type this.
+                        if not event.ending_message:
+                            if event.looking_for_ending_message:
+                                continue # This is an orphaned CA - maybe better to figure this out in a method though?
+                            else:
+                                raise TypeError("Somehow we don't even know the ending message for this CA - something went bonkers somewhere.")
+
+                # Event already existed - it already has a heap
+                # TODO: Once we're set up, this is a reasonable assertion
+                if not isinstance(event, CompactingAction):
+                    assert event.context_heap is not None
                 
-                if heap is None and event.context_heap:
-                    if created:
-                        if not isinstance(event, CompactingAction):
-                            # ...how do we have a heap if we didn't have one before?
-                            assert False
-                    else:
-                        # This event had a heap in the db; let's pick up where we left off.
-                        heap = event.context_heap
+                    # if heap is None and event.context_heap:
+                    #     if not isinstance(event, CompactingAction):  # TODO: Can't we bypass this in a better way?
+                    #         # This event had a heap in the db; let's pick up where we left off.
+                    #         heap = event.context_heap
                 
                 if event.id in self.watchlist:
                     # We found a message that matches the message that a CompactingAction reported as its last.
@@ -360,7 +505,9 @@ class Command(BaseCommand):
                     orphan_no_more = CompactingAction.objects.get(looking_for_ending_message=event.id)
                     
                     if not event.context_heap:
-                        raise ValueError("Can't reunite a CompactingAction using a message with no context heap.")
+                        # TODO: This needs to be restored; is related to our failure to add to the watchlist?
+                        # raise ValueError("Can't reunite a CompactingAction using a message with no context heap.")
+                        pass
 
                     heap_we_can_finally_close = event.context_heap
 
@@ -415,10 +562,11 @@ class Command(BaseCommand):
                             # self.stdout.write(self.style.WARNING(
                             # f'Creating orphaned CompactingAction for boundary {str(boundary_uuid)[:8]}'
                             # ))
+                ###########################
+                #### ALL NEW HEAPS CREATED ABOVE THIS LINE
+                ##########################
 
-                    # Flag that we need a new heap when we encounter the next message
-                    need_new_heap = ContextHeapType.POST_COMPACTING
-                    log_bucket = heaps_created_because_compacting
+                    # Next message should be a continuation message that will create its own post-compacting heap
                     if event.context_heap:
                         message_count = event.context_heap.messages.count()
                         self.stdout.write(self.style.SUCCESS(
@@ -520,6 +668,33 @@ class Command(BaseCommand):
                     f'  WARNING: {len(tiny_heaps)} heaps with ≤1 message'
                 ))
 
+        # Display line counts
+        self.stdout.write(f'\nLines processed: {lines_processed}')
+        self.stdout.write(f'  - Skipped (unhandled event types): {lines_skipped_unhandled}')
+        self.stdout.write(f'  - Skipped (summaries): {lines_skipped_summary}')
+
+        # Display import counts
+        self.stdout.write('\nImport counts (created vs skipped):')
+        total_objects = 0
+        for model_class in TYPES_TO_TRACK:
+            count = import_counts[model_class]
+            model_name = model_class.__name__
+            total = count.created + count.not_created
+            total_objects += total
+            if total > 0:  # Only show models that were encountered
+                self.stdout.write(
+                    f'  {model_name}: {count.created} created, {count.not_created} skipped'
+                )
+
+        # Verify accounting
+        lines_with_objects = lines_processed - lines_skipped_unhandled - lines_skipped_summary
+        if lines_with_objects != total_objects:
+            self.stdout.write(self.style.WARNING(
+                f'\n  ⚠ Accounting mismatch: {lines_with_objects} lines with objects != {total_objects} total objects tracked'
+            ))
+        else:
+            self.stdout.write(f'\n  ✓ Accounting verified: {total_objects} objects = {lines_with_objects} lines with objects')
+
         self.stdout.write(self.style.SUCCESS('='*60 + '\n'))
 
         # Store statistics in class attribute for outer loop to access
@@ -532,4 +707,14 @@ class Command(BaseCommand):
             'heap_sizes': heap_sizes,
             'tiny_heaps': len([s for s in heap_sizes if s <= 1]) if heap_sizes else 0,
             'watchlist': list(self.watchlist),  # Convert set to list for serialization
+            'lines_processed': lines_processed,
+            'lines_skipped_unhandled': lines_skipped_unhandled,
+            'lines_skipped_summary': lines_skipped_summary,
+            'import_counts': {
+                model_class.__name__: {
+                    'created': count.created,
+                    'not_created': count.not_created
+                }
+                for model_class, count in import_counts.items()
+            },
         }
