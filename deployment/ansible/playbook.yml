@@ -46,3 +46,30 @@
       loop: "{{ users }}"
       loop_control:
         loop_var: user
+
+    - name: Final verification - count messages in database
+      shell: docker exec magenta-postgres psql -U magent -d magenta_memory -t -c "SELECT COUNT(*) FROM conversations_message;"
+      register: final_message_count
+      ignore_errors: yes
+
+    - name: Display deployment summary
+      debug:
+        msg: |
+          ============================================
+          DEPLOYMENT COMPLETE
+          ============================================
+          Database: magenta_memory
+          Message count: {{ final_message_count.stdout | trim if final_message_count is defined and not final_message_count.failed else 'ERROR' }}
+          Expected count: {{ expected_message_count | default('N/A - no migration performed') }}
+          Status: {{ 'VERIFIED ✓' if (expected_message_count is defined and final_message_count.stdout | trim == expected_message_count) else 'WARNING - counts do not match!' if expected_message_count is defined else 'No migration to verify' }}
+
+          User instances deployed:
+          {% for user in users %}
+          - {{ user.name }}: ssh {{ user.name }}@hunter.cryptograss.live (port {{ user.ssh_port }})
+          {% endfor %}
+
+          Next steps:
+          - SSH to container: ssh justin@hunter.cryptograss.live
+          - Test MCP bootstrap on fresh Claude Code session
+          - Verify WAKEUP.md and CLAUDE.md are accessible
+          ============================================

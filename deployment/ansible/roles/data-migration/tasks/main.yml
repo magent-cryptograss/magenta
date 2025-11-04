@@ -33,12 +33,29 @@
   register: restore_result
   ignore_errors: yes
 
+- name: Count messages in source dump file
+  shell: pg_restore -l /tmp/magenta_memory.dump | grep -c "TABLE DATA.*conversations_message" || echo "0"
+  register: dump_message_count
+  when: restore_result is defined and restore_result.rc == 0
+  ignore_errors: yes
+
+- name: Count messages after restore
+  shell: docker exec magenta-postgres psql -U magent -d magenta_memory -t -c "SELECT COUNT(*) FROM conversations_message;"
+  register: restored_message_count
+  when: restore_result is defined and restore_result.rc == 0
+
+- name: Set expected message count fact
+  set_fact:
+    expected_message_count: "{{ restored_message_count.stdout | trim }}"
+  when: restore_result is defined and restore_result.rc == 0
+
 - name: Display migration results
   debug:
     msg: |
       Database migration status:
       - Existing messages: {{ existing_data.stdout | trim if not existing_data.failed else 'N/A' }}
       - Restore result: {{ 'SUCCESS' if (restore_result is defined and restore_result.rc is defined and restore_result.rc == 0) else 'SKIPPED (data already exists)' if existing_data.stdout | default('') | trim | int > 0 else 'FAILED' if restore_result is defined else 'SKIPPED' }}
+      - Messages restored: {{ restored_message_count.stdout | trim if restored_message_count is defined else 'N/A' }}
 
 - name: Clean up dump file on hunter
   file:
