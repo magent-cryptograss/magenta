@@ -3,6 +3,8 @@
   command: docker compose -f docker-compose.services.yml up -d --build
   args:
     chdir: "{{ base_dir }}/magenta-source"
+  environment:
+    POSTGRES_PASSWORD: "{{ postgres_password }}"
 
 - name: Verify services are running
   command: docker ps --filter "name={{ item }}" --format "{% raw %}{{.Names}}{% endraw %}"
