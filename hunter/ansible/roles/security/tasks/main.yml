@@ -88,6 +88,15 @@
     port: '14000:14029'
     proto: tcp
 
+- name: Configure UFW - allow shared services
+  ufw:
+    rule: allow
+    port: '{{ item }}'
+    proto: tcp
+  loop:
+    - '3000'  # Memory Lane
+    - '8000'  # MCP Server
+
 - name: Enable UFW
   ufw:
     state: enabled

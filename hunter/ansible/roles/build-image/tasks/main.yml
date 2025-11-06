@@ -7,6 +7,11 @@
     force: yes
     update: yes
 
+- name: Force fetch latest changes from production branch
+  command: git fetch origin production && git reset --hard origin/production
+  args:
+    chdir: "{{ base_dir }}/magenta-source"
+
 - name: Get docker group GID from host
   shell: "getent group docker | cut -d: -f3"
   register: docker_gid
