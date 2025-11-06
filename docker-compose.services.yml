@@ -1,28 +1,11 @@
 version: '3.8'
 
 services:
-  magenta-postgres:
-    image: postgres:16
-    container_name: magenta-postgres
-    environment:
-      POSTGRES_DB: magenta_memory
-      POSTGRES_USER: magent
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - magenta-net
-    restart: unless-stopped
-
   memory-lane:
     build:
       context: .
       dockerfile: Dockerfile.services
     container_name: memory-lane
-    depends_on:
-      - magenta-postgres
     environment:
       - POSTGRES_HOST=magenta-postgres
       - POSTGRES_DB=magenta_memory
@@ -41,8 +24,6 @@ services:
       context: .
       dockerfile: Dockerfile.services
     container_name: watcher
-    depends_on:
-      - magenta-postgres
     environment:
       - POSTGRES_HOST=magenta-postgres
       - POSTGRES_DB=magenta_memory
@@ -68,8 +49,6 @@ services:
       context: .
       dockerfile: Dockerfile.services
     container_name: mcp-server
-    depends_on:
-      - magenta-postgres
     environment:
       - POSTGRES_HOST=magenta-postgres
       - POSTGRES_DB=magenta_memory
@@ -91,5 +70,4 @@ networks:
     name: magenta-net
 
 volumes:
-  postgres-data:
   watcher-logs:
