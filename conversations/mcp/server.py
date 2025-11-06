@@ -163,7 +163,7 @@ async def run_mcp_server(port=8000):
     # Run server
     config = uvicorn.Config(
         app,
-        host="::",
+        host="0.0.0.0",
         port=port,
         log_level="info"
     )
