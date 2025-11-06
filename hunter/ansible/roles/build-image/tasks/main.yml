@@ -13,7 +13,7 @@
 - name: Build magenta-arthel base image
   command: docker compose -f docker-compose-build.yml build --build-arg DOCKER_GID={{ docker_gid.stdout }}
   args:
-    chdir: "{{ base_dir }}/magenta-source"
+    chdir: "{{ base_dir }}/magenta-source/hunter"
 
 - name: Verify image was built
   command: docker images magenta-arthel:latest --format "{% raw %}{{.Repository}}:{{.Tag}}{% endraw %}"

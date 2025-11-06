@@ -10,7 +10,7 @@ services:
       - POSTGRES_HOST=magenta-postgres
       - POSTGRES_DB=magenta_memory
       - POSTGRES_USER=magent
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
       - "3000:3000"
@@ -28,7 +28,7 @@ services:
       - POSTGRES_HOST=magenta-postgres
       - POSTGRES_DB=magenta_memory
       - POSTGRES_USER=magent
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
       # Colon-separated list of directories to watch
       - CLAUDE_LOGS_DIR=/project-logs/justin:/project-logs/rj:/project-logs/skyler
@@ -53,7 +53,7 @@ services:
       - POSTGRES_HOST=magenta-postgres
       - POSTGRES_DB=magenta_memory
       - POSTGRES_USER=magent
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
       - "8000:8000"
