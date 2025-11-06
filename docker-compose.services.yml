@@ -34,10 +34,10 @@ services:
       - CLAUDE_LOGS_DIR=/project-logs/justin:/project-logs/rj:/project-logs/skyler
       - WATCHER_ERA_NAME=Live Conversations
     volumes:
-      # Mount all users' Claude Code logs
-      - /opt/magenta/justin/.claude/projects:/project-logs/justin:ro
-      - /opt/magenta/rj/.claude/projects:/project-logs/rj:ro
-      - /opt/magenta/skyler/.claude/projects:/project-logs/skyler:ro
+      # Mount all users' Claude Code logs (from their home directories)
+      - /opt/magenta/justin/home/.claude/projects:/project-logs/justin:ro
+      - /opt/magenta/rj/home/.claude/projects:/project-logs/rj:ro
+      - /opt/magenta/skyler/home/.claude/projects:/project-logs/skyler:ro
       - watcher-logs:/app/logs
     networks:
       - magenta-net

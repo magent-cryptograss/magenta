@@ -72,6 +72,14 @@ RUN git clone ${ARTHEL_REPO_URL} /home/magent/workspace/arthel
 # Install dependencies for arthel
 RUN cd /home/magent/workspace/arthel && npm install
 
+# Clone magenta repository
+ARG MAGENTA_REPO_URL=https://github.com/magent-cryptograss/magenta.git
+ARG MAGENTA_BRANCH=production
+RUN git clone --branch ${MAGENTA_BRANCH} ${MAGENTA_REPO_URL} /home/magent/workspace/magenta
+
+# Install Python dependencies for magenta
+RUN pip3 install --break-system-packages -r /home/magent/workspace/magenta/requirements.txt
+
 USER root
 
 # Copy startup script
