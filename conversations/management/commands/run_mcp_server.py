@@ -6,6 +6,7 @@ Implements the tools defined in MCP_MEMORY_RECOVERY_SPEC.md
 """
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from conversations.models import Message, Era, ContextHeap, ThinkingEntity
 from django.db.models import Q
 from asgiref.sync import sync_to_async
@@ -18,9 +19,9 @@ import logging
 import sys
 from pathlib import Path
 
-# Set up file logging
-log_dir = Path('/home/jmyles/projects/JustinHolmesMusic/arthel/arthel/magenta/logs')
-log_dir.mkdir(exist_ok=True)
+# Set up file logging - use BASE_DIR from settings
+log_dir = Path(settings.BASE_DIR) / 'logs'
+log_dir.mkdir(exist_ok=True, parents=True)
 log_file = log_dir / 'mcp_server.log'
 
 # Configure logging to both file and stderr

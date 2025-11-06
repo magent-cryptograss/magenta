@@ -5,6 +5,7 @@ Simple wrapper that sets up logging and delegates to the MCP server module.
 """
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 import asyncio
 import logging
 import sys
@@ -27,9 +28,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         """Set up logging and run the MCP server"""
 
-        # Set up file logging
-        log_dir = Path('/home/jmyles/projects/JustinHolmesMusic/arthel/arthel/magenta/logs')
-        log_dir.mkdir(exist_ok=True)
+        # Set up file logging - use BASE_DIR from settings
+        log_dir = Path(settings.BASE_DIR) / 'logs'
+        log_dir.mkdir(exist_ok=True, parents=True)
         log_file = log_dir / 'mcp_server_v2.log'
 
         # Configure logging

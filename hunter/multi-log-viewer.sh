@@ -1,6 +1,13 @@
 #!/bin/bash
 # Multi-pane log viewer for hunter deployment
 # Shows all important logs in tmux panes
+#
+# Usage:
+#   - Switch panes: Ctrl-b arrow-keys
+#   - Copy from pane: Ctrl-b [ (enter copy mode), Space (start select), Enter (copy)
+#   - Paste: Ctrl-b ]
+#   - Detach: Ctrl-b d
+#   - Reattach: tmux attach -t hunter-logs
 
 SESSION="hunter-logs"
 
@@ -33,6 +40,10 @@ if [ $? != 0 ]; then
     tmux select-pane -t $SESSION:0.1 -T "Memory Lane"
     tmux select-pane -t $SESSION:0.2 -T "Watcher"
     tmux select-pane -t $SESSION:0.3 -T "PostgreSQL"
+
+    # Enable pane border titles (show at top of each pane)
+    tmux set-option -t $SESSION pane-border-status top
+    tmux set-option -t $SESSION pane-border-format " #{pane_title} "
 fi
 
 # Attach to session
