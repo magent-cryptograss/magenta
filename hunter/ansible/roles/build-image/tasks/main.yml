@@ -5,6 +5,7 @@
     dest: "{{ base_dir }}/magenta-source"
     version: production
     force: yes
+    update: yes
 
 - name: Get docker group GID from host
   shell: "getent group docker | cut -d: -f3"
