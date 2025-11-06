@@ -12,6 +12,8 @@ services:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - magenta-net
     restart: unless-stopped
 
   memory-lane:
@@ -29,6 +31,8 @@ services:
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
       - "3000:3000"
+    networks:
+      - magenta-net
     restart: unless-stopped
     command: gunicorn --bind 0.0.0.0:3000 --workers 2 --access-logfile - memory_viewer.wsgi:application
 
@@ -54,6 +58,8 @@ services:
       - /opt/magenta/rj/.claude/projects:/project-logs/rj:ro
       - /opt/magenta/skyler/.claude/projects:/project-logs/skyler:ro
       - watcher-logs:/app/logs
+    networks:
+      - magenta-net
     restart: unless-stopped
     command: python watcher/conversation_watcher.py
 
@@ -72,10 +78,17 @@ services:
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
       - "8000:8000"
+    networks:
+      - magenta-net
     restart: unless-stopped
     stdin_open: true
     tty: true
-    command: python manage.py run_mcp_server
+    command: python manage.py run_mcp_server_v2 --port 8000
+
+networks:
+  magenta-net:
+    external: true
+    name: magenta-net
 
 volumes:
   postgres-data:

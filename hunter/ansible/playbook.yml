@@ -6,6 +6,32 @@
     - vault.yml
 
   tasks:
+    - name: Validate database backup file exists (fail early)
+      stat:
+        path: "{{ db_dump_file }}"
+      register: backup_file_check
+      delegate_to: localhost
+      become: no
+      failed_when: not backup_file_check.stat.exists
+      when: db_dump_file is defined
+
+    - name: Fail if database backup was not provided
+      fail:
+        msg: |
+          Database backup file is required but not provided.
+          Run with: ansible-playbook playbook.yml -i inventory.yml -e "db_dump_file=/path/to/backup.dump"
+      when: db_dump_file is not defined
+
+    - name: Start copying database backup to hunter (async)
+      shell: |
+        rsync -az "{{ db_dump_file }}" "{{ ansible_user }}@{{ ansible_host | default(inventory_hostname) }}:/tmp/magenta_memory.dump" 2>&1 | tail -1
+      delegate_to: localhost
+      become: no
+      async: 3600  # Allow up to 1 hour for large files
+      poll: 0  # Don't wait, continue with other tasks
+      register: db_copy_job
+      when: db_dump_file is defined
+
     - name: Ensure base directory exists
       file:
         path: "{{ base_dir }}"
@@ -39,6 +65,10 @@
     - name: Include SSH router role
       include_role:
         name: ssh-router
+
+    - name: Include services role (MCP server, Memory Lane, Watcher)
+      include_role:
+        name: services
 
     - name: Include user-instance role for each user
       include_role:

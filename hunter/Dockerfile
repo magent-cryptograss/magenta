@@ -10,6 +10,9 @@ RUN mkdir /var/run/sshd
 # Install code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh
 
+# Install Jinja2 syntax highlighting extension for code-server
+RUN code-server --install-extension samuelcolvin.jinjahtml
+
 # Create a non-root user with explicit UID/GID 1000
 # Remove existing user/group with UID/GID 1000 if present (usually 'ubuntu')
 RUN (userdel -r ubuntu 2>/dev/null || true) && \
@@ -24,7 +27,7 @@ RUN npm install -g @anthropic-ai/sdk @anthropic-ai/claude-code playwright
 RUN npx playwright install-deps
 RUN npx @modelcontextprotocol/server-puppeteer
 
-# Install Docker CLI
+# Install Docker CLI and add docker group
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
@@ -35,6 +38,12 @@ RUN apt-get update && apt-get install -y \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null \
     && apt-get update \
     && apt-get install -y docker-ce-cli
+
+# Create docker group and add magent user to it
+# Accept DOCKER_GID as build arg (defaults to 999 if not provided)
+ARG DOCKER_GID=999
+RUN groupadd -g ${DOCKER_GID} docker \
+    && usermod -aG docker magent
 
 # Install GitHub CLI (following official docs)
 RUN (type -p wget >dev/null || (apt update && apt install wget -y)) \
@@ -66,12 +75,12 @@ RUN cd /home/magent/workspace/arthel && npm install
 USER root
 
 # Copy startup script
-COPY container-startup.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/container-startup.sh
+COPY container_startup.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/container_startup.py
 
 # CLAUDE.md will be symlinked from magenta repo on container startup
 
 # Expose ports
 EXPOSE 22 8080 4000 4050
 
-CMD ["/usr/local/bin/container-startup.sh"]
+CMD ["/usr/local/bin/container_startup.py"]

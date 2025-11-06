@@ -1,6 +1,6 @@
-# Magenta Deployment
+# Hunter Deployment
 
-Infrastructure for deploying the magenta memory system to hunter (VPS).
+Infrastructure for deploying the magenta memory system to hunter VPS.
 
 ## Architecture
 
@@ -41,7 +41,7 @@ Each team member gets isolated container with:
 
 ```bash
 # Start services (postgres, watcher)
-cd deployment
+cd hunter
 docker-compose -f docker-compose.services.yml up -d
 
 # Start dev container
@@ -52,7 +52,7 @@ docker-compose -f docker-compose.local.yml up -d
 
 ```bash
 # Deploy everything
-cd deployment/ansible
+cd hunter/ansible
 ansible-playbook -i inventory.yml playbook.yml
 ```
 
@@ -93,4 +93,4 @@ All containers access the shared database:
 ✅ Line accounting with verification
 ✅ Perfect deduplication (tested on 365 files, 131K+ lines)
 ✅ Watcher running and importing in real-time
-✅ All infrastructure organized in `/deployment`
+✅ All infrastructure organized in `/hunter`

@@ -10,13 +10,12 @@ services:
       # Maps to container ports 4000-4009
       - "{{ user.port_range_start }}-{{ user.port_range_start + 9 }}:4000-4009"
     volumes:
-      - {{ base_dir }}/{{ user.name }}/.claude:/home/magent/.claude
+      # Mount entire home directory to persist workspace, .claude, bash history, etc
+      - {{ base_dir }}/{{ user.name }}/home:/home/magent
+      # SSH keys and git config mounted separately (read-only for security)
       - {{ base_dir }}/{{ user.name }}/.ssh:/home/magent/.ssh:ro
       - {{ base_dir }}/{{ user.name }}/.gitconfig:/home/magent/.gitconfig:ro
-      - {{ base_dir }}/{{ user.name }}/.config/gh:/home/magent/.config/gh
       - /var/run/docker.sock:/var/run/docker.sock
-      # Mount Claude Code project logs for live conversation watching
-      - /home/{{ user.name }}/.claude/projects/-home-{{ user.name }}-projects-JustinHolmesMusic-arthel:/home/magent/.claude/project-logs:ro
     networks:
       - magenta-net
     environment:

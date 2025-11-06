@@ -1,14 +1,18 @@
 ---
 - name: Copy magenta source files to VPS
   synchronize:
-    src: "{{ playbook_dir }}/../"
+    src: "{{ playbook_dir }}/../../"
     dest: "{{ base_dir }}/magenta-source/"
     rsync_opts:
-      - "--exclude=ansible"
+      - "--exclude=hunter/ansible"
       - "--exclude=.git"
 
+- name: Get docker group GID from host
+  shell: "getent group docker | cut -d: -f3"
+  register: docker_gid
+
 - name: Build magenta-arthel base image
-  command: docker compose -f docker-compose-build.yml build
+  command: docker compose -f docker-compose-build.yml build --build-arg DOCKER_GID={{ docker_gid.stdout }}
   args:
     chdir: "{{ base_dir }}/magenta-source"
 

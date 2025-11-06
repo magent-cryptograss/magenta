@@ -5,6 +5,22 @@
     state: directory
     mode: '0755'
 
+- name: Create home directory volume for user
+  file:
+    path: "{{ base_dir }}/{{ user.name }}/home"
+    state: directory
+    owner: 1000  # magent user ID in container
+    group: 1000
+    mode: '0755'
+
+- name: Create workspace directory for user
+  file:
+    path: "{{ base_dir }}/{{ user.name }}/home/workspace"
+    state: directory
+    owner: 1000  # magent user ID in container
+    group: 1000
+    mode: '0755'
+
 - name: Create .claude directory for user
   file:
     path: "{{ base_dir }}/{{ user.name }}/.claude"
@@ -67,3 +83,17 @@
   command: docker compose up -d
   args:
     chdir: "{{ base_dir }}/{{ user.name }}"
+
+- name: Wait for container to initialize (give startup script time to run)
+  pause:
+    seconds: 5
+
+- name: Show container startup logs
+  shell: docker logs {{ user.name }}-arthel
+  register: container_logs
+  ignore_errors: yes
+
+- name: Display container startup logs
+  debug:
+    msg: "{{ container_logs.stdout_lines }}"
+  when: container_logs is defined and container_logs.stdout_lines is defined

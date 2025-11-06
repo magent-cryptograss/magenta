@@ -31,7 +31,7 @@ echo "Step 3: Deploying to hunter VPS..."
 echo "Running ansible playbook..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR/ansible"
-ansible-playbook -i inventory.yml playbook.yml -e "db_dump_file=/tmp/$BACKUP_FILE"
+ansible-playbook -v -i inventory.yml playbook.yml -e "db_dump_file=/tmp/$BACKUP_FILE"
 
 echo ""
 echo "=== Deployment Complete ==="

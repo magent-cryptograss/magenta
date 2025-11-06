@@ -19,7 +19,7 @@ fi
 # If SSH_ORIGINAL_COMMAND is set, execute it in the container
 # Otherwise, start an interactive shell
 if [ -n "$SSH_ORIGINAL_COMMAND" ]; then
-    docker exec -i "$CONTAINER" su - magent -c "$SSH_ORIGINAL_COMMAND"
+    docker exec -it "$CONTAINER" su - magent -c "$SSH_ORIGINAL_COMMAND"
 else
     docker exec -it "$CONTAINER" su - magent
 fi
