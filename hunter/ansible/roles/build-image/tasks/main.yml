@@ -1,11 +1,10 @@
 ---
-- name: Copy magenta source files to VPS
-  synchronize:
-    src: "{{ playbook_dir }}/../../"
-    dest: "{{ base_dir }}/magenta-source/"
-    rsync_opts:
-      - "--exclude=hunter/ansible"
-      - "--exclude=.git"
+- name: Clone or update magenta repository
+  git:
+    repo: https://github.com/magent-cryptograss/magenta.git
+    dest: "{{ base_dir }}/magenta-source"
+    version: production
+    force: yes
 
 - name: Get docker group GID from host
   shell: "getent group docker | cut -d: -f3"
