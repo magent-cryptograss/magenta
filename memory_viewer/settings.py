@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', 'magenta_memory'),
         'USER': os.getenv('POSTGRES_USER', 'magent'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'changeme'),
-        'HOST': 'postgres',
+        'HOST': os.getenv('POSTGRES_HOST', 'magenta-postgres'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
