@@ -13,14 +13,20 @@ RUN curl -fsSL https://code-server.dev/install.sh | sh
 # Create a non-root user  
 RUN useradd -m -s /bin/bash magent
 
-# Copy SSH key as ROOT and set up permissions
-COPY id_ed25519.pub /tmp/
+# Copy SSH key as ROOT and set up permissions (optional for local dev)
+# Create the directory first
 RUN mkdir -p /home/magent/.ssh \
-    && cat /tmp/id_ed25519.pub >> /home/magent/.ssh/authorized_keys \
     && chown -R magent:magent /home/magent/.ssh \
-    && chmod 700 /home/magent/.ssh \
-    && chmod 600 /home/magent/.ssh/authorized_keys \
-    && rm /tmp/id_ed25519.pub
+    && chmod 700 /home/magent/.ssh
+
+# Copy SSH key if it exists (for SSH access to container)
+# For local dev, you can skip this and use docker exec instead
+COPY id_ed25519.pub* /tmp/
+RUN if [ -f /tmp/id_ed25519.pub ]; then \
+        cat /tmp/id_ed25519.pub >> /home/magent/.ssh/authorized_keys \
+        && chmod 600 /home/magent/.ssh/authorized_keys \
+        && rm /tmp/id_ed25519.pub; \
+    fi
 
 # Install Claude tools and Playwright globally (as root)
 RUN npm install -g @anthropic-ai/sdk @anthropic-ai/claude-code playwright
