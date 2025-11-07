@@ -43,7 +43,7 @@ services:
   # Memory Lane UI
   memory-lane:
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile.services
     container_name: memory-lane-local
     depends_on:
