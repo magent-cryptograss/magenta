@@ -20,25 +20,30 @@ services:
       - magent-home:/home/magent
     environment:
       - GH_TOKEN=${GH_TOKEN}
+      # Connect to hunter postgres via SSH tunnel
+      - POSTGRES_HOST=${POSTGRES_HOST:-host.docker.internal}
+      - POSTGRES_PORT=${POSTGRES_PORT:-15432}
+      - POSTGRES_DB=${POSTGRES_DB:-magenta_memory}
+      - POSTGRES_USER=${POSTGRES_USER:-magent}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
       - magenta-net
-    depends_on:
-      - postgres
 
-  # PostgreSQL database
-  postgres:
-    image: postgres:16
-    container_name: magenta-postgres-local
-    environment:
-      POSTGRES_DB: magenta_memory
-      POSTGRES_USER: magent
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    networks:
-      - magenta-net
+  # PostgreSQL database - DISABLED for hunter connection
+  # Uncomment this section if you want local isolated postgres
+  # postgres:
+  #   image: postgres:16
+  #   container_name: magenta-postgres-local
+  #   environment:
+  #     POSTGRES_DB: magenta_memory
+  #     POSTGRES_USER: magent
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - magenta-net
 
   # Memory Lane UI
   memory-lane:
@@ -46,13 +51,13 @@ services:
       context: ..
       dockerfile: Dockerfile.services
     container_name: memory-lane-local
-    depends_on:
-      - postgres
     environment:
-      - POSTGRES_HOST=postgres
-      - POSTGRES_DB=magenta_memory
-      - POSTGRES_USER=magent
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      # Connect to hunter postgres via SSH tunnel
+      - POSTGRES_HOST=${POSTGRES_HOST:-host.docker.internal}
+      - POSTGRES_PORT=${POSTGRES_PORT:-15432}
+      - POSTGRES_DB=${POSTGRES_DB:-magenta_memory}
+      - POSTGRES_USER=${POSTGRES_USER:-magent}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
       - "3000:3000"
