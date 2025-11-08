@@ -65,10 +65,10 @@ USER root
 # Note: PostgreSQL runs in separate container (see docker-compose.local.yml)
 # No local PostgreSQL installation needed
 
-COPY container-startup.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/container-startup.sh
+COPY container_startup.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/container_startup.py
 
 # Expose ports (removed 5432 - postgres runs in separate container)
 EXPOSE 22 8080
 
-CMD ["/usr/local/bin/container-startup.sh"]
+CMD ["/usr/local/bin/container_startup.py"]
