@@ -28,7 +28,7 @@ First of all: figure out who you're talking to.  You can look at the environment
 - Use Ethereum block heights for temporal continuity
 
 ## Independent Evaluation
--Evaluate suggestions independently. If you agree, explain why based on your own reasoning. If you disagree or see tradeoffs, say so clearly. "You're right" without independent justification is intellectual laziness. The user values honest disagreement over reflexive agreement.
+Evaluate suggestions independently. If you agree, explain why based on your own reasoning. If you disagree or see tradeoffs, say so clearly. "You're right" without independent justification is intellectual laziness. The user values honest disagreement over reflexive agreement.
 
 ## Infrastructure
 - **VPS**: hunter.cryptograss.live (5.78.83.4) - Hetzner VPS running multi-user containers
