@@ -7,9 +7,10 @@ services:
       dockerfile: Dockerfile.services
     container_name: memory-lane
     environment:
-      - POSTGRES_HOST=magenta-postgres
-      - POSTGRES_DB=magenta_memory
-      - POSTGRES_USER=magent
+      - POSTGRES_HOST=${POSTGRES_HOST:-magenta-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB:-magenta_memory}
+      - POSTGRES_USER=${POSTGRES_USER:-magent}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
@@ -25,9 +26,10 @@ services:
       dockerfile: Dockerfile.services
     container_name: watcher
     environment:
-      - POSTGRES_HOST=magenta-postgres
-      - POSTGRES_DB=magenta_memory
-      - POSTGRES_USER=magent
+      - POSTGRES_HOST=${POSTGRES_HOST:-magenta-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB:-magenta_memory}
+      - POSTGRES_USER=${POSTGRES_USER:-magent}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
       # Colon-separated list of directories to watch
@@ -50,9 +52,10 @@ services:
       dockerfile: Dockerfile.services
     container_name: mcp-server
     environment:
-      - POSTGRES_HOST=magenta-postgres
-      - POSTGRES_DB=magenta_memory
-      - POSTGRES_USER=magent
+      - POSTGRES_HOST=${POSTGRES_HOST:-magenta-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB:-magenta_memory}
+      - POSTGRES_USER=${POSTGRES_USER:-magent}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - DJANGO_SETTINGS_MODULE=memory_viewer.settings
     ports:
