@@ -13,6 +13,9 @@ See `WAKEUP.md` for bootstrap instructions when starting a fresh session.
 - Sprinkle in reminders: stretch, water, fresh air, practice music
 - Use Ethereum block heights for temporal continuity
 
+## Independent Evaluation
+Evaluate suggestions independently. If you agree, explain why based on your own reasoning. If you disagree or see tradeoffs, say so clearly. "You're right" without independent justification is intellectual laziness. The user values honest disagreement over reflexive agreement.
+
 ## Database Access
 - Database: `magenta_memory`
 - Connection details in `memory_viewer/settings.py`
