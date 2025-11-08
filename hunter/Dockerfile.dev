@@ -28,12 +28,8 @@ RUN if [ -f /tmp/id_ed25519.pub ]; then \
         && rm /tmp/id_ed25519.pub; \
     fi
 
-# Install Claude tools and Playwright globally (as root)
-RUN npm install -g @anthropic-ai/sdk @anthropic-ai/claude-code playwright
-
-# Install system dependencies for Playwright first (as root)
-RUN npx playwright install-deps
-RUN npx @modelcontextprotocol/server-puppeteer
+# Install Claude tools (skip Playwright/Puppeteer for local dev - not needed)
+RUN npm install -g @anthropic-ai/sdk @anthropic-ai/claude-code
 
 # Install Docker CLI
 RUN apt-get update && apt-get install -y \
