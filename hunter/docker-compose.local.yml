@@ -24,6 +24,8 @@ services:
       - POSTGRES_DB=${POSTGRES_DB:-magenta_memory}
       - POSTGRES_USER=${POSTGRES_USER:-magent}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # Skip arthel for local dev (not needed for MCP troubleshooting)
+      - SKIP_ARTHEL=1
     networks:
       - magenta-net
 

@@ -92,13 +92,20 @@ def setup_workspace():
     workspace = Path("/home/magent/workspace")
     workspace.mkdir(parents=True, exist_ok=True)
 
-    # Clone arthel (main development repo)
-    ensure_repo_cloned(
-        "https://github.com/jMyles/arthel.git",
-        workspace / "arthel",
-        user='magent',
-        run_install=True
-    )
+    # Ensure magent owns the workspace directory
+    run_command(f"chown -R magent:magent {workspace}")
+
+    # Clone arthel (main development repo) - optional for local dev
+    # Skip if SKIP_ARTHEL env var is set
+    if os.getenv('SKIP_ARTHEL'):
+        logger.info("Skipping arthel clone (SKIP_ARTHEL set)")
+    else:
+        ensure_repo_cloned(
+            "https://github.com/jMyles/arthel.git",
+            workspace / "arthel",
+            user='magent',
+            run_install=True
+        )
 
     # Clone magenta (for CLAUDE.md and WAKEUP.md)
     ensure_repo_cloned(
