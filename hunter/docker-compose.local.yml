@@ -91,4 +91,4 @@ volumes:
 
 networks:
   magenta-net:
-    driver: bridge
+    external: true

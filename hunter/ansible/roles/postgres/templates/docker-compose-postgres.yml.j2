@@ -9,6 +9,8 @@ services:
       POSTGRES_USER: magent
     volumes:
       - {{ base_dir }}/postgres-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
     networks:
       - magenta-net
     restart: unless-stopped
