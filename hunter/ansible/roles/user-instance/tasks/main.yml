@@ -79,8 +79,8 @@
     src: docker-compose.yml.j2
     dest: "{{ base_dir }}/{{ user.name }}/docker-compose.yml"
 
-- name: Start user instance
-  command: docker compose up -d
+- name: Start user instance (recreate to pick up new image)
+  command: docker compose up -d --force-recreate
   args:
     chdir: "{{ base_dir }}/{{ user.name }}"
 
