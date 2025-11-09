@@ -1,5 +1,8 @@
 FROM ubuntu:latest
 
+# Install tini for proper init system (reaps zombie processes)
+RUN apt-get update && apt-get install -y tini
+
 # Install packages from list
 COPY packages.txt /tmp/
 RUN apt-get update \
@@ -91,4 +94,6 @@ RUN chmod +x /usr/local/bin/container_startup.py
 # Expose ports
 EXPOSE 22 8080 4000 4050
 
+# Use tini as init system to properly reap zombie processes
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/usr/local/bin/container_startup.py"]
