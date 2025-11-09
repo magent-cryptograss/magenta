@@ -23,6 +23,13 @@ RUN (userdel -r ubuntu 2>/dev/null || true) && \
     groupadd -g 1000 magent && \
     useradd -u 1000 -g 1000 -m -s /bin/bash magent
 
+# Configure tmux defaults for all users
+RUN echo "# Enable mouse support" > /etc/tmux.conf && \
+    echo "set -g mouse on" >> /etc/tmux.conf && \
+    echo "" >> /etc/tmux.conf && \
+    echo "# Increase scrollback buffer size" >> /etc/tmux.conf && \
+    echo "set -g history-limit 10000" >> /etc/tmux.conf
+
 # Install Claude tools and Playwright globally (as root)
 RUN npm install -g @anthropic-ai/sdk @anthropic-ai/claude-code playwright
 
