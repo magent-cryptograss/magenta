@@ -1,6 +1,6 @@
 ---
 - name: Start shared services (MCP server, Memory Lane, Watcher)
-  command: docker compose -f docker-compose.services.yml up -d --build
+  command: docker compose -f docker-compose.services.yml up -d --build --force-recreate
   args:
     chdir: "{{ base_dir }}/magenta-source"
   environment:
