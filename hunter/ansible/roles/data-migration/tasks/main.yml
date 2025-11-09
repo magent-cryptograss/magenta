@@ -12,13 +12,13 @@
   delay: 10
   delegate_to: localhost
   become: no
-  when: db_copy_job is defined
+  when: db_copy_job is defined and db_copy_job.ansible_job_id is defined
 
 - name: Set permissions on copied database dump
   file:
     path: /tmp/magenta_memory.dump
     mode: '0600'
-  when: db_copy_job is defined
+  when: db_dump_file is defined
 
 - name: Wait for postgres container to be ready
   shell: docker exec magenta-postgres pg_isready -U magent
