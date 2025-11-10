@@ -186,7 +186,7 @@ class ConversationWatcher(FileSystemEventHandler):
         logger.info("Scanning existing files...")
 
         file_count = 0
-        for filepath in self.watch_dir.glob('*.jsonl'):
+        for filepath in self.watch_dir.rglob('*.jsonl'):
             # Just seek to end - we only want NEW lines from this point forward
             with open(filepath, 'r') as f:
                 f.seek(0, 2)  # Seek to end
@@ -231,7 +231,7 @@ def main():
         watcher.scan_existing_files()
 
         # Schedule observer for this directory
-        observer.schedule(watcher, str(watch_dir), recursive=False)
+        observer.schedule(watcher, str(watch_dir), recursive=True)
 
     # Start observing all directories
     observer.start()
