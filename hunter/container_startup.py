@@ -131,6 +131,13 @@ def setup_claude_config():
         "CLAUDE.md in home directory"
     )
 
+    # Symlink .env for Django dev server database access
+    setup_symlink(
+        "/opt/magenta/magenta-source/.env",
+        "/home/magent/workspace/magenta/.env",
+        ".env file for local dev database access"
+    )
+
     # Fix permissions
     logger.info("Fixing .claude directory permissions...")
     run_command("chown -R magent:magent /home/magent/.claude")
@@ -168,11 +175,11 @@ def configure_mcp_server():
 
     # Add Playwright MCP server for browser automation via Docker
     run_command(
-        "claude mcp add --scope user --transport stdio playwright 'docker run -i --rm --init --pull=always mcr.microsoft.com/playwright/mcp'",
+        "claude mcp add --scope user --transport stdio playwright 'docker run -i --rm --init --network magenta-net --pull=always mcr.microsoft.com/playwright/mcp'",
         user='magent',
         check=False
     )
-    logger.info("✓ Playwright MCP server configured (via Docker)")
+    logger.info("✓ Playwright MCP server configured (via Docker on magenta-net)")
 
 
 def setup_environment_variables():
