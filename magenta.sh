@@ -7,7 +7,10 @@
 set -e  # Exit on error
 
 # Check if mosh is installed (optional but recommended)
-if ! command -v mosh &> /dev/null; then
+USE_MOSH=false
+if command -v mosh &> /dev/null; then
+    USE_MOSH=true
+else
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "⚠️  Mosh not found (optional)"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -94,9 +97,9 @@ if [ -f "$ENV_FILE" ]; then
     export $(grep -v '^#' "$ENV_FILE" | xargs)
 fi
 
-# SSH into the container and start/attach to tmux session with Claude Code
+# Connect using mosh if available, otherwise SSH
 # Pass through GH_TOKEN and other environment variables
-ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "
+REMOTE_COMMAND="
     # Load environment variables
     export GH_TOKEN='$GH_TOKEN'
     export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
@@ -144,3 +147,9 @@ ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" 
         )\"
     fi
 "
+
+if [ "$USE_MOSH" = true ]; then
+    mosh --ssh="ssh -p $SSH_PORT" "$SSH_USER@$SSH_HOST" -- bash -c "$REMOTE_COMMAND"
+else
+    ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "$REMOTE_COMMAND"
+fi
