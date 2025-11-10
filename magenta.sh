@@ -6,6 +6,23 @@
 
 set -e  # Exit on error
 
+# Check if mosh is installed (optional but recommended)
+if ! command -v mosh &> /dev/null; then
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  Mosh not found (optional)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Mosh provides persistent SSH connections that survive network changes."
+    echo "Install it for better connection reliability:"
+    echo ""
+    echo "  macOS:   brew install mosh"
+    echo "  Ubuntu:  sudo apt install mosh"
+    echo "  Arch:    sudo pacman -S mosh"
+    echo ""
+    echo "Continuing with regular SSH..."
+    echo ""
+fi
+
 # Parse target argument (default to local)
 TARGET="${1:-local}"
 
