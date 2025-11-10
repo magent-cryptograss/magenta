@@ -5,5 +5,7 @@ urlpatterns = [
     path('memory_lane/', views.memory_lane, name='memory_lane'),
     path('api/messages/', views.api_messages, name='api_messages'),
     path('api/all_messages/', views.all_messages, name='all_messages'),
+    path('api/heap_metadata/', views.heap_metadata, name='heap_metadata'),
+    path('api/heap_messages/<str:heap_id>/', views.heap_messages, name='heap_messages'),
     path('api/messages_since/<str:message_id>/', views.messages_since, name='messages_since'),
 ]

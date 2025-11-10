@@ -521,11 +521,12 @@
         let collapsedMainFlows = new Set();
         let collapsedChains = new Set();
         let commandChainsInitialized = false;  // Track if we've already auto-collapsed command chains
+        let loadedHeaps = new Set();  // Track which heaps have had their messages loaded
         const database = '{{ database }}';
 
         async function loadMessages() {
             try {
-                const response = await fetch(`/api/all_messages/?db=${database}`);
+                const response = await fetch(`/api/heap_metadata/?db=${database}`);
                 eraData = await response.json();
 
                 // Flatten messages for searching and build parent-child relationships
@@ -543,14 +544,16 @@
                             collapsedMainFlows.add(window.id);
                         }
 
-                        allMessages.push(...window.messages);
+                        // Initialize empty messages array
+                        window.messages = [];
 
-                        // Recursively collapse child windows and collect their messages
+                        // Recursively collapse child windows
                         function collapseChildWindows(win) {
                             if (win.child_heaps) {
                                 win.child_heaps.forEach(child => {
                                     collapsedWindows.add(child.id);
-                                    allMessages.push(...child.messages);
+                                    // Initialize empty messages array for child
+                                    child.messages = [];
                                     collapseChildWindows(child);
                                 });
                             }
@@ -601,15 +604,33 @@
             let rowNumber = 1;
             let totalMessages = 0;
 
+            // Check if any filters are active (used throughout rendering logic)
+            const hasActiveFilters = search || uuidSearch || minLength > 0 || person || blockheightSpecified;
+
+            // Helper: get message count (use message_count if messages not loaded, otherwise actual length)
+            function getMessageCount(heap) {
+                return heap.message_count !== undefined ? heap.message_count : heap.messages.length;
+            }
+
             // Render by Era > ContextWindow > Messages
             eraData.eras.forEach(era => {
                 const eraCollapsed = collapsedEras.has(era.id);
                 const eraIcon = eraCollapsed ? '►' : '▼';
 
-                // Count messages in this era
+                // Count messages in this era (recursively include child heaps)
+                function countHeapMessages(heap) {
+                    let count = getMessageCount(heap);
+                    if (heap.child_heaps) {
+                        heap.child_heaps.forEach(child => {
+                            count += countHeapMessages(child);
+                        });
+                    }
+                    return count;
+                }
+
                 let eraMessageCount = 0;
                 era.context_heaps.forEach(window => {
-                    eraMessageCount += window.messages.length;
+                    eraMessageCount += countHeapMessages(window);
                 });
 
                 // Build era note icons
@@ -809,7 +830,7 @@
                             <tr class="window-header ${isActiveHeap ? 'active-heap' : ''}" onclick="event.stopPropagation(); toggleWindow('${window.id}')" style="${activeStyle}">
                                 <td class="expand-icon" rowspan="2">${windowIcon}</td>
                                 <td colspan="7" style="padding: 4px 6px; padding-left: ${parentIndent}px; border-bottom: none;">
-                                    <div style="font-weight: bold;">${heapNumber}${shortType} ${window.messages.length}${splitInfo} ${windowBlockheightRange}</div>
+                                    <div style="font-weight: bold;">${heapNumber}${shortType} ${getMessageCount(window)}${splitInfo} ${windowBlockheightRange}</div>
                                     ${windowTimestamp ? `<div style="font-size: 10px; color: #858585; font-weight: normal;">${windowTimestamp}</div>` : ''}
                                     ${compactingInfo}
                                 </td>
@@ -866,7 +887,7 @@
                                         <tr class="main-flow-header" onclick="event.stopPropagation(); toggleMainFlow('${window.id}')">
                                             <td class="expand-icon">${mainFlowIcon}</td>
                                             <td colspan="7" style="padding: 4px; padding-left: ${mainFlowIndent}px;">
-                                                Main flow (${window.messages.length} messages)
+                                                Main flow (${getMessageCount(window)} messages)
                                             </td>
                                         </tr>
                                     `;
@@ -965,12 +986,15 @@
                             }
                         }
 
-                        // Always include window header if it has any matching messages (even if collapsed)
-                        // Check using helper function to see if there are ANY matches
+                        // Render window if it has content OR if no filters are active
+                        // With lazy-loading, show heaps even if messages aren't loaded yet
                         const potentialMatches = countVisibleInWindow(window);
-                        if (potentialMatches > 0) {
+                        const windowMessageCount = getMessageCount(window);
+                        const shouldRenderWindow = !hasActiveFilters || potentialMatches > 0 || windowMessageCount > 0;
+
+                        if (shouldRenderWindow) {
                             // Return potentialMatches for count so collapsed windows still register as having content
-                            return { html: headerRow + windowHtml, count: potentialMatches };
+                            return { html: headerRow + windowHtml, count: Math.max(potentialMatches, windowMessageCount) };
                         } else {
                             return { html: '', count: 0 };
                         }
@@ -988,9 +1012,11 @@
                     });
                 }
 
-                // Only render this era if it has visible messages
-                // (When collapsed, we still count potential matches to decide visibility)
-                if (eraVisibleCount > 0) {
+                // Render era if it has content OR if no filters are active
+                // With lazy-loading, we want to show eras/heaps even if messages aren't loaded yet
+                const shouldRenderEra = !hasActiveFilters || eraVisibleCount > 0 || eraMessageCount > 0;
+
+                if (shouldRenderEra) {
                     const heapCount = era.context_heaps.length;
                     html += `
                         <tr class="era-header" onclick="toggleEra('${era.id}')">
@@ -1071,8 +1097,51 @@
             renderMessages();
         }
 
-        function toggleWindow(windowId) {
-            if (collapsedWindows.has(windowId)) {
+        async function toggleWindow(windowId) {
+            const isCurrentlyCollapsed = collapsedWindows.has(windowId);
+
+            if (isCurrentlyCollapsed) {
+                // Expanding - check if we need to load messages first
+                if (!loadedHeaps.has(windowId)) {
+                    // Load messages for this heap
+                    try {
+                        const response = await fetch(`/api/heap_messages/${windowId}/`);
+                        const data = await response.json();
+
+                        // Find the heap and update its messages
+                        function findAndUpdateHeap(heaps) {
+                            for (const heap of heaps) {
+                                if (heap.id === windowId) {
+                                    heap.messages = data.messages;
+                                    // Add messages to allMessages for searching
+                                    allMessages.push(...data.messages);
+                                    loadedHeaps.add(windowId);
+                                    return true;
+                                }
+                                if (heap.child_heaps && findAndUpdateHeap(heap.child_heaps)) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }
+
+                        for (const era of eraData.eras) {
+                            if (findAndUpdateHeap(era.context_heaps)) {
+                                break;
+                            }
+                        }
+
+                        // Rebuild parent-child relationships for new messages
+                        allMessages.forEach(msg => {
+                            msg.children = allMessages.filter(m => m.parent_uuid === msg.id);
+                        });
+                    } catch (error) {
+                        console.error('Error loading heap messages:', error);
+                        alert('Failed to load messages for this heap');
+                        return;
+                    }
+                }
+
                 collapsedWindows.delete(windowId);
             } else {
                 collapsedWindows.add(windowId);
@@ -1689,11 +1758,84 @@
             }
         }, true); // Use capture phase to intercept before bubbling
 
-        // Set up filter listeners
-        document.getElementById('searchFilter').addEventListener('input', renderMessages);
-        document.getElementById('uuidFilter').addEventListener('input', renderMessages);
-        document.getElementById('minLengthFilter').addEventListener('input', renderMessages);
-        document.getElementById('personFilter').addEventListener('change', renderMessages);
+        // Function to load all heap messages for searching
+        async function ensureAllHeapsLoaded() {
+            const heapsToLoad = [];
+
+            // Collect all heaps that haven't been loaded
+            function collectUnloadedHeaps(heaps) {
+                for (const heap of heaps) {
+                    if (!loadedHeaps.has(heap.id)) {
+                        heapsToLoad.push(heap);
+                    }
+                    if (heap.child_heaps) {
+                        collectUnloadedHeaps(heap.child_heaps);
+                    }
+                }
+            }
+
+            for (const era of eraData.eras) {
+                collectUnloadedHeaps(era.context_heaps);
+            }
+
+            if (heapsToLoad.length === 0) {
+                return; // All heaps already loaded
+            }
+
+            // Load all unloaded heaps in parallel
+            console.log(`Loading ${heapsToLoad.length} unloaded heaps for search...`);
+            const loadPromises = heapsToLoad.map(async heap => {
+                try {
+                    const response = await fetch(`/api/heap_messages/${heap.id}/`);
+                    const data = await response.json();
+                    heap.messages = data.messages;
+                    allMessages.push(...data.messages);
+                    loadedHeaps.add(heap.id);
+                } catch (error) {
+                    console.error(`Error loading heap ${heap.id}:`, error);
+                }
+            });
+
+            await Promise.all(loadPromises);
+
+            // Rebuild parent-child relationships
+            allMessages.forEach(msg => {
+                msg.children = allMessages.filter(m => m.parent_uuid === msg.id);
+            });
+
+            console.log(`Loaded ${heapsToLoad.length} heaps, total messages: ${allMessages.length}`);
+        }
+
+        // Debounce helper
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // Wrap renderMessages with heap loading for search fields
+        async function renderWithSearch() {
+            const search = document.getElementById('searchFilter').value;
+            const uuidSearch = document.getElementById('uuidFilter').value;
+            const minLength = parseInt(document.getElementById('minLengthFilter').value) || 0;
+            const person = document.getElementById('personFilter').value;
+
+            // If any search/filter is active, load all heaps first
+            if (search || uuidSearch || minLength > 0 || person) {
+                await ensureAllHeapsLoaded();
+            }
+
+            renderMessages();
+        }
+
+        // Set up filter listeners with debouncing for text inputs
+        const debouncedRenderWithSearch = debounce(renderWithSearch, 300);
+        document.getElementById('searchFilter').addEventListener('input', debouncedRenderWithSearch);
+        document.getElementById('uuidFilter').addEventListener('input', debouncedRenderWithSearch);
+        document.getElementById('minLengthFilter').addEventListener('input', debouncedRenderWithSearch);
+        document.getElementById('personFilter').addEventListener('change', renderWithSearch);
         document.getElementById('showChildrenFilter').addEventListener('change', renderMessages);
         document.getElementById('showThinkingFilter').addEventListener('change', renderMessages);
         document.getElementById('flatViewFilter').addEventListener('change', renderMessages);
