@@ -99,7 +99,8 @@ RUN chmod +x /usr/local/bin/container_startup.py
 # CLAUDE.md will be symlinked from magenta repo on container startup
 
 # Expose ports
-EXPOSE 22 8080 4000 4050
+# SSH, code-server, preview ports, and mosh UDP range
+EXPOSE 22 8080 4000 4050 60000-61000/udp
 
 # Use tini as init system to properly reap zombie processes
 ENTRYPOINT ["/usr/bin/tini", "--"]

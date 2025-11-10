@@ -9,6 +9,8 @@ services:
       # Port range: {{ user.port_range_start }}-{{ user.port_range_start + 9 }}
       # Maps to container ports 4000-4009
       - "{{ user.port_range_start }}-{{ user.port_range_start + 9 }}:4000-4009"
+      # Mosh UDP port range (60000-61000 in container, mapped to unique range per user)
+      - "{{ user.mosh_port_start | default(60000 + (user.ssh_port - 2222) * 100) }}-{{ user.mosh_port_start | default(60000 + (user.ssh_port - 2222) * 100) + 99 }}:60000-60099/udp"
     volumes:
       # Mount entire home directory to persist workspace, .claude, bash history, etc
       - {{ base_dir }}/{{ user.name }}/home:/home/magent

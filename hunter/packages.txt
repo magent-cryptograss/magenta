@@ -37,3 +37,4 @@ netcat-openbsd
 iproute2
 tmux
 screen
+mosh
