@@ -8,4 +8,9 @@
 }
 
 {% endfor %}
+# {{ user.full_name }} - code-server
+code.{{ user.name }}.{{ base_domain }} {
+    reverse_proxy localhost:{{ 18080 + (user.ssh_port - 2222) }}
+}
+
 {% endfor %}
