@@ -33,6 +33,8 @@
   file:
     path: "{{ base_dir }}/{{ user.name }}/.ssh"
     state: directory
+    owner: 1000  # magent user ID in container
+    group: 1000
     mode: '0700'
 
 - name: Copy shared CLAUDE.md to user .claude directory
@@ -62,6 +64,8 @@
   copy:
     dest: "{{ base_dir }}/{{ user.name }}/.ssh/authorized_keys"
     content: "{{ user.ssh_pubkey }}\n"
+    owner: 1000  # magent user ID in container
+    group: 1000
     mode: '0600'
 
 - name: Create git config for user
