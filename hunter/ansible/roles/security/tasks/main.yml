@@ -46,8 +46,8 @@
       enabled = true
       port = ssh
       logpath = /var/log/auth.log
-      maxretry = 20
-      bantime = 600
+      maxretry = 3
+      bantime = 86400
     mode: '0644'
   notify: restart fail2ban
 
