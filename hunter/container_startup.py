@@ -232,6 +232,12 @@ def start_services():
     run_command("service ssh start")
     logger.info("✓ SSH started")
 
+    # Start code-server
+    password = os.environ.get('CODE_SERVER_PASSWORD', 'changeme')
+    logger.info("Starting code-server...")
+    run_command(f"nohup code-server --bind-addr 0.0.0.0:8080 --auth password --password '{password}' /home/magent/workspace > /tmp/code-server.log 2>&1 &", user='magent')
+    logger.info("✓ code-server started on port 8080")
+
     # Note: PostgreSQL runs in separate container, not started here
     logger.info("✓ Using shared PostgreSQL container")
 
