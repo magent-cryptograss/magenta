@@ -7,7 +7,7 @@ services:
     ports:
       - "{{ user.ssh_port }}:22"
       # code-server web IDE (18080 for justin, 18081 for rj, etc.)
-      - "{{ 18080 + loop.index0 }}:8080"
+      - "{{ 18080 + (user.ssh_port - 2222) }}:8080"
       # Port range: {{ user.port_range_start }}-{{ user.port_range_start + 9 }}
       # Maps to container ports 4000-4009
       - "{{ user.port_range_start }}-{{ user.port_range_start + 9 }}:4000-4009"
