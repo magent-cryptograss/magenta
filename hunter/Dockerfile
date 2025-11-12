@@ -82,19 +82,20 @@ RUN git clone ${ARTHEL_REPO_URL} /home/magent/workspace/arthel
 # Install dependencies for arthel
 RUN cd /home/magent/workspace/arthel && npm install
 
-# Install uv (as magent user)
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/home/magent/.local/bin:$PATH"
-
 # Clone magenta repository
 ARG MAGENTA_REPO_URL=https://github.com/magent-cryptograss/magenta.git
 ARG MAGENTA_BRANCH=production
 RUN git clone --branch ${MAGENTA_BRANCH} ${MAGENTA_REPO_URL} /home/magent/workspace/magenta
 
-# Install Python dependencies for magenta using uv
-RUN /home/magent/.local/bin/uv pip install --python /usr/bin/python3 --break-system-packages -r /home/magent/workspace/magenta/requirements.txt
-
+# Switch to root to install uv and Python dependencies
 USER root
+
+# Install uv (as root for system-wide access)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+# Install Python dependencies for magenta using uv
+RUN /root/.local/bin/uv pip install --python /usr/bin/python3 --break-system-packages -r /home/magent/workspace/magenta/requirements.txt
 
 # Copy startup script
 COPY container_startup.py /usr/local/bin/
