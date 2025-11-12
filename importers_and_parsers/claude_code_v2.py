@@ -137,12 +137,12 @@ def import_line_from_claude_code_v2(line, era, filename, username='justin'):
         # Get the user's ThinkingEntity (create if doesn't exist)
         user, _ = ThinkingEntity.objects.get_or_create(
             name=username,
-            defaults={'description': f'Developer: {username}'}
+            defaults={'is_biological_human': True}
         )
         # magent is always the AI assistant
         magent, _ = ThinkingEntity.objects.get_or_create(
             name='magent',
-            defaults={'description': 'AI assistant'}
+            defaults={'is_biological_human': False}
         )
 
         event_type, event = Message.detect_event_type_claude_code_v2(line)
