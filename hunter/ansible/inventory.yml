@@ -26,15 +26,14 @@ all:
         port_range_start: 14000  # 14000-14009
         code_server_password: "{{ vault_justin_password }}"
 
-      # Uncomment when ready to add more users:
-      # - name: rj
-      #   full_name: "R.J. Partington III"
-      #   email: "rj@example.com"
-      #   github_username: "rjpartingtoniii"
-      #   ssh_pubkey: "rj_ssh_key_here"
-      #   ssh_port: 2223
-      #   port_range_start: 14010
-      #   code_server_password: "{{ vault_rj_password | default('change-me-rj') }}"
+      - name: rj
+        full_name: "R.J. Partington III"
+        email: "rj@example.com"
+        github_username: "rjpartingtoniii"
+        ssh_pubkey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3PKuhIuPkCMX7RQu6xNK3V40gQtdbhIVrknmhskzYX4aOhAyA4sB5YpcDhCwusiNmoXTllEga6vwcAJSKpn8XafddfZXyZkfg4tWT/sBDMiwInICqah5bcImBwLfBaA2/oFo9/26Qg3s/Z4DU6EiE+VyqnoMPYdOU0KCuXCumy/xira7QKa0aRXTC7M81uXRFvFAPaYav0FYPsj4JLYD1Eg6IXapxV6mQ1KXK1Y7gbD+6OuyAvP232SyTNsQNqf5dDdAIW+CtWuSIDv90u0+nkg000wm9xC8lQUPoGzZQDy249q++jrHRlubgmONKcxZBJeZtbA5m8myNzTyfmtRx rjpartingtoniii@Richards-MacBook-Pro-2.local"
+        ssh_port: 2223
+        port_range_start: 14010
+        code_server_password: "{{ vault_rj_password }}"
 
       # - name: skyler
       #   full_name: "Skyler Golden"
