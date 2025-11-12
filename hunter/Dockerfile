@@ -84,7 +84,7 @@ RUN cd /home/magent/workspace/arthel && npm install
 
 # Install uv (as magent user)
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/home/magent/.cargo/bin:$PATH"
+ENV PATH="/home/magent/.local/bin:$PATH"
 
 # Clone magenta repository
 ARG MAGENTA_REPO_URL=https://github.com/magent-cryptograss/magenta.git
@@ -92,7 +92,7 @@ ARG MAGENTA_BRANCH=production
 RUN git clone --branch ${MAGENTA_BRANCH} ${MAGENTA_REPO_URL} /home/magent/workspace/magenta
 
 # Install Python dependencies for magenta using uv
-RUN uv pip install --system -r /home/magent/workspace/magenta/requirements.txt
+RUN /home/magent/.local/bin/uv pip install --system -r /home/magent/workspace/magenta/requirements.txt
 
 USER root
 
