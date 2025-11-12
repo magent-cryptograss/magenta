@@ -131,12 +131,19 @@ def extract_timestamp(event):
             return int(dt.timestamp() * 1000)
     return None
 
-def import_line_from_claude_code_v2(line, era, filename):
-        
+def import_line_from_claude_code_v2(line, era, filename, username='justin'):
+
         # Get entities
-        # TODO: #12
-        justin = ThinkingEntity.objects.get(name='justin')
-        magent = ThinkingEntity.objects.get(name='magent')
+        # Get the user's ThinkingEntity (create if doesn't exist)
+        user, _ = ThinkingEntity.objects.get_or_create(
+            name=username,
+            defaults={'description': f'Developer: {username}'}
+        )
+        # magent is always the AI assistant
+        magent, _ = ThinkingEntity.objects.get_or_create(
+            name='magent',
+            defaults={'description': 'AI assistant'}
+        )
 
         event_type, event = Message.detect_event_type_claude_code_v2(line)
 
@@ -294,9 +301,9 @@ def import_line_from_claude_code_v2(line, era, filename):
                     'created_at': timezone.now(),
                 }
             )
-            # Thought-out response is magent responding to justin
+            # Thought-out response is magent responding to user
             if created:
-                message.recipients.add(justin)
+                message.recipients.add(user)
 
         elif event_type == "tool result":
             # Tool result comes from the tool itself, not from a thinking entity
@@ -333,20 +340,20 @@ def import_line_from_claude_code_v2(line, era, filename):
                     'created_at': timezone.now(),
                 }
             )
-            # Continuation is magent to justin (resuming after compact)
+            # Continuation is magent to user (resuming after compact)
             if created:
-                message.recipients.add(justin)
+                message.recipients.add(user)
         elif event_type == "regular message":
             role = event['message']['role']
             content = event['message']['content']
 
             #### This block is clearly broken - we need real logic for this.
             if role == 'user':
-                sender = justin
+                sender = user
                 recipient = magent
             elif role == 'assistant':
                 sender = magent
-                recipient = justin
+                recipient = user
             else:
                 assert False
 
@@ -370,7 +377,7 @@ def import_line_from_claude_code_v2(line, era, filename):
             role = event['message']['role']
             content = event['message']['content']
             if role == "user":
-                sender = justin
+                sender = user
                 recipient = magent
             else:
                 assert False # Not sure what this can be?
@@ -420,12 +427,12 @@ def import_line_from_claude_code_v2(line, era, filename):
             if isinstance(parsed_content, dict):
                 if parsed_content.get('type') == 'slash_command':
                     # Slash command invocation - from user to SlashCommand tool
-                    sender = justin  # TODO: #12 - determine actual user
+                    sender = user
                     recipient = get_or_create_participant('SlashCommand', 'tool')
                 elif parsed_content.get('type') == 'command_output':
                     # Command output - from system stdout back to user
                     sender = get_or_create_participant('stdout', 'system')
-                    recipient = justin  # TODO: #12 - determine actual user
+                    recipient = user
                 else:
                     # Meta caveat message - from magent to magent
                     sender = magent

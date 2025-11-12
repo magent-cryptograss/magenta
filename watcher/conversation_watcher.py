@@ -61,7 +61,7 @@ class ConversationWatcher(FileSystemEventHandler):
         Initialize watcher.
 
         Args:
-            watch_dir: Directory to watch (e.g., /home/magent/.claude/project-logs/)
+            watch_dir: Directory to watch (e.g., /project-logs/justin/)
             era: Era instance to import into
         """
         self.watch_dir = Path(watch_dir)
@@ -69,7 +69,20 @@ class ConversationWatcher(FileSystemEventHandler):
         self.file_positions = {}  # Track last position read for each file
         self.current_heap = None  # Track current heap for edge cases
 
-        logger.info(f"Watcher initialized for {watch_dir}")
+        # Extract username from watch directory path
+        # Expected format: /project-logs/username/...
+        parts = self.watch_dir.parts
+        if 'project-logs' in parts:
+            idx = parts.index('project-logs')
+            if idx + 1 < len(parts):
+                self.username = parts[idx + 1]
+            else:
+                self.username = 'unknown'
+        else:
+            # Fallback - try to extract from path
+            self.username = parts[-2] if len(parts) >= 2 else 'unknown'
+
+        logger.info(f"Watcher initialized for {watch_dir} (user: {self.username})")
         logger.info(f"Importing into era: {era.name} ({era.id})")
 
     def on_modified(self, event):
@@ -162,7 +175,7 @@ class ConversationWatcher(FileSystemEventHandler):
         from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
 
         # Parse and create message using existing logic
-        event, created = import_line_from_claude_code_v2(line, self.era, filename)
+        event, created = import_line_from_claude_code_v2(line, self.era, filename, self.username)
 
         # Check if this is an event type we don't handle yet
         if event is EVENT_TYPE_WE_DO_NOT_HANDLE_YET:
