@@ -92,7 +92,7 @@ ARG MAGENTA_BRANCH=production
 RUN git clone --branch ${MAGENTA_BRANCH} ${MAGENTA_REPO_URL} /home/magent/workspace/magenta
 
 # Install Python dependencies for magenta using uv
-RUN /home/magent/.local/bin/uv pip install --system -r /home/magent/workspace/magenta/requirements.txt
+RUN /home/magent/.local/bin/uv pip install --python /usr/bin/python3 --break-system-packages -r /home/magent/workspace/magenta/requirements.txt
 
 USER root
 
