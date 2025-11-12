@@ -51,23 +51,26 @@ django.setup()
 from conversations.models import Era, Message
 from importers_and_parsers.claude_code_v2 import import_line_from_claude_code_v2
 from watcher.heap_assignment import assign_heap_to_message
+from security import SecretsFilter
 
 
 class ConversationWatcher(FileSystemEventHandler):
     """Watch JSONL files and import new messages."""
 
-    def __init__(self, watch_dir, era):
+    def __init__(self, watch_dir, era, secrets_filter=None):
         """
         Initialize watcher.
 
         Args:
             watch_dir: Directory to watch (e.g., /project-logs/justin/)
             era: Era instance to import into
+            secrets_filter: Optional SecretsFilter instance for scrubbing sensitive data
         """
         self.watch_dir = Path(watch_dir)
         self.era = era
         self.file_positions = {}  # Track last position read for each file
         self.current_heap = None  # Track current heap for edge cases
+        self.secrets_filter = secrets_filter
 
         # Extract username from watch directory path
         # Expected format: /project-logs/username/...
@@ -84,6 +87,8 @@ class ConversationWatcher(FileSystemEventHandler):
 
         logger.info(f"Watcher initialized for {watch_dir} (user: {self.username})")
         logger.info(f"Importing into era: {era.name} ({era.id})")
+        if self.secrets_filter:
+            logger.info("Secrets filtering enabled")
 
     def on_modified(self, event):
         """Handle file modification events."""
@@ -174,6 +179,10 @@ class ConversationWatcher(FileSystemEventHandler):
         """
         from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
 
+        # Scrub secrets before importing if filter is configured
+        if self.secrets_filter:
+            line = self.secrets_filter.scrub_jsonl_line(line)
+
         # Parse and create message using existing logic
         event, created = import_line_from_claude_code_v2(line, self.era, filename, self.username)
 
@@ -216,10 +225,24 @@ def main():
     # Configuration
     WATCH_DIR = os.getenv('CLAUDE_LOGS_DIR', '/home/magent/.claude/project-logs')
     ERA_NAME = os.getenv('WATCHER_ERA_NAME', 'Current Working Era (Era N)')
+    VAULT_PATH = os.getenv('VAULT_PATH')
+    VAULT_PASSWORD = os.getenv('ANSIBLE_VAULT_PASSWORD')
 
     # Support for multi-user directories
     # If WATCH_DIR contains multiple colon-separated paths, watch all of them
     watch_dirs = [Path(d.strip()) for d in WATCH_DIR.split(':') if d.strip()]
+
+    # Initialize secrets filter if vault is configured
+    secrets_filter = None
+    if VAULT_PATH and VAULT_PASSWORD:
+        try:
+            secrets_filter = SecretsFilter(vault_path=VAULT_PATH, vault_password=VAULT_PASSWORD)
+            logger.info("SecretsFilter initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize SecretsFilter: {e}")
+            logger.warning("Continuing without secrets filtering")
+    else:
+        logger.info("No vault configured - secrets filtering disabled")
 
     # Get or create era
     era, created = Era.objects.get_or_create(name=ERA_NAME)
@@ -238,7 +261,7 @@ def main():
             continue
 
         logger.info(f"Setting up watcher for: {watch_dir}")
-        watcher = ConversationWatcher(watch_dir, era)
+        watcher = ConversationWatcher(watch_dir, era, secrets_filter=secrets_filter)
 
         # Scan existing files to establish baseline
         watcher.scan_existing_files()

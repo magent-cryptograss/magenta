@@ -35,12 +35,17 @@ services:
       # Colon-separated list of directories to watch
       - CLAUDE_LOGS_DIR=/project-logs/justin:/project-logs/rj:/project-logs/skyler
       - WATCHER_ERA_NAME=Live Conversations
+      # Secrets filtering
+      - VAULT_PATH=/app/vault.yml
+      - ANSIBLE_VAULT_PASSWORD=${ANSIBLE_VAULT_PASSWORD}
     volumes:
       # Mount all users' Claude Code logs (from their home directories)
       - /opt/magenta/justin/home/.claude/projects:/project-logs/justin:ro
       - /opt/magenta/rj/home/.claude/projects:/project-logs/rj:ro
       - /opt/magenta/skyler/home/.claude/projects:/project-logs/skyler:ro
       - watcher-logs:/app/logs
+      # Mount vault for secrets filtering (read-only)
+      - /opt/magenta/magenta-source/hunter/ansible/vault.yml:/app/vault.yml:ro
     networks:
       - magenta-net
     restart: unless-stopped

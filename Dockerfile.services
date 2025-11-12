@@ -4,13 +4,19 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y \
     postgresql-client \
     git \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.cargo/bin:$PATH"
 
 WORKDIR /app
 
-# Copy requirements and install Python packages
+# Copy project files and install Python packages with uv
+COPY pyproject.toml .
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install --system -r requirements.txt
 
 # Copy Django project
 COPY . .
