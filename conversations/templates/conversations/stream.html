@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magenta Stream</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 13px;
+            margin: 0;
+            padding: 0;
+            background: #0d1117;
+            color: #c9d1d9;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .header {
+            padding: 12px 20px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        .status {
+            font-size: 11px;
+            color: #8b949e;
+        }
+        .status.live {
+            color: #3fb950;
+        }
+        .stream-container {
+            height: calc(100vh - 50px);
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .message {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: #161b22;
+            border-radius: 6px;
+            border-left: 3px solid #30363d;
+            animation: slideIn 0.3s ease-out;
+        }
+        .message.new {
+            animation: highlight 2s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes highlight {
+            0% {
+                background: #1f3a2f;
+                border-left-color: #3fb950;
+            }
+            100% {
+                background: #161b22;
+                border-left-color: #30363d;
+            }
+        }
+        .message.from-justin {
+            border-left-color: #58a6ff;
+        }
+        .message.from-magent {
+            border-left-color: #a371f7;
+        }
+        .message.tool-use {
+            border-left-color: #f0883e;
+        }
+        .message.tool-result {
+            border-left-color: #8b949e;
+        }
+        .message.thought {
+            border-left-color: #db61a2;
+            font-style: italic;
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 11px;
+        }
+        .sender {
+            font-weight: bold;
+        }
+        .sender.justin {
+            color: #58a6ff;
+        }
+        .sender.magent {
+            color: #a371f7;
+        }
+        .timestamp {
+            color: #8b949e;
+        }
+        .message-type {
+            font-size: 10px;
+            color: #8b949e;
+            margin-left: 8px;
+        }
+        .content {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        .content.expanded {
+            max-height: none;
+        }
+        .content.truncated::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(transparent, #161b22);
+        }
+        .expand-btn {
+            font-size: 10px;
+            color: #58a6ff;
+            cursor: pointer;
+            margin-top: 4px;
+            display: none;
+        }
+        .content.truncated + .expand-btn {
+            display: block;
+        }
+        .tool-name {
+            color: #f0883e;
+            font-size: 11px;
+        }
+        .no-messages {
+            text-align: center;
+            color: #8b949e;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">🐇 Magenta Stream</div>
+        <div class="status" id="status">Connecting...</div>
+    </div>
+    <div class="stream-container" id="stream">
+        <div class="no-messages">Loading messages...</div>
+    </div>
+
+    <script>
+        const streamContainer = document.getElementById('stream');
+        const statusEl = document.getElementById('status');
+        let lastMessageId = null;
+        let isFirstLoad = true;
+        const POLL_INTERVAL = 3000;
+        const MAX_MESSAGES = 100;
+
+        function formatTimestamp(ts) {
+            if (!ts) return '';
+            const date = new Date(typeof ts === 'number' ? ts : ts);
+            return date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+        }
+
+        function getContentPreview(content) {
+            if (!content) return '';
+            if (typeof content === 'object') {
+                return JSON.stringify(content, null, 2);
+            }
+            return String(content);
+        }
+
+        function createMessageElement(msg, isNew = false) {
+            const div = document.createElement('div');
+
+            let typeClass = '';
+            let typeLabel = '';
+            if (msg.message_type === 'Thought') {
+                typeClass = 'thought';
+                typeLabel = '💭 thinking';
+            } else if (msg.message_type === 'ToolUse') {
+                typeClass = 'tool-use';
+                typeLabel = '🔧 ' + (msg.tool_name || 'tool');
+            } else if (msg.message_type === 'ToolResult') {
+                typeClass = 'tool-result';
+                typeLabel = '📋 result' + (msg.is_error ? ' ❌' : '');
+            }
+
+            const senderClass = msg.sender === 'justin' ? 'from-justin' : 'from-magent';
+            div.className = `message ${senderClass} ${typeClass}` + (isNew ? ' new' : '');
+
+            const content = getContentPreview(msg.content);
+            const isTruncated = content.length > 500;
+
+            div.innerHTML = `
+                <div class="message-header">
+                    <span>
+                        <span class="sender ${msg.sender}">${msg.sender}</span>
+                        <span class="message-type">${typeLabel}</span>
+                    </span>
+                    <span class="timestamp">${formatTimestamp(msg.timestamp)}</span>
+                </div>
+                <div class="content ${isTruncated ? 'truncated' : ''}">${escapeHtml(content.substring(0, 500))}${isTruncated ? '...' : ''}</div>
+                <div class="expand-btn" onclick="expandMessage(this)">Show more</div>
+            `;
+
+            div.dataset.fullContent = content;
+            return div;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function expandMessage(btn) {
+            const contentEl = btn.previousElementSibling;
+            const messageEl = btn.parentElement;
+            const fullContent = messageEl.dataset.fullContent;
+
+            if (contentEl.classList.contains('expanded')) {
+                contentEl.classList.remove('expanded');
+                contentEl.classList.add('truncated');
+                contentEl.textContent = fullContent.substring(0, 500) + '...';
+                btn.textContent = 'Show more';
+            } else {
+                contentEl.classList.add('expanded');
+                contentEl.classList.remove('truncated');
+                contentEl.textContent = fullContent;
+                btn.textContent = 'Show less';
+            }
+        }
+
+        async function fetchMessages() {
+            try {
+                let url = '/api/all_messages/?limit=100&order=desc';
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch');
+
+                const data = await response.json();
+                const messages = data.messages || [];
+
+                if (messages.length === 0) {
+                    streamContainer.innerHTML = '<div class="no-messages">No messages yet</div>';
+                    return;
+                }
+
+                if (isFirstLoad) {
+                    streamContainer.innerHTML = '';
+                    messages.forEach(msg => {
+                        streamContainer.appendChild(createMessageElement(msg, false));
+                    });
+                    isFirstLoad = false;
+                    if (messages.length > 0) {
+                        lastMessageId = messages[0].id;
+                    }
+                } else {
+                    // Check for new messages
+                    const newMessages = [];
+                    for (const msg of messages) {
+                        if (msg.id === lastMessageId) break;
+                        newMessages.push(msg);
+                    }
+
+                    if (newMessages.length > 0) {
+                        // Insert new messages at top
+                        newMessages.reverse().forEach(msg => {
+                            const el = createMessageElement(msg, true);
+                            streamContainer.insertBefore(el, streamContainer.firstChild);
+                        });
+                        lastMessageId = messages[0].id;
+
+                        // Trim old messages
+                        while (streamContainer.children.length > MAX_MESSAGES) {
+                            streamContainer.removeChild(streamContainer.lastChild);
+                        }
+                    }
+                }
+
+                statusEl.textContent = `Live • ${messages.length} messages`;
+                statusEl.className = 'status live';
+
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                statusEl.textContent = 'Connection error';
+                statusEl.className = 'status';
+            }
+        }
+
+        // Initial fetch
+        fetchMessages();
+
+        // Poll for updates
+        setInterval(fetchMessages, POLL_INTERVAL);
+    </script>
+</body>
+</html>

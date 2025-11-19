@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('memory_lane/', views.memory_lane, name='memory_lane'),
+    path('stream/', views.stream, name='stream'),
     path('api/messages/', views.api_messages, name='api_messages'),
     path('api/all_messages/', views.all_messages, name='all_messages'),
     path('api/heap_metadata/', views.heap_metadata, name='heap_metadata'),

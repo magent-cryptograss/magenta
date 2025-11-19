@@ -13,6 +13,11 @@ def memory_lane(request):
     return render(request, 'conversations/memory_lane.html')
 
 
+def stream(request):
+    """Live stream view - compact, auto-updating recent messages."""
+    return render(request, 'conversations/stream.html')
+
+
 def messages_since(request, message_id):
     """
     Get all messages created after the specified message_id.
