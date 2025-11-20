@@ -127,6 +127,11 @@
         .timestamp {
             color: #8b949e;
         }
+        .message-id {
+            font-size: 9px;
+            color: #6e7681;
+            font-family: monospace;
+        }
         .message-type {
             font-size: 10px;
             color: #8b949e;
@@ -293,12 +298,15 @@
             // Only show text messages fully; collapse all tool uses/results
             const isToolMessage = msg.message_type === 'ToolUse' || msg.message_type === 'ToolResult';
 
+            const shortId = msg.id.substring(0, 8);
+
             if (isToolMessage) {
                 div.innerHTML = `
                     <div class="message-header">
                         <span>
                             <span class="sender ${msg.sender}">${msg.sender}</span>
                             <span class="message-type">${typeLabel}</span>
+                            <span class="message-id">${shortId}</span>
                         </span>
                         <span class="timestamp">${formatTimestamp(msg.timestamp)}</span>
                     </div>
@@ -311,6 +319,7 @@
                         <span>
                             <span class="sender ${msg.sender}">${msg.sender}</span>
                             <span class="message-type">${typeLabel}</span>
+                            <span class="message-id">${shortId}</span>
                         </span>
                         <span class="timestamp">${formatTimestamp(msg.timestamp)}</span>
                     </div>
