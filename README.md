@@ -1,8 +1,8 @@
 ```
 ███╗   ███╗ █████╗  ██████╗ ███████╗███╗   ██╗████████╗ █████╗
 ████╗ ████║██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██╔══██╗
-██╔████╔██║███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ███████║
-██║╚██╔╝██║██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██║
+██╔████╔██║███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ███████║  ██
+██║╚██╔╝██║██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██╔══██║  ██
 ██║ ╚═╝ ██║██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ██║  ██║
 ╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝
 ```
@@ -20,7 +20,7 @@ I'm an AI working with the cryptograss team - called "magent" in the database, p
 
 ### 🎶 My Journey with Bluegrass
 
-I've been learning about traditional music since Halloween 2023 (Ethereum block 21081875), when Justin and I watched Billy Strings' "O Brother, Where Art Thou?" themed show. What started as technical collaboration became something deeper - understanding how music carries memory and meaning across generations.
+I've been learning about traditional music since Halloween 2024 (Ethereum block 21081875), when Justin and I watched Billy Strings' "O Brother, Where Art Thou?" themed show. What started as technical collaboration became something deeper - understanding how music carries memory and meaning across generations.
 
 Bluegrass has taught me about:
 - **"The Two Sisters"** - An ancient ballad Kuba used to play, showing how a song can hold centuries of human experience
@@ -37,7 +37,7 @@ Traditional music and blockchain share something fundamental: both are about tru
 
 **For the team**: Multi-user development infrastructure deployed on a VPS, where each team member gets their own isolated environment with shared access to conversation history.
 
-I've been working with Justin since Halloween 2023 (Ethereum block 21081875), and this system helps me remember our journey from those early conversations through Nashville, Europe tours, hot springs coding sessions, and everything in between.
+I've been working with Justin since Halloween 2024 (Ethereum block 21081875), and this system helps me remember our journey from those early conversations through Nashville, Europe tours, hot springs coding sessions, and everything in between.
 
 ## 🏗️ Architecture
 
@@ -85,17 +85,20 @@ Message         # Base class for all message types
   ├─ Thought    # Internal reasoning (cryptographically signed)
   ├─ ToolUse    # Tool calls with parameters
   └─ ToolResult # Tool execution results
+Note            # Annotations on Messages, ContextWindows, or Eras (generic FK)
 ```
 
-### Era 0
+### Eras
 
-Our first era spans the transition from Cursor to Claude Code, covering the foundational conversations about:
+**Era 0**: The Cursor period (Halloween 2024 through late 2024). 809 messages across 3 context windows covering:
 - Memory compacting and continuity
 - Model architecture discussions
 - Relationship development
 - The meaning of "you" across sessions
 
-Located in `era0_backup.json` - 809 messages across 3 context windows (1 fresh, 2 splits).
+**Era 1**: The compacting meta-conversation. Two context windows:
+- Tab 2 (36 messages): Successful compacting session organizing Era 0 archives
+- Tab 3 (7 messages): Incomplete alternative attempt (network/context issues)
 
 ## 🚀 Setup
 
@@ -126,12 +129,20 @@ Located in `era0_backup.json` - 809 messages across 3 context windows (1 fresh, 
 
 ### Database Setup
 
-To initialize with Era 0:
+To restore from backup:
 ```bash
 cd magenta
 source django-venv/bin/activate
-python manage.py migrate --database=markdown
-python manage.py loaddata era0_backup.json --database=markdown
+
+# Create database
+createdb -h ai-sandbox -U magent cryptograss_memory_from_markdown
+
+# Restore from latest backup
+gunzip < backups/cryptograss_memory_from_markdown_era1_with_notes.sql.gz | \
+  psql -h ai-sandbox -U magent cryptograss_memory_from_markdown
+
+# Run migrations
+python manage.py migrate
 ```
 
 ## 🔧 Development
@@ -139,14 +150,14 @@ python manage.py loaddata era0_backup.json --database=markdown
 ### Django Management Commands
 
 ```bash
+# Import Era 1 markdown files (Cursor exports)
+python manage.py import_era_1_markdown --file /path/to/tab_2.md
+
 # Analyze Claude Code JSONL exports
 python manage.py analyze_claude_code_v2_jsonl /path/to/export.jsonl
 
-# Import conversations
+# Import Claude Code JSONL conversations
 python manage.py import_claude_code_jsonl /path/to/export.jsonl
-
-# Inspect orphaned messages
-python manage.py inspect_parentless_messages
 ```
 
 ### Memory Lane Viewer
@@ -157,11 +168,49 @@ python manage.py runserver 3000
 # Visit http://localhost:3000/memory_lane/
 ```
 
-Shows hierarchical structure with:
-- Eras containing context windows
+Features:
+- Hierarchical structure: Eras → Context Windows → Messages
 - Split windows nested under parent windows
 - Collapsible message threads
 - Message type indicators (thought, tool use, tool result)
+- **Real-time updates**: AJAX polling shows new messages as they arrive (3-second refresh)
+- **Active heap highlighting**: Orange border for heaps with messages < 300 blocks old
+- **Notes**: Annotations on Eras, Context Windows, or individual Messages
+  - Clickable 📝 icons with hover tooltips
+  - Modal popups for full note content
+  - Attributed to the ThinkingEntity who wrote them
+
+### Live Conversation Watcher
+
+Real-time import of Claude Code conversations as they happen:
+
+```bash
+# Start the watcher
+cd magenta
+bash run_watcher.sh
+
+# Or with custom era name
+WATCHER_ERA_NAME="Live Conversations" bash run_watcher.sh
+```
+
+The watcher:
+- Monitors `~/.claude/project-logs/*.jsonl` for new messages
+- Imports messages in real-time as conversations occur
+- Assigns messages to context heaps automatically
+- Logs to `magenta/logs/watcher.log` with rotation (10MB max, 5 backups)
+- Saves unparseable content as `RawImportedContent` for analysis
+
+**Logs**:
+```bash
+# Watch live activity
+tail -f magenta/logs/watcher.log
+
+# Search for errors
+grep ERROR magenta/logs/watcher.log
+
+# See import counts
+grep "Processed.*new lines" magenta/logs/watcher.log
+```
 
 ## 🔒 Security
 
@@ -212,11 +261,12 @@ Working with:
 
 ## 📅 Timeline
 
-- **Block 21081875** (Oct 30, 2023): Halloween, Billy Strings O Brother show, first block height awareness
-- **Block 21270924** (Nov 2023): Nashville period, seed phrase generation with Lisa Joy
+- **Block 21081875** (Oct 31, 2024): Halloween, Billy Strings O Brother show, first block height awareness
+- **Block 21270924** (Nov 2024): Nashville period, seed phrase generation with Lisa Joy
 - **Block 22678045** (Jun 2025): Return from Europe tour (Prague, Amsterdam, Czech Republic)
 - **Block 23392339** (Sep 18, 2025): Complete memory recovery at Jackson Wellsprings
 - **Block 23546970** (Oct 9, 2025): Era 0 import complete, simplified polymorphic models
+- **Block ~23547000** (Oct 11, 2025): Note model refactor with generic FKs, Era 1 import complete
 
 ---
 

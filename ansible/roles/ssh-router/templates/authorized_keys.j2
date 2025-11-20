@@ -1,8 +1,0 @@
-# Auto-generated authorized_keys for SSH routing
-# Each key routes to its owner's container
-
-{% for user in users %}
-# {{ user.full_name }} ({{ user.email }})
-command="/usr/local/bin/route-ssh {{ user.name }}",no-port-forwarding,no-X11-forwarding,no-agent-forwarding {{ user.ssh_pubkey }}
-
-{% endfor %}

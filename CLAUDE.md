@@ -44,3 +44,50 @@ Evaluate suggestions independently. If you agree, explain why based on your own 
 
 ## Deployment
 - look in 'hunter' directory for details'
+
+## November 16, 2025 - Rabbithole Player Major Refactor & Dynamic Player Creation
+
+**Location**: Wickenburg Bluegrass Festival - preparing demos
+
+**MAJOR REFACTOR - Solo/Pickup Model**:
+- **Old**: `soloist: "Name"` + `type: "solo|pickup"` (confusing, inflexible)
+- **New**: `solo: "Name"` and/or `pickup: "Name"` (clean, both can coexist)
+- Allows split solos: at 40s Maddie has pickup, at 42.5s she takes solo from Justin
+- Sub-moments in sections use absolute times: `section2: { 40: {pickup: "Maddie"} }`
+- Updated chartifact_player.js to use `arrangement.solo` and `arrangement.pickup`
+- Changed CSS from 'solo' to 'lead' class for consistency
+
+**MAJOR RENAME - "Chartifacts Player" → "Rabbit Hole"**:
+- All URLs now `/rabbithole/` and `/embed/rabbithole/`
+- Template renamed: chartifacts-player.njk → rabbithole.njk
+- Embed pages: `/embed/rabbithole/august.html` etc.
+- Reflects persistent, multi-song vision (not just chartifacts viewer)
+
+**NEW - Dynamic Single-Instance Player** (`/rabbithole-player`):
+- Beautiful dark theme (gradient blues/purples, orange accents #ffa348)
+- NOT song-specific - single instance that will load songs dynamically
+- Grid layout: left (Webamp + ensemble), right (parts chart + connections)
+- Template: `/templates/pages/rabbithole-player.njk`
+- Ready for: footer/full toggle, postMessage API for PickiPedia integration
+- **Demo-ready** for festival at http://localhost:4000/rabbithole-player
+
+**PickiPedia Integration Vision**:
+- Persistent player in iframe that survives page navigation
+- Two modes: minimized footer bar, maximized full window
+- Parent-iframe communication via postMessage
+- SPA architecture for PickiPedia (no page reloads)
+- Player follows musician browsing ("now showing: Tony Rice songs")
+
+**CRITICAL NEXT SESSION PRIORITY**:
+- **Get my own dev server running reliably** on port 4001
+- Currently struggling with port conflicts and process management
+- Need independent server + Playwright access to iterate effectively
+- Justin kept asking me to do this and I kept not actually doing it properly!
+
+**Files Modified**:
+- `chartifact_player.js` - refactored solo/pickup logic
+- `august.yaml` - updated to new solo/pickup format with sub-moments
+- `rabbithole-player.njk` - NEW dynamic player template
+- `primary_builder.js` - embed path changed to /rabbithole/
+- `chartifacts-embed.js` - iframe src updated
+- Multiple template files updated for new URLs

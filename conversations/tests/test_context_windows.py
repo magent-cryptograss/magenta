@@ -1,10 +1,10 @@
 """
-Tests for ContextOpeningMessage and CompactingAction creation.
+Tests for ContextHeap and CompactingAction creation.
 
-Tests the new polymorphic message structure where:
-- ContextOpeningMessage IS the context window
-- RegularMessage chains with parent and context_window
-- CompactingAction marks when a context was closed
+Tests the polymorphic message structure where:
+- Messages accumulate in a ContextHeap
+- Parent chains link messages together
+- CompactingAction marks when a heap was closed via compacting
 """
 
 import json
@@ -14,13 +14,15 @@ from pathlib import Path
 from django.test import TestCase
 from conversations.models import (
     ThinkingEntity,
-    ContextOpeningMessage,
-    RegularMessage,
+    Era,
+    ContextHeap,
+    ContextHeapType,
+    Message,
     CompactingAction
 )
 
 
-class ContextWindowTestCase(TestCase):
+class ContextHeapTestCase(TestCase):
     """Test context window creation with new polymorphic structure."""
 
     def setUp(self):
@@ -31,8 +33,11 @@ class ContextWindowTestCase(TestCase):
     def test_create_context_with_compacting_action(self):
         """Test creating a context window that ended with a compact event."""
 
+        # Create Era
+        era = Era.objects.create(name='Test Era')
+
         # First message opens the context
-        opener = ContextOpeningMessage.objects.create(
+        opener = Message.objects.create(
             id='00000000-0000-0000-0000-000000000001',
             content="Let's build a memory system",
             sender=self.justin,
@@ -42,35 +47,47 @@ class ContextWindowTestCase(TestCase):
         )
         opener.recipients.add(self.magent)
 
+        # Create ContextHeap with opener as first_message
+        heap = ContextHeap.objects.create(
+            era=era,
+            first_message=opener,
+            type=ContextHeapType.FRESH
+        )
+
+        # Set opener's context_heap
+        opener.context_heap = heap
+        opener.save()
+
         # Chain of regular messages
         session_id = opener.session_id
 
-        msg2 = RegularMessage.objects.create(
+        msg2 = Message.objects.create(
             id='00000000-0000-0000-0000-000000000002',
             content="Great idea! Let's start.",
             sender=self.magent,
             timestamp=1726401660,
             session_id=session_id,
             parent=opener,
-            context_window=opener
+            context_heap=heap
         )
         msg2.recipients.add(self.justin)
 
-        msg3 = RegularMessage.objects.create(
+        msg3 = Message.objects.create(
             id='00000000-0000-0000-0000-000000000003',
             content="Show me the code",
             sender=self.justin,
             timestamp=1726401720,
             session_id=session_id,
             parent=msg2,
-            context_window=opener
+            context_heap=heap
         )
         msg3.recipients.add(self.magent)
 
         # Create CompactingAction to mark context as closed
         compacting = CompactingAction.objects.create(
-            context_opening_message=opener,
+            context_heap=heap,
             ending_message_id='00000000-0000-0000-0000-000000000003',
+            compact_boundary_message_id='00000000-0000-0000-0000-000000000003',
             summary='Discussion about memory systems',
             compact_trigger='manual',
             pre_compact_tokens=145000
@@ -83,31 +100,35 @@ class ContextWindowTestCase(TestCase):
 
         # Verify message chain
         self.assertEqual(msg2.parent, opener)
-        self.assertEqual(msg2.context_window, opener)
+        self.assertEqual(msg2.context_heap, heap)
         self.assertEqual(msg3.parent, msg2)
-        self.assertEqual(msg3.context_window, opener)
+        self.assertEqual(msg3.context_heap, heap)
 
-        # Verify all messages in context
-        context_messages = opener.messages.all()
-        self.assertEqual(context_messages.count(), 2)  # msg2 and msg3
-        context_message_ids = [str(msg.id) for msg in context_messages]
-        self.assertIn(str(msg2.id), context_message_ids)
-        self.assertIn(str(msg3.id), context_message_ids)
+        # Verify all messages in heap
+        heap_messages = heap.messages.all()
+        self.assertEqual(heap_messages.count(), 3)  # opener, msg2, msg3
+        heap_message_ids = [str(msg.id) for msg in heap_messages]
+        self.assertIn(str(opener.id), heap_message_ids)
+        self.assertIn(str(msg2.id), heap_message_ids)
+        self.assertIn(str(msg3.id), heap_message_ids)
 
         # Verify compacting action
-        self.assertEqual(opener.compacting_action.compact_trigger, 'manual')
-        self.assertEqual(opener.compacting_action.pre_compact_tokens, 145000)
-        self.assertEqual(opener.compacting_action.summary, 'Discussion about memory systems')
+        self.assertEqual(heap.compacting_action.compact_trigger, 'manual')
+        self.assertEqual(heap.compacting_action.pre_compact_tokens, 145000)
+        self.assertEqual(heap.compacting_action.summary, 'Discussion about memory systems')
 
         print("✓ Context window with compacting test passed!")
-        print(f"  Opener: {opener}")
-        print(f"  Messages in context: {context_messages.count()}")
+        print(f"  Heap: {heap}")
+        print(f"  Messages in heap: {heap_messages.count()}")
         print(f"  Compacting: {compacting}")
 
     def test_context_without_compacting(self):
         """Test creating a context window that just ended (no compact)."""
 
-        opener = ContextOpeningMessage.objects.create(
+        # Create Era
+        era = Era.objects.create(name='Test Era 2')
+
+        opener = Message.objects.create(
             id='00000000-0000-0000-0000-000000000005',
             content="Quick question",
             sender=self.justin,
@@ -116,31 +137,41 @@ class ContextWindowTestCase(TestCase):
         )
         opener.recipients.add(self.magent)
 
-        msg2 = RegularMessage.objects.create(
+        # Create ContextHeap
+        heap = ContextHeap.objects.create(
+            era=era,
+            first_message=opener,
+            type=ContextHeapType.FRESH
+        )
+
+        opener.context_heap = heap
+        opener.save()
+
+        msg2 = Message.objects.create(
             id='00000000-0000-0000-0000-000000000006',
             content="Sure, what is it?",
             sender=self.magent,
             timestamp=1726405260,
             session_id=opener.session_id,
             parent=opener,
-            context_window=opener
+            context_heap=heap
         )
         msg2.recipients.add(self.justin)
 
         # Verify context works without compacting action
-        self.assertEqual(opener.messages.count(), 1)
-        self.assertFalse(hasattr(opener, 'compacting_action'))
+        self.assertEqual(heap.messages.count(), 2)
+        self.assertFalse(hasattr(heap, 'compacting_action'))
 
         print("✓ Non-compacted context test passed!")
-        print(f"  Opener: {opener}")
-        print(f"  Has compacting action: {hasattr(opener, 'compacting_action')}")
+        print(f"  Heap: {heap}")
+        print(f"  Has compacting action: {hasattr(heap, 'compacting_action')}")
 
     def test_multiple_recipients(self):
         """Test message with multiple recipients."""
 
         rj = ThinkingEntity.objects.create(name='rj', is_biological_human=True)
 
-        opener = ContextOpeningMessage.objects.create(
+        opener = Message.objects.create(
             id='00000000-0000-0000-0000-000000000007',
             content="Hey team, let's collaborate",
             sender=self.justin,
@@ -166,4 +197,4 @@ if __name__ == '__main__':
 
     TestRunner = get_runner(settings)
     test_runner = TestRunner()
-    failures = test_runner.run_tests(["conversations.tests.test_context_windows"])
+    failures = test_runner.run_tests(["conversations.tests.test_context_heaps"])

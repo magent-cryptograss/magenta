@@ -35,3 +35,4 @@ deletion-candidate/
 # Environment
 .env
 .env.local
+vault-plaintext.yml

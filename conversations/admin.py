@@ -2,12 +2,13 @@ from django.contrib import admin
 from .models import (
     ThinkingEntity,
     Era,
-    ContextWindow,
+    ContextHeap,
     Message,
     Thought,
     ToolUse,
     ToolResult,
     CompactingAction,
+    Summary,
     Topic,
     Note
 )
@@ -27,8 +28,8 @@ class EraAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'created_at')
 
 
-@admin.register(ContextWindow)
-class ContextWindowAdmin(admin.ModelAdmin):
+@admin.register(ContextHeap)
+class ContextHeapAdmin(admin.ModelAdmin):
     list_display = ('id', 'era', 'type', 'first_message', 'created_at')
     list_filter = ('era', 'type')
     search_fields = ('id',)
@@ -93,8 +94,19 @@ class ToolResultAdmin(admin.ModelAdmin):
 
 @admin.register(CompactingAction)
 class CompactingActionAdmin(admin.ModelAdmin):
-    list_display = ('context_window', 'ending_message_id', 'compact_trigger', 'created_at')
+    list_display = ('context_heap', 'ending_message', 'compact_trigger', 'created_at')
     readonly_fields = ('created_at',)
+
+
+@admin.register(Summary)
+class SummaryAdmin(admin.ModelAdmin):
+    list_display = ('id', 'summary_preview', 'leaf_message', 'looking_for_leaf_message', 'created_at')
+    search_fields = ('summary_text',)
+    readonly_fields = ('id', 'created_at')
+
+    def summary_preview(self, obj):
+        return obj.summary_text[:80] + '...' if len(obj.summary_text) > 80 else obj.summary_text
+    summary_preview.short_description = 'Summary'
 
 
 @admin.register(Topic)
@@ -106,10 +118,14 @@ class TopicAdmin(admin.ModelAdmin):
 
 @admin.register(Note)
 class NoteAdmin(admin.ModelAdmin):
-    list_display = ('id', 'message', 'author', 'content_preview', 'created_at')
-    list_filter = ('author',)
+    list_display = ('id', 'from_entity', 'about_type', 'content_preview', 'created_at')
+    list_filter = ('from_entity', 'content_type')
     search_fields = ('content',)
     readonly_fields = ('id', 'created_at')
+
+    def about_type(self, obj):
+        return obj.content_type.model if obj.content_type else '?'
+    about_type.short_description = 'About'
 
     def content_preview(self, obj):
         return obj.content[:100] + '...' if len(obj.content) > 100 else obj.content

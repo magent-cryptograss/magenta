@@ -1,0 +1,18 @@
+# Local development overrides for docker-compose.services.yml
+# Usage: docker compose -f docker-compose.services.yml -f docker-compose.local-override.yml up
+
+services:
+  # Override container names to avoid conflicts with hunter
+  memory-lane:
+    container_name: memory-lane-local
+
+  watcher:
+    container_name: watcher-local
+    # Don't need watcher for local dev (optional)
+    profiles:
+      - full
+
+  mcp-server:
+    container_name: mcp-server-local
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
