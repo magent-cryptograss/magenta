@@ -44,6 +44,17 @@ def create_mcp_server():
                 }
             ),
             types.Tool(
+                name="get_message_by_id",
+                description="Get a specific message by its UUID",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "message_id": {"type": "string", "description": "The UUID of the message to retrieve"}
+                    },
+                    "required": ["message_id"]
+                }
+            ),
+            types.Tool(
                 name="get_messages_before",
                 description="Get N messages before a given message or timestamp",
                 inputSchema={

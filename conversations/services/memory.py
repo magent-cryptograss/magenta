@@ -21,6 +21,14 @@ class MemoryService:
         ).order_by('-created_at').first()
 
     @staticmethod
+    def get_message_by_id(message_id):
+        """Get a specific message by its UUID"""
+        try:
+            return Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return None
+
+    @staticmethod
     def get_messages_before(reference_id=None, reference_timestamp=None, limit=300):
         """Get N messages before a reference point"""
         if reference_id:
