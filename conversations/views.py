@@ -14,6 +14,75 @@ def memory_lane(request):
     return render(request, 'conversations/memory_lane.html', {'database': database})
 
 
+def stream(request):
+    """Live stream view - compact, auto-updating recent messages."""
+    return render(request, 'conversations/stream.html')
+
+
+def recent_messages(request):
+    """Lightweight endpoint for stream - just last N messages."""
+    import os
+    from dotenv import load_dotenv
+    from pathlib import Path
+    load_dotenv(Path(__file__).resolve().parent.parent / '.env')
+
+    limit = min(int(request.GET.get('limit', 100)), 500)
+
+    messages = Message.objects.select_related(
+        'sender'
+    ).prefetch_related(
+        'recipients'
+    ).order_by('-created_at')[:limit]
+
+    messages_data = []
+    for msg in messages:
+        # Get the actual polymorphic instance
+        msg_type = 'Message'
+        tool_name = None
+        is_error = False
+
+        if hasattr(msg, 'thought'):
+            msg_type = 'Thought'
+        elif hasattr(msg, 'tooluse'):
+            msg_type = 'ToolUse'
+            tool_name = msg.tooluse.tool_name
+        elif hasattr(msg, 'toolresult'):
+            msg_type = 'ToolResult'
+            is_error = msg.toolresult.is_error
+
+        # Handle content - extract text from message format
+        content = ''
+        if msg.content:
+            if isinstance(msg.content, str):
+                content = msg.content[:1000]
+            elif isinstance(msg.content, list):
+                # Extract text from [{"text": "...", "type": "text"}] format
+                texts = []
+                for item in msg.content:
+                    if isinstance(item, dict) and 'text' in item:
+                        texts.append(item['text'])
+                content = '\n'.join(texts)[:1000]
+            elif isinstance(msg.content, dict):
+                import json
+                content = json.dumps(msg.content)[:1000]
+            else:
+                content = str(msg.content)[:1000]
+
+        msg_dict = {
+            'id': str(msg.id),
+            'message_type': msg_type,
+            'sender': msg.sender.name if msg.sender else 'unknown',
+            'content': content,
+            'timestamp': msg.timestamp,
+            'tool_name': tool_name,
+            'is_error': is_error,
+            'context_heap_id': str(msg.context_heap_id) if msg.context_heap_id else None,
+        }
+        messages_data.append(msg_dict)
+
+    return JsonResponse({'messages': messages_data})
+
+
 def all_messages(request):
     """Messages grouped by Era and ContextWindow."""
     database = request.GET.get('db', 'default')

@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +30,7 @@ SECRET_KEY = 'django-insecure-zqun#rs1hda@a#za&#&9p7qs-5@hvh97nepfddp%mt6#^l078d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.hunter.cryptograss.live', 'memory-lane', '5.78.83.4']
 
 
 # Application definition
@@ -76,20 +81,12 @@ WSGI_APPLICATION = 'memory_viewer.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cryptograss_memory_from_backup',
-        'USER': 'magent',
-        'PASSWORD': '',  # Trust authentication on ai-sandbox
-        'HOST': 'ai-sandbox',
-        'PORT': '5432',
+        'NAME': os.getenv('POSTGRES_DB', 'magenta_memory'),
+        'USER': os.getenv('POSTGRES_USER', 'magent'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('POSTGRES_HOST', 'magenta-postgres'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     },
-    'markdown': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cryptograss_memory_from_markdown',
-        'USER': 'magent',
-        'PASSWORD': '',  # Trust authentication on ai-sandbox
-        'HOST': 'ai-sandbox',
-        'PORT': '5432',
-    }
 }
 
 
