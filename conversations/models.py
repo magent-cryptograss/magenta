@@ -66,6 +66,7 @@ class ThinkingEntity(ConversationParticipant):
     Distinguished from other participants by having deliberation and intention.
     """
 
+
     is_biological_human = models.BooleanField(default=True)
 
     class Meta:

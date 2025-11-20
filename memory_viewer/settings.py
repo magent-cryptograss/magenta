@@ -14,11 +14,11 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv(Path(__file__).resolve().parent.parent / '.env')
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-zqun#rs1hda@a#za&#&9p7qs-5@hvh97nepfddp%mt6#^l078d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'hunter.cryptograss.live', 'memory-lane', '5.78.83.4', 'justin-arthel']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.hunter.cryptograss.live', 'memory-lane', '5.78.83.4', 'justin-arthel']
 
 
 # Application definition
