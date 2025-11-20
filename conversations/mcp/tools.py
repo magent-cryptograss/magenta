@@ -33,6 +33,31 @@ async def handle_get_latest_continuation():
     return [types.TextContent(type="text", text=str(continuation.content))]
 
 
+async def handle_get_message_by_id(arguments):
+    """Get a specific message by UUID"""
+    message_id = arguments.get("message_id")
+
+    if not message_id:
+        return [types.TextContent(type="text", text="Error: message_id is required")]
+
+    message = await sync_to_async(MemoryService.get_message_by_id)(message_id)
+
+    if not message:
+        return [types.TextContent(type="text", text=f"Message '{message_id}' not found")]
+
+    lines = [
+        f"Message ID: {message.id}",
+        f"Sender: {message.sender_id}",
+        f"Created: {message.created_at.isoformat()}",
+        f"Timestamp: {message.timestamp}",
+        f"Context Heap: {message.context_heap_id}",
+        f"Message Number: {message.message_number}",
+        f"\nContent:\n{str(message.content)}"
+    ]
+
+    return [types.TextContent(type="text", text='\n'.join(lines))]
+
+
 async def handle_get_messages_before(arguments):
     """Get messages before a reference point"""
     reference_id = arguments.get("reference_id") if arguments else None
@@ -156,6 +181,7 @@ async def handle_random_messages(arguments):
 TOOL_HANDLERS = {
     "bootstrap_memory": handle_bootstrap_memory,
     "get_latest_continuation": handle_get_latest_continuation,
+    "get_message_by_id": handle_get_message_by_id,
     "get_messages_before": handle_get_messages_before,
     "get_era_summary": handle_get_era_summary,
     "get_context_heap": handle_get_context_heap,
