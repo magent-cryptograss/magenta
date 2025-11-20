@@ -254,7 +254,7 @@
 
         async function fetchMessages() {
             try {
-                let url = '/api/all_messages/?limit=100&order=desc';
+                let url = '/api/recent_messages/?limit=100';
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Failed to fetch');

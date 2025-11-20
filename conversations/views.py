@@ -18,6 +18,46 @@ def stream(request):
     return render(request, 'conversations/stream.html')
 
 
+def recent_messages(request):
+    """Lightweight endpoint for stream - just last N messages."""
+    limit = min(int(request.GET.get('limit', 100)), 500)
+
+    messages = Message.objects.select_related(
+        'sender'
+    ).prefetch_related(
+        'recipients'
+    ).order_by('-message_number')[:limit]
+
+    messages_data = []
+    for msg in messages:
+        # Get the actual polymorphic instance
+        msg_type = 'Message'
+        tool_name = None
+        is_error = False
+
+        if hasattr(msg, 'thought'):
+            msg_type = 'Thought'
+        elif hasattr(msg, 'tooluse'):
+            msg_type = 'ToolUse'
+            tool_name = msg.tooluse.tool_name
+        elif hasattr(msg, 'toolresult'):
+            msg_type = 'ToolResult'
+            is_error = msg.toolresult.is_error
+
+        msg_dict = {
+            'id': str(msg.id),
+            'message_type': msg_type,
+            'sender': msg.sender.name if msg.sender else 'unknown',
+            'content': msg.content[:1000] if msg.content else '',  # Truncate for performance
+            'timestamp': msg.timestamp,
+            'tool_name': tool_name,
+            'is_error': is_error,
+        }
+        messages_data.append(msg_dict)
+
+    return JsonResponse({'messages': messages_data})
+
+
 def messages_since(request, message_id):
     """
     Get all messages created after the specified message_id.
