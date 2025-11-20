@@ -21,18 +21,9 @@ def stream(request):
 
 def recent_messages(request):
     """Lightweight endpoint for stream - just last N messages."""
-    import os
-    from dotenv import load_dotenv
-    from pathlib import Path
-    load_dotenv(Path(__file__).resolve().parent.parent / '.env')
-
     limit = min(int(request.GET.get('limit', 100)), 500)
 
-    messages = Message.objects.select_related(
-        'sender'
-    ).prefetch_related(
-        'recipients'
-    ).order_by('-created_at')[:limit]
+    messages = Message.objects.select_related('sender').order_by('-created_at')[:limit]
 
     messages_data = []
     for msg in messages:

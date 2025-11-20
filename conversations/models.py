@@ -22,10 +22,25 @@ import uuid
 
 
 # ============================================================================
-# Thinking Entity Model
+# Participant Models
 # ============================================================================
 
-class ThinkingEntity(models.Model):
+class ConversationParticipant(models.Model):
+    """
+    Base class for conversation participants.
+    """
+
+    name = models.CharField(max_length=50, primary_key=True)
+    participant_type = models.CharField(max_length=20)
+
+    class Meta:
+        db_table = 'conversation_participants'
+
+    def __str__(self):
+        return self.name
+
+
+class ThinkingEntity(ConversationParticipant):
     """
     A thinking entity - human or AI.
 
@@ -33,7 +48,6 @@ class ThinkingEntity(models.Model):
     from other models (messages sent, messages received, etc).
     """
 
-    name = models.CharField(max_length=50, unique=True, primary_key=True)
     is_biological_human = models.BooleanField(default=True)
 
     class Meta:
@@ -103,7 +117,7 @@ class ContextWindow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'context_windows'
+        db_table = 'context_heaps'
         ordering = ['created_at']
 
     def __str__(self):
@@ -137,14 +151,14 @@ class Message(models.Model):
     content = models.JSONField()
 
     # Context - all messages belong to a window
-    context_window = models.ForeignKey('ContextWindow', models.PROTECT, related_name='messages', null=True, blank=True)
+    context_heap = models.ForeignKey('ContextWindow', models.PROTECT, related_name='messages', null=True, blank=True, db_column='context_heap_id')
 
     # Threading - optional parent for message chains
     parent = models.ForeignKey('self', models.PROTECT, related_name='children', null=True, blank=True)
 
-    # Participants
-    sender = models.ForeignKey(ThinkingEntity, models.PROTECT, related_name='sent_messages')
-    recipients = models.ManyToManyField(ThinkingEntity, related_name='received_messages')
+    # Participants - FK to ConversationParticipant base table
+    sender = models.ForeignKey(ConversationParticipant, models.PROTECT, related_name='sent_messages')
+    recipients = models.ManyToManyField(ConversationParticipant, related_name='received_messages')
 
     # Session context
     session_id = models.UUIDField(null=True, blank=True)
@@ -180,7 +194,7 @@ class Message(models.Model):
             models.Index(fields=['session_id', 'timestamp']),
             models.Index(fields=['sender']),
         ]
-        unique_together = [['context_window', 'message_number']]
+        unique_together = [['context_heap', 'message_number']]
 
     def __str__(self):
         recipient_names = ','.join(r.name for r in self.recipients.all()) if self.pk else '?'
