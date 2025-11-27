@@ -1,11 +1,18 @@
+import json
+import logging
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from .models import (
     Message,
     Thought,
     ToolUse,
-    ToolResult
+    ToolResult,
+    Era
 )
+
+logger = logging.getLogger(__name__)
 
 
 def memory_lane(request):
@@ -802,3 +809,114 @@ def heap_messages(request, heap_id):
             })
 
     return JsonResponse({'messages': messages_data}, safe=False)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def ingest(request):
+    """
+    Ingest endpoint for receiving JSONL lines from watchers.
+
+    Accepts POST with JSON body:
+    {
+        "lines": ["jsonl line 1", "jsonl line 2", ...],
+        "username": "justin",  # optional, defaults to "justin"
+        "era_name": "Current Working Era",  # optional
+        "source": "hunter-watcher"  # optional, for logging
+    }
+
+    Or single line:
+    {
+        "line": "single jsonl line",
+        "username": "justin"
+    }
+
+    Returns:
+    {
+        "imported": 5,
+        "skipped": 2,
+        "errors": ["error message 1", ...]
+    }
+    """
+    from importers_and_parsers.claude_code_v2 import import_line_from_claude_code_v2
+    from watcher.heap_assignment import assign_heap_to_message
+    from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError as e:
+        return JsonResponse({'error': f'Invalid JSON: {e}'}, status=400)
+
+    # Get parameters
+    username = data.get('username', 'justin')
+    era_name = data.get('era_name', 'Current Working Era (Era N)')
+    source = data.get('source', 'unknown')
+
+    # Get lines - support both single line and batch
+    lines = data.get('lines', [])
+    if 'line' in data:
+        lines = [data['line']]
+
+    if not lines:
+        return JsonResponse({'error': 'No lines provided'}, status=400)
+
+    # Get or create era
+    era, _ = Era.objects.get_or_create(name=era_name)
+
+    # Optional: Apply secrets filter if configured
+    # This requires ANSIBLE_VAULT_PASSWORD and vault path to be set
+    secrets_filter = None
+    try:
+        import os
+        vault_password = os.environ.get('ANSIBLE_VAULT_PASSWORD')
+        vault_path = os.environ.get('SECRETS_VAULT_PATH')
+        if vault_password and vault_path:
+            from security.secrets_filter import SecretsFilter
+            secrets_filter = SecretsFilter(vault_path, vault_password)
+            logger.info(f"Secrets filter active with {len(secrets_filter.secrets)} secrets")
+    except Exception as e:
+        logger.warning(f"Could not initialize secrets filter: {e}")
+
+    # Process lines
+    imported = 0
+    skipped = 0
+    errors = []
+    current_heap = None
+
+    for line in lines:
+        try:
+            # Apply secrets filter if available
+            if secrets_filter:
+                line = secrets_filter.scrub(line)
+
+            # Import the line
+            event, created = import_line_from_claude_code_v2(
+                line, era, f"ingest-{source}", username
+            )
+
+            if event is EVENT_TYPE_WE_DO_NOT_HANDLE_YET:
+                skipped += 1
+                continue
+
+            if not created:
+                skipped += 1
+                continue
+
+            # Assign heap if it's a Message
+            if isinstance(event, Message):
+                heap = assign_heap_to_message(event, era, current_heap)
+                current_heap = heap
+
+            imported += 1
+
+        except Exception as e:
+            errors.append(str(e))
+            logger.error(f"Error importing line from {source}: {e}")
+
+    logger.info(f"Ingest from {source}: imported={imported}, skipped={skipped}, errors={len(errors)}")
+
+    return JsonResponse({
+        'imported': imported,
+        'skipped': skipped,
+        'errors': errors[:10]  # Limit error messages returned
+    })

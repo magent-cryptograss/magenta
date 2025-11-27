@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/heap_metadata/', views.heap_metadata, name='heap_metadata'),
     path('api/heap_messages/<str:heap_id>/', views.heap_messages, name='heap_messages'),
     path('api/messages_since/<str:message_id>/', views.messages_since, name='messages_since'),
+    path('api/ingest/', views.ingest, name='ingest'),
 ]

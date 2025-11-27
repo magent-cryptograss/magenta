@@ -9,6 +9,8 @@ import os
 import sys
 import time
 import logging
+import json
+import requests
 from pathlib import Path
 from logging.handlers import RotatingFileHandler
 from watchdog.observers import Observer
@@ -56,18 +58,28 @@ from watcher.heap_assignment import assign_heap_to_message
 class ConversationWatcher(FileSystemEventHandler):
     """Watch JSONL files and import new messages."""
 
-    def __init__(self, watch_dir, era):
+    def __init__(self, watch_dir, era, remote_endpoint=None, batch_size=10, batch_interval=2.0):
         """
         Initialize watcher.
 
         Args:
             watch_dir: Directory to watch (e.g., /project-logs/justin/)
-            era: Era instance to import into
+            era: Era instance to import into (can be None if using remote mode)
+            remote_endpoint: Optional URL to POST lines to (e.g., https://memory-lane.maybelle.cryptograss.live/api/ingest/)
+            batch_size: Number of lines to batch before sending (for remote mode)
+            batch_interval: Max seconds to wait before flushing batch
         """
         self.watch_dir = Path(watch_dir)
         self.era = era
         self.file_positions = {}  # Track last position read for each file
         self.current_heap = None  # Track current heap for edge cases
+
+        # Remote mode settings
+        self.remote_endpoint = remote_endpoint
+        self.batch_size = batch_size
+        self.batch_interval = batch_interval
+        self.pending_lines = []  # Buffer for batching
+        self.last_flush_time = time.time()
 
         # Extract username from watch directory path
         # Expected format: /project-logs/username/...
@@ -83,7 +95,10 @@ class ConversationWatcher(FileSystemEventHandler):
             self.username = parts[-2] if len(parts) >= 2 else 'unknown'
 
         logger.info(f"Watcher initialized for {watch_dir} (user: {self.username})")
-        logger.info(f"Importing into era: {era.name} ({era.id})")
+        if remote_endpoint:
+            logger.info(f"Remote mode: POSTing to {remote_endpoint}")
+        elif era:
+            logger.info(f"Local mode: Importing into era: {era.name} ({era.id})")
 
     def on_modified(self, event):
         """Handle file modification events."""
@@ -172,6 +187,21 @@ class ConversationWatcher(FileSystemEventHandler):
             line: JSONL line string
             filename: Source filename
         """
+        if self.remote_endpoint:
+            # Remote mode: batch lines and POST to endpoint
+            self.pending_lines.append(line)
+
+            # Flush if batch is full or enough time has passed
+            if len(self.pending_lines) >= self.batch_size:
+                self.flush_batch()
+            elif time.time() - self.last_flush_time > self.batch_interval:
+                self.flush_batch()
+        else:
+            # Local mode: import directly to database
+            self._import_line_local(line, filename)
+
+    def _import_line_local(self, line, filename):
+        """Import line directly to local database."""
         from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
 
         # Parse and create message using existing logic
@@ -193,6 +223,37 @@ class ConversationWatcher(FileSystemEventHandler):
             logger.debug(f"Imported message {str(event.id)[:8]} → heap {str(heap.id)[:8]}")
         else:
             logger.info(f"Imported {event.__class__.__name__} {str(event.id)[:8]}")
+
+    def flush_batch(self):
+        """Send batched lines to remote endpoint."""
+        if not self.pending_lines:
+            return
+
+        try:
+            response = requests.post(
+                self.remote_endpoint,
+                json={
+                    'lines': self.pending_lines,
+                    'username': self.username,
+                    'source': f'hunter-watcher-{self.username}'
+                },
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                result = response.json()
+                logger.info(f"Remote ingest: imported={result.get('imported', 0)}, skipped={result.get('skipped', 0)}")
+                if result.get('errors'):
+                    logger.warning(f"Remote ingest errors: {result['errors'][:3]}")
+            else:
+                logger.error(f"Remote ingest failed: {response.status_code} - {response.text[:200]}")
+
+        except requests.RequestException as e:
+            logger.error(f"Failed to POST to remote endpoint: {e}")
+
+        # Clear batch regardless of success (avoid infinite retries)
+        self.pending_lines = []
+        self.last_flush_time = time.time()
 
     def scan_existing_files(self):
         """Scan existing files to establish baseline positions."""
@@ -216,20 +277,27 @@ def main():
     # Configuration
     WATCH_DIR = os.getenv('CLAUDE_LOGS_DIR', '/home/magent/.claude/project-logs')
     ERA_NAME = os.getenv('WATCHER_ERA_NAME', 'Current Working Era (Era N)')
+    REMOTE_ENDPOINT = os.getenv('WATCHER_REMOTE_ENDPOINT', '')  # e.g., https://memory-lane.maybelle.cryptograss.live/api/ingest/
 
     # Support for multi-user directories
     # If WATCH_DIR contains multiple colon-separated paths, watch all of them
     watch_dirs = [Path(d.strip()) for d in WATCH_DIR.split(':') if d.strip()]
 
-    # Get or create era
-    era, created = Era.objects.get_or_create(name=ERA_NAME)
-    if created:
-        logger.info(f"Created new era: {ERA_NAME}")
+    # Determine mode
+    if REMOTE_ENDPOINT:
+        logger.info(f"Running in REMOTE mode - POSTing to {REMOTE_ENDPOINT}")
+        era = None  # Don't need local era for remote mode
     else:
-        logger.info(f"Using existing era: {ERA_NAME}")
+        # Local mode - need Django database
+        era, created = Era.objects.get_or_create(name=ERA_NAME)
+        if created:
+            logger.info(f"Created new era: {ERA_NAME}")
+        else:
+            logger.info(f"Using existing era: {ERA_NAME}")
 
     # Create observer
     observer = Observer()
+    watchers = []
 
     # Set up watchers for each directory
     for watch_dir in watch_dirs:
@@ -238,7 +306,11 @@ def main():
             continue
 
         logger.info(f"Setting up watcher for: {watch_dir}")
-        watcher = ConversationWatcher(watch_dir, era)
+        watcher = ConversationWatcher(
+            watch_dir, era,
+            remote_endpoint=REMOTE_ENDPOINT if REMOTE_ENDPOINT else None
+        )
+        watchers.append(watcher)
 
         # Scan existing files to establish baseline
         watcher.scan_existing_files()
@@ -255,7 +327,16 @@ def main():
     try:
         while True:
             time.sleep(1)
+            # Periodically flush any pending batches (for remote mode)
+            for watcher in watchers:
+                if watcher.remote_endpoint and watcher.pending_lines:
+                    if time.time() - watcher.last_flush_time > watcher.batch_interval:
+                        watcher.flush_batch()
     except KeyboardInterrupt:
+        # Flush any remaining lines before stopping
+        for watcher in watchers:
+            if watcher.remote_endpoint:
+                watcher.flush_batch()
         observer.stop()
         logger.info("Stopping watcher...")
 
