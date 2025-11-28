@@ -35,6 +35,8 @@ services:
       # Colon-separated list of directories to watch
       - CLAUDE_LOGS_DIR=/project-logs/justin:/project-logs/rj:/project-logs/skyler
       - WATCHER_ERA_NAME=Live Conversations
+      # Optional: POST to remote endpoint instead of local DB
+      - WATCHER_REMOTE_ENDPOINT=${WATCHER_REMOTE_ENDPOINT:-}
     volumes:
       # Mount all users' Claude Code logs (from their home directories)
       - /opt/magenta/justin/home/.claude/projects:/project-logs/justin:ro
