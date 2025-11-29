@@ -92,6 +92,9 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'changeme'),
         'HOST': os.getenv('POSTGRES_HOST', 'magenta-postgres'),
         'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        # For async MCP server: don't persist connections (avoids stale connection errors)
+        'CONN_MAX_AGE': 0,
+        'CONN_HEALTH_CHECKS': True,
     }
 }
 
