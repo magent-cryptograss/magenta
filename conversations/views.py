@@ -817,6 +817,8 @@ def ingest(request):
     """
     Ingest endpoint for receiving JSONL lines from watchers.
 
+    Requires Authorization: Bearer <INGEST_API_KEY> header if INGEST_API_KEY is set.
+
     Accepts POST with JSON body:
     {
         "lines": ["jsonl line 1", "jsonl line 2", ...],
@@ -841,6 +843,13 @@ def ingest(request):
     from importers_and_parsers.claude_code_v2 import import_line_from_claude_code_v2
     from watcher.heap_assignment import assign_heap_to_message
     from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
+
+    # Check API key if configured
+    expected_key = os.environ.get('INGEST_API_KEY')
+    if expected_key:
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header != f'Bearer {expected_key}':
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
 
     try:
         data = json.loads(request.body)

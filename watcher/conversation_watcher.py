@@ -229,6 +229,12 @@ class ConversationWatcher(FileSystemEventHandler):
         if not self.pending_lines:
             return
 
+        # Build headers with optional API key auth
+        headers = {}
+        api_key = os.environ.get('INGEST_API_KEY')
+        if api_key:
+            headers['Authorization'] = f'Bearer {api_key}'
+
         try:
             response = requests.post(
                 self.remote_endpoint,
@@ -237,6 +243,7 @@ class ConversationWatcher(FileSystemEventHandler):
                     'username': self.username,
                     'source': f'hunter-watcher-{self.username}'
                 },
+                headers=headers,
                 timeout=30
             )
 
