@@ -45,14 +45,17 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
-# Django setup
-import django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'memory_viewer.settings')
-django.setup()
+# Django setup is deferred until needed (for remote mode, we don't need DB access)
+_django_initialized = False
 
-from conversations.models import Era, Message
-from importers_and_parsers.claude_code_v2 import import_line_from_claude_code_v2
-from watcher.heap_assignment import assign_heap_to_message
+def init_django():
+    """Initialize Django if not already done. Only needed for local mode."""
+    global _django_initialized
+    if not _django_initialized:
+        import django
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'memory_viewer.settings')
+        django.setup()
+        _django_initialized = True
 
 
 class ConversationWatcher(FileSystemEventHandler):
@@ -160,6 +163,12 @@ class ConversationWatcher(FileSystemEventHandler):
             filename: Source filename
             error_msg: Error message
         """
+        # Skip saving if in remote mode (let remote handle it)
+        if self.remote_endpoint:
+            logger.warning(f"Unparseable line from {filename} (error: {error_msg}) - skipping in remote mode")
+            return
+
+        init_django()
         from conversations.models import RawImportedContent
         from django.contrib.contenttypes.models import ContentType
         import json
@@ -202,7 +211,11 @@ class ConversationWatcher(FileSystemEventHandler):
 
     def _import_line_local(self, line, filename):
         """Import line directly to local database."""
+        init_django()
         from constant_sorrow.constants import EVENT_TYPE_WE_DO_NOT_HANDLE_YET
+        from conversations.models import Message
+        from importers_and_parsers.claude_code_v2 import import_line_from_claude_code_v2
+        from watcher.heap_assignment import assign_heap_to_message
 
         # Parse and create message using existing logic
         event, created = import_line_from_claude_code_v2(line, self.era, filename, self.username)
@@ -296,6 +309,8 @@ def main():
         era = None  # Don't need local era for remote mode
     else:
         # Local mode - need Django database
+        init_django()
+        from conversations.models import Era
         era, created = Era.objects.get_or_create(name=ERA_NAME)
         if created:
             logger.info(f"Created new era: {ERA_NAME}")
