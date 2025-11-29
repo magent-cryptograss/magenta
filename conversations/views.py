@@ -876,7 +876,6 @@ def ingest(request):
     # This requires ANSIBLE_VAULT_PASSWORD and vault path to be set
     secrets_filter = None
     try:
-        import os
         vault_password = os.environ.get('ANSIBLE_VAULT_PASSWORD')
         vault_path = os.environ.get('SECRETS_VAULT_PATH')
         if vault_password and vault_path:
