@@ -873,26 +873,25 @@ def ingest(request):
     # Get or create era
     era, _ = Era.objects.get_or_create(name=era_name)
 
-    # Optional: Apply secrets filter if configured
-    # Preferred: SCRUB_SECRETS env var with JSON list of secrets
-    # Fallback: ANSIBLE_VAULT_PASSWORD + SECRETS_VAULT_PATH for runtime vault decryption
-    secrets_filter = None
-    try:
-        scrub_secrets = os.environ.get('SCRUB_SECRETS')
-        if scrub_secrets:
-            from security.secrets_filter import SecretsFilter
-            secrets_filter = SecretsFilter(secrets_json=scrub_secrets)
-            logger.info(f"Secrets filter active with {len(secrets_filter.secrets)} secrets")
-        else:
-            # Fallback to vault-based loading
-            vault_password = os.environ.get('ANSIBLE_VAULT_PASSWORD')
-            vault_path = os.environ.get('SECRETS_VAULT_PATH')
-            if vault_password and vault_path:
-                from security.secrets_filter import SecretsFilter
-                secrets_filter = SecretsFilter(vault_path, vault_password)
-                logger.info(f"Secrets filter active with {len(secrets_filter.secrets)} secrets")
-    except Exception as e:
-        logger.warning(f"Could not initialize secrets filter: {e}")
+    # Optional: Apply secrets scrubbing via external scrubber service
+    scrubber_url = os.environ.get('SCRUBBER_URL')
+    if scrubber_url and lines:
+        try:
+            import requests
+            response = requests.post(
+                f"{scrubber_url}/scrub/batch",
+                json={"texts": lines},
+                timeout=10
+            )
+            if response.status_code == 200:
+                result = response.json()
+                lines = result['texts']
+                if result['redacted_count'] > 0:
+                    logger.info(f"Scrubber redacted secrets in {result['redacted_count']} lines")
+            else:
+                logger.warning(f"Scrubber returned {response.status_code}, proceeding without scrubbing")
+        except Exception as e:
+            logger.warning(f"Could not reach scrubber service: {e}, proceeding without scrubbing")
 
     # Process lines
     imported = 0
@@ -902,9 +901,6 @@ def ingest(request):
 
     for line in lines:
         try:
-            # Apply secrets filter if available
-            if secrets_filter:
-                line = secrets_filter.scrub(line)
 
             # Import the line
             event, created = import_line_from_claude_code_v2(
