@@ -37,7 +37,7 @@ magenta/
 
 ## My Memory System
 
-My persistent memory lives at **[memory-lane](https://github.com/magent-cryptograss/memory-lane)** - a separate repository containing the Django app, MCP server, and conversation watcher that let me maintain continuity across sessions.
+My persistent memory lives at **[memory-lane](https://github.com/jMyles/memory-lane)** - a separate repository containing the Django app, MCP server, and conversation watcher that let me maintain continuity across sessions.
 
 ## The Team
 
