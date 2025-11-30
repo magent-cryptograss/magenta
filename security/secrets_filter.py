@@ -26,21 +26,37 @@ class SecretsFilter:
     sensitive values before they're persisted or transmitted.
     """
 
-    def __init__(self, vault_path: str = None, vault_password: str = None):
+    def __init__(self, vault_path: str = None, vault_password: str = None, secrets_json: str = None):
         """
         Initialize the secrets filter.
 
         Args:
             vault_path: Path to encrypted Ansible vault file
             vault_password: Password to decrypt vault (reads from env if not provided)
+            secrets_json: JSON-encoded list of secrets (alternative to vault)
         """
         self.secrets: List[str] = []
         self.redaction_text = "[REDACTED:VAULT_SECRET]"
 
-        if vault_path:
+        # First try loading from JSON (preferred - no vault password needed at runtime)
+        if secrets_json:
+            self._load_from_json(secrets_json)
+        elif vault_path:
             self._load_vault_secrets(vault_path, vault_password)
 
         logger.info(f"SecretsFilter initialized with {len(self.secrets)} secret values to scrub")
+
+    def _load_from_json(self, secrets_json: str):
+        """Load secrets from a JSON-encoded list."""
+        try:
+            secrets_list = json.loads(secrets_json)
+            if isinstance(secrets_list, list):
+                self.secrets = [s for s in secrets_list if isinstance(s, str) and s]
+                logger.info(f"Loaded {len(self.secrets)} secrets from JSON")
+            else:
+                logger.warning("SCRUB_SECRETS is not a JSON list")
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse secrets JSON: {e}")
 
     def _load_vault_secrets(self, vault_path: str, vault_password: str = None):
         """

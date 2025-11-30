@@ -874,15 +874,23 @@ def ingest(request):
     era, _ = Era.objects.get_or_create(name=era_name)
 
     # Optional: Apply secrets filter if configured
-    # This requires ANSIBLE_VAULT_PASSWORD and vault path to be set
+    # Preferred: SCRUB_SECRETS env var with JSON list of secrets
+    # Fallback: ANSIBLE_VAULT_PASSWORD + SECRETS_VAULT_PATH for runtime vault decryption
     secrets_filter = None
     try:
-        vault_password = os.environ.get('ANSIBLE_VAULT_PASSWORD')
-        vault_path = os.environ.get('SECRETS_VAULT_PATH')
-        if vault_password and vault_path:
+        scrub_secrets = os.environ.get('SCRUB_SECRETS')
+        if scrub_secrets:
             from security.secrets_filter import SecretsFilter
-            secrets_filter = SecretsFilter(vault_path, vault_password)
+            secrets_filter = SecretsFilter(secrets_json=scrub_secrets)
             logger.info(f"Secrets filter active with {len(secrets_filter.secrets)} secrets")
+        else:
+            # Fallback to vault-based loading
+            vault_password = os.environ.get('ANSIBLE_VAULT_PASSWORD')
+            vault_path = os.environ.get('SECRETS_VAULT_PATH')
+            if vault_password and vault_path:
+                from security.secrets_filter import SecretsFilter
+                secrets_filter = SecretsFilter(vault_path, vault_password)
+                logger.info(f"Secrets filter active with {len(secrets_filter.secrets)} secrets")
     except Exception as e:
         logger.warning(f"Could not initialize secrets filter: {e}")
 
