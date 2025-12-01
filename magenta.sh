@@ -23,28 +23,30 @@ for arg in "$@"; do
     esac
 done
 
-# Check if mosh is installed (optional but recommended)
-USE_MOSH=false
-if command -v mosh &> /dev/null; then
-    USE_MOSH=true
-else
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "⚠️  Mosh not found (optional)"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "Mosh provides persistent SSH connections that survive network changes."
-    echo "Install it for better connection reliability:"
-    echo ""
-    echo "  macOS:   brew install mosh"
-    echo "  Ubuntu:  sudo apt install mosh"
-    echo "  Arch:    sudo pacman -S mosh"
-    echo ""
-    echo "Continuing with regular SSH..."
-    echo ""
-fi
-
 # Parse target argument (default to local)
 TARGET="${POSITIONAL_ARGS[0]:-local}"
+
+# Check if mosh is installed (only useful for remote connections)
+USE_MOSH=false
+if [ "$TARGET" != "local" ]; then
+    if command -v mosh &> /dev/null; then
+        USE_MOSH=true
+    else
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "⚠️  Mosh not found (optional)"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "Mosh provides persistent SSH connections that survive network changes."
+        echo "Install it for better connection reliability:"
+        echo ""
+        echo "  macOS:   brew install mosh"
+        echo "  Ubuntu:  sudo apt install mosh"
+        echo "  Arch:    sudo pacman -S mosh"
+        echo ""
+        echo "Continuing with regular SSH..."
+        echo ""
+    fi
+fi
 
 # Set connection parameters based on target
 case "$TARGET" in
