@@ -1,12 +1,15 @@
 # Local Development Setup
 
-This guide covers running the magenta development environment on your laptop, connecting to the hunter postgres database.
+This guide covers running the magenta development environment on your laptop, connecting to the maybelle postgres database.
+
+**Note:** As of late 2025, PostgreSQL runs on maybelle, not hunter. Hunter only runs user containers and the watcher.
 
 ## Prerequisites
 
 - Docker and docker-compose installed
-- SSH access to hunter.cryptograss.live
-- Ansible vault password (for extracting secrets)
+- SSH access to maybelle.cryptograss.live
+- Ansible vault password (for extracting secrets from maybelle-config)
+- Clone of maybelle-config repo (for vault access)
 
 ## Initial Setup
 
@@ -37,17 +40,17 @@ networks:
 
 ## Running the Environment
 
-### 1. Start the SSH tunnel to hunter postgres
+### 1. Start the SSH tunnel to maybelle postgres
 
 In a dedicated terminal, keep this running:
 
 ```bash
-ssh -L 0.0.0.0:15432:localhost:5432 root@hunter.cryptograss.live
+ssh -L 0.0.0.0:15432:localhost:5432 root@maybelle.cryptograss.live
 ```
 
-This tunnels your local port 15432 (listening on all interfaces) to hunter's postgres on port 5432.
+This tunnels your local port 15432 (listening on all interfaces) to maybelle's postgres on port 5432.
 
-Note: Postgres on hunter is bound to localhost only (127.0.0.1:5432), so it's not exposed to the internet.
+Note: Postgres on maybelle is bound to localhost only (127.0.0.1:5432), so it's not exposed to the internet.
 
 ### 2. Start the dev workspace
 
@@ -134,13 +137,13 @@ Look for successful connections, not "fetch failed" errors.
 
 This keeps the shared services configuration identical between hunter and local, reducing maintenance burden.
 
-### How does the MCP server reach hunter's postgres?
+### How does the MCP server reach maybelle's postgres?
 
-1. SSH tunnel on laptop: `localhost:15432` → `hunter:magenta-postgres:5432`
+1. SSH tunnel on laptop: `localhost:15432` → `maybelle:localhost:5432`
 2. `.env.local` sets `POSTGRES_HOST=host.docker.internal` and `POSTGRES_PORT=15432`
 3. `docker-compose.local-override.yml` adds `extra_hosts` mapping for `host.docker.internal` (Linux only)
 4. MCP server container connects to `host.docker.internal:15432` which resolves to laptop's localhost
-5. Laptop's SSH tunnel forwards to hunter
+5. Laptop's SSH tunnel forwards to maybelle
 
 ## Troubleshooting
 
@@ -165,12 +168,12 @@ The `host.docker.internal` mapping isn't working. Make sure `docker-compose.loca
 The tunnel will drop if your laptop sleeps or network changes. Just restart it:
 
 ```bash
-ssh -L 0.0.0.0:15432:localhost:5432 root@hunter.cryptograss.live
+ssh -L 0.0.0.0:15432:localhost:5432 root@maybelle.cryptograss.live
 ```
 
 ### "Temporary failure in name resolution" in SSH tunnel
 
-This means postgres isn't exposed on hunter's localhost. Make sure you've deployed the updated postgres configuration that includes the port mapping (127.0.0.1:5432:5432).
+This means postgres isn't exposed on maybelle's localhost. Maybelle's postgres container should be bound to 127.0.0.1:5432.
 
 ## Stopping Everything
 
@@ -189,7 +192,7 @@ docker compose -f docker-compose.local.yml down
 ## When to Use Local vs Hunter
 
 **Use local dev when:**
-- Hunter is down or having issues
+- Hunter is down or being rebuilt
 - Testing changes to MCP server, Memory Lane, or Watcher before deploying
 - Working offline (with cached data)
 
@@ -198,4 +201,4 @@ docker compose -f docker-compose.local.yml down
 - Want to see real-time watcher updates
 - Multiple team members collaborating
 
-Both environments connect to the same postgres database on hunter, so conversations and data are shared.
+Both environments connect to the same postgres database on maybelle, so conversations and data are shared.
