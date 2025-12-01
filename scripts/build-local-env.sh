@@ -43,11 +43,20 @@ echo "Building .env.local from vault..."
 echo "Using vault: $VAULT_FILE"
 
 # Extract secrets from vault
-POSTGRES_PASSWORD=$(ansible-vault view "$VAULT_FILE" 2>/dev/null | grep postgres_password | head -1 | sed 's/.*: *//' | tr -d '"')
+VAULT_CONTENT=$(ansible-vault view "$VAULT_FILE" 2>/dev/null)
+
+POSTGRES_PASSWORD=$(echo "$VAULT_CONTENT" | grep postgres_password | head -1 | sed 's/.*: *//' | tr -d '"')
+GH_TOKEN=$(echo "$VAULT_CONTENT" | grep magent_github_token | head -1 | sed 's/.*: *//' | tr -d '"')
 
 if [ -z "$POSTGRES_PASSWORD" ]; then
     echo "Error: Could not extract postgres password from vault"
     exit 1
+fi
+
+if [ -z "$GH_TOKEN" ]; then
+    echo "Warning: Could not extract magent_github_token from vault"
+    echo "GH_TOKEN will need to be set manually"
+    GH_TOKEN="your_github_token_here"
 fi
 
 # Generate .env.local
@@ -65,11 +74,8 @@ POSTGRES_DB=magenta_memory
 POSTGRES_USER=magent
 POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 
-# GitHub CLI Authentication
-# Add your personal GitHub token here
-# Generate at: https://github.com/settings/tokens
-# Required scopes: repo, read:org, workflow
-GH_TOKEN=your_github_token_here
+# GitHub CLI Authentication (from vault: magent_github_token)
+GH_TOKEN=$GH_TOKEN
 
 # Django Settings
 DJANGO_SECRET_KEY=local-dev-secret-key-change-if-needed
@@ -90,6 +96,5 @@ EOF
 echo "✓ Generated $ENV_FILE"
 echo ""
 echo "Next steps:"
-echo "1. Edit .env.local and add your GH_TOKEN"
-echo "2. Start SSH tunnel: ssh -L 15432:localhost:5432 root@maybelle.cryptograss.live"
-echo "3. Start your local container"
+echo "1. Start SSH tunnel: ssh -L 15432:localhost:5432 root@maybelle.cryptograss.live"
+echo "2. Start your local container"
