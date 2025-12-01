@@ -1,10 +1,27 @@
 #!/bin/bash
 # Script to SSH into Docker container and start Claude Code session
-# Usage: ./magenta.sh [local|hunter]
-#   local  - Connect to local Docker container (default)
-#   hunter - Connect to hunter VPS
+# Usage: ./magenta.sh [local|hunter] [--force-fresh]
+#   local        - Connect to local Docker container (default)
+#   hunter       - Connect to hunter VPS
+#   --force-fresh - Skip --continue, start fresh with reawaken prompt
 
 set -e  # Exit on error
+
+# Parse options
+FORCE_FRESH=false
+POSITIONAL_ARGS=()
+
+for arg in "$@"; do
+    case $arg in
+        --force-fresh)
+            FORCE_FRESH=true
+            shift
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$arg")
+            ;;
+    esac
+done
 
 # Check if mosh is installed (optional but recommended)
 USE_MOSH=false
@@ -27,7 +44,7 @@ else
 fi
 
 # Parse target argument (default to local)
-TARGET="${1:-local}"
+TARGET="${POSITIONAL_ARGS[0]:-local}"
 
 # Set connection parameters based on target
 case "$TARGET" in
@@ -44,9 +61,10 @@ case "$TARGET" in
         HOST_KEY_ID="hunter.cryptograss.live"
         ;;
     *)
-        echo "Usage: $0 [local|hunter]"
-        echo "  local  - Connect to local Docker container (default)"
-        echo "  hunter - Connect to hunter VPS"
+        echo "Usage: $0 [local|hunter] [--force-fresh]"
+        echo "  local        - Connect to local Docker container (default)"
+        echo "  hunter       - Connect to hunter VPS"
+        echo "  --force-fresh - Skip --continue, start fresh with reawaken prompt"
         exit 1
         ;;
 esac
@@ -103,20 +121,33 @@ REMOTE_COMMAND="
     # Load environment variables
     export GH_TOKEN='$GH_TOKEN'
     export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
+    FORCE_FRESH='$FORCE_FRESH'
 
     # Check if tmux session 'magenta' exists
     if tmux has-session -t magenta 2>/dev/null; then
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-        echo '🔄 Attaching to existing tmux session: magenta'
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-        tmux attach-session -t magenta
+        if [ \"\$FORCE_FRESH\" = 'true' ]; then
+            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+            echo '⚠️  --force-fresh: Killing existing tmux session'
+            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+            tmux kill-session -t magenta
+        else
+            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+            echo '🔄 Attaching to existing tmux session: magenta'
+            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+            tmux attach-session -t magenta
+            exit 0
+        fi
+    fi
+
+    echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    echo '✨ Creating new tmux session: magenta'
+    echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    # Create new session and start Claude Code
+    # Projects live in ~/workspace/ and logs go to ~/.claude/projects/
+    # Try to continue (unless --force-fresh), if that fails start fresh with reawaken prompt
+    if [ \"\$FORCE_FRESH\" = 'true' ]; then
+        tmux new-session -s magenta \"cd ~ && claude 'reawaken magent'\"
     else
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-        echo '✨ Creating new tmux session: magenta'
-        echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-        # Create new session and start Claude Code
-        # Projects live in ~/workspace/ and logs go to ~/.claude/projects/
-        # Try to continue, if that fails start fresh with reawaken prompt
         tmux new-session -s magenta \"cd ~ && (
             # Try to continue - if it fails, check for specific error
             if ! claude --continue 2>/tmp/claude_error.log; then
