@@ -1,20 +1,26 @@
 #!/bin/bash
 # Script to SSH into Docker container and start Claude Code session
-# Usage: ./magenta.sh [local|hunter] [--force-fresh]
+# Usage: ./magenta.sh [local|hunter] [--force-fresh] [--dangerously-skip-permissions]
 #   local        - Connect to local Docker container (default)
 #   hunter       - Connect to hunter VPS
 #   --force-fresh - Skip --continue, start fresh with reawaken prompt
+#   --dangerously-skip-permissions - Pass through to claude to skip permission prompts
 
 set -e  # Exit on error
 
 # Parse options
 FORCE_FRESH=false
+DANGEROUSLY_SKIP_PERMISSIONS=false
 POSITIONAL_ARGS=()
 
 for arg in "$@"; do
     case $arg in
         --force-fresh)
             FORCE_FRESH=true
+            shift
+            ;;
+        --dangerously-skip-permissions)
+            DANGEROUSLY_SKIP_PERMISSIONS=true
             shift
             ;;
         *)
@@ -124,6 +130,13 @@ REMOTE_COMMAND="
     export GH_TOKEN='$GH_TOKEN'
     export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
     FORCE_FRESH='$FORCE_FRESH'
+    DANGEROUSLY_SKIP_PERMISSIONS='$DANGEROUSLY_SKIP_PERMISSIONS'
+
+    # Build claude flags
+    CLAUDE_FLAGS=''
+    if [ \"\$DANGEROUSLY_SKIP_PERMISSIONS\" = 'true' ]; then
+        CLAUDE_FLAGS='--dangerously-skip-permissions'
+    fi
 
     # Check if tmux session 'magenta' exists
     if tmux has-session -t magenta 2>/dev/null; then
@@ -148,11 +161,11 @@ REMOTE_COMMAND="
     # Projects live in ~/workspace/ and logs go to ~/.claude/projects/
     # Try to continue (unless --force-fresh), if that fails start fresh with reawaken prompt
     if [ \"\$FORCE_FRESH\" = 'true' ]; then
-        tmux new-session -s magenta \"cd ~ && claude 'reawaken magent'\"
+        tmux new-session -s magenta \"cd ~ && claude \$CLAUDE_FLAGS 'reawaken magent'\"
     else
         tmux new-session -s magenta \"cd ~ && (
             # Try to continue - if it fails, check for specific error
-            if ! claude --continue 2>/tmp/claude_error.log; then
+            if ! claude \$CLAUDE_FLAGS --continue 2>/tmp/claude_error.log; then
                 if grep -iq 'no conversation found to continue' /tmp/claude_error.log; then
                     echo ''
                     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
@@ -160,7 +173,7 @@ REMOTE_COMMAND="
                     echo 'Starting fresh with reawaken prompt...'
                     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
                     echo ''
-                    claude 'reawaken magent'
+                    claude \$CLAUDE_FLAGS 'reawaken magent'
                 else
                     echo ''
                     echo 'Claude Code failed with an error. Check /tmp/claude_error.log for details.'
