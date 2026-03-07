@@ -1,20 +1,22 @@
 #!/bin/bash
 # Script to SSH into Docker container and start Claude Code session
-# Usage: ./magenta.sh [local|hunter] [--force-fresh] [--dangerously-skip-permissions]
+# Usage: ./magenta.sh [local|hunter] [--force-fresh] [--dangerously-skip-permissions] [--join <user>]
 #   local        - Connect to local Docker container (default)
 #   hunter       - Connect to hunter VPS
 #   --force-fresh - Skip --continue, start fresh with reawaken prompt
 #   --dangerously-skip-permissions - Pass through to claude to skip permission prompts
+#   --join <user> - Join another user's container in multiplayer mode (hunter only)
 
 set -e  # Exit on error
 
 # Parse options
 FORCE_FRESH=false
 DANGEROUSLY_SKIP_PERMISSIONS=false
+JOIN_USER=""
 POSITIONAL_ARGS=()
 
-for arg in "$@"; do
-    case $arg in
+while [[ $# -gt 0 ]]; do
+    case $1 in
         --force-fresh)
             FORCE_FRESH=true
             shift
@@ -23,8 +25,13 @@ for arg in "$@"; do
             DANGEROUSLY_SKIP_PERMISSIONS=true
             shift
             ;;
+        --join)
+            JOIN_USER="$2"
+            shift 2
+            ;;
         *)
-            POSITIONAL_ARGS+=("$arg")
+            POSITIONAL_ARGS+=("$1")
+            shift
             ;;
     esac
 done
@@ -186,6 +193,20 @@ REMOTE_COMMAND="
         )\"
     fi
 "
+
+# If --join is specified, just SSH with the username as the command
+# The route-ssh script on hunter will route to that user's shared tmux
+if [ -n "$JOIN_USER" ]; then
+    if [ "$TARGET" != "hunter" ]; then
+        echo "Error: --join is only supported with the hunter target"
+        exit 1
+    fi
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Joining ${JOIN_USER}'s container in multiplayer mode..."
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "$JOIN_USER"
+    exit $?
+fi
 
 if [ "$USE_MOSH" = true ]; then
     mosh --predict=always --ssh="ssh -p $SSH_PORT" "$SSH_USER@$SSH_HOST" -- bash -c "$REMOTE_COMMAND"
