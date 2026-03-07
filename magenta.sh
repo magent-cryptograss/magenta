@@ -29,6 +29,10 @@ while [[ $# -gt 0 ]]; do
             JOIN_USER="$2"
             shift 2
             ;;
+        --session)
+            SESSION_NAME="$2"
+            shift 2
+            ;;
         *)
             POSITIONAL_ARGS+=("$1")
             shift
@@ -204,7 +208,9 @@ if [ -n "$JOIN_USER" ]; then
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "Joining ${JOIN_USER}'s container in multiplayer mode..."
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "$JOIN_USER"
+    JOIN_CMD="$JOIN_USER"
+    [ -n "$SESSION_NAME" ] && JOIN_CMD="$JOIN_USER $SESSION_NAME"
+    ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "$JOIN_CMD"
     exit $?
 fi
 
