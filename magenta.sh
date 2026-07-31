@@ -1,22 +1,82 @@
 #!/bin/bash
-# Script to SSH into Docker container and start Claude Code session
-# Usage: ./magenta.sh [local|hunter] [--force-fresh] [--dangerously-skip-permissions] [--join <user>]
-#   local        - Connect to local Docker container (default)
-#   hunter       - Connect to hunter VPS
-#   --force-fresh - Skip --continue, start fresh with reawaken prompt
-#   --dangerously-skip-permissions - Pass through to claude to skip permission prompts
-#   --join <user> - Join another user's container in multiplayer mode (hunter only)
+# magenta.sh — connect to a Docker container and start (or attach) a Claude Code
+# session inside tmux. Supports local containers, hunter VPS, named parallel
+# sessions in one container, and joining another user's shared session.
 
 set -e  # Exit on error
 
-# Parse options
+# ─── help text ─────────────────────────────────────────────────────────
+show_help() {
+    cat <<'EOF'
+Usage: magenta.sh [TARGET] [OPTIONS]
+
+Connect to a container and drop into a tmux + Claude Code session.
+
+TARGETS:
+  local                 Local Docker container (default). SSH to localhost:2222.
+  hunter                Hunter VPS. SSH via sshrouter@hunter.cryptograss.live;
+                        the route-ssh script routes to your container by SSH key.
+
+OPTIONS:
+  --session <name>      Name for the tmux session (default: magenta). Use this to
+                        run multiple parallel sessions in the same container —
+                        e.g. one for the current task and another for a side
+                        investigation you want to keep alive. Attaches to an
+                        existing session with that name if one exists, otherwise
+                        creates it.
+  --force-fresh         Kill the existing tmux session (if any) and start a
+                        fresh Claude conversation instead of --continue'ing.
+                        Recommended when creating a new named session so Claude
+                        doesn't attach to the wrong prior conversation.
+  --dangerously-skip-permissions
+                        Pass through to `claude` — bypass permission prompts.
+                        Only takes effect at process start; can't flip mid-session.
+  --join <user>         Join another user's container in multiplayer/pair-programming
+                        mode. Only valid with TARGET=hunter. Combine with
+                        --session <name> to attach to a specific tmux session
+                        in their container.
+  -h, --help            Show this help and exit.
+
+EXAMPLES:
+  magenta.sh                                    # Attach to local, session 'magenta'
+  magenta.sh hunter                             # Attach to hunter, session 'magenta'
+  magenta.sh hunter --force-fresh               # Fresh Claude on hunter
+  magenta.sh hunter --session alchemy           # Named parallel session on hunter
+  magenta.sh hunter --session alchemy --force-fresh
+                                                # Fresh Claude in named session
+                                                # (recommended for a brand-new session)
+  magenta.sh hunter --join skyler               # Join skyler's default session
+  magenta.sh hunter --join skyler --session review
+                                                # Join skyler's 'review' session
+
+NOTES ON PARALLEL SESSIONS:
+  tmux session names are per-container. Two named sessions in the same container
+  keep their tmux state separate, but `claude --continue` picks the last-modified
+  conversation in the current directory. So if you plan to keep two sessions
+  running for different projects, either:
+    (a) start each with --force-fresh so it launches a new conversation, or
+    (b) run them from different working directories inside the container.
+  Otherwise both sessions may try to attach the same underlying conversation.
+
+ENVIRONMENT:
+  Reads magenta/.env if present. GH_TOKEN and POSTGRES_PASSWORD are forwarded
+  to the remote session.
+EOF
+}
+
+# ─── argument parsing ──────────────────────────────────────────────────
 FORCE_FRESH=false
 DANGEROUSLY_SKIP_PERMISSIONS=false
 JOIN_USER=""
+SESSION_NAME=""
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        -h|--help)
+            show_help
+            exit 0
+            ;;
         --force-fresh)
             FORCE_FRESH=true
             shift
@@ -40,10 +100,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Parse target argument (default to local)
+# Default target = local; default session = magenta.
 TARGET="${POSITIONAL_ARGS[0]:-local}"
+SESSION_NAME="${SESSION_NAME:-magenta}"
 
-# Check if mosh is installed (only useful for remote connections)
+# ─── mosh check (remote targets only) ──────────────────────────────────
 USE_MOSH=false
 if [ "$TARGET" != "local" ]; then
     if command -v mosh &> /dev/null; then
@@ -65,7 +126,7 @@ if [ "$TARGET" != "local" ]; then
     fi
 fi
 
-# Set connection parameters based on target
+# ─── target resolution ────────────────────────────────────────────────
 case "$TARGET" in
     local)
         SSH_HOST="localhost"
@@ -80,30 +141,27 @@ case "$TARGET" in
         HOST_KEY_ID="hunter.cryptograss.live"
         ;;
     *)
-        echo "Usage: $0 [local|hunter] [--force-fresh]"
-        echo "  local        - Connect to local Docker container (default)"
-        echo "  hunter       - Connect to hunter VPS"
-        echo "  --force-fresh - Skip --continue, start fresh with reawaken prompt"
+        echo "Error: unknown target '$TARGET'"
+        echo ""
+        show_help
         exit 1
         ;;
 esac
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🚀 Connecting to: $TARGET ($SSH_USER@$SSH_HOST:$SSH_PORT)"
+echo "   tmux session:  $SESSION_NAME"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# Check if SSH key has changed
+# ─── host key check ────────────────────────────────────────────────────
 if ssh-keygen -F "$HOST_KEY_ID" > /dev/null 2>&1; then
-    # Key exists, try to connect to check if it's valid
-    # For hunter, we need -t flag because route-ssh uses docker exec -it
     TTY_FLAG=""
     if [ "$TARGET" = "hunter" ]; then
         TTY_FLAG="-t"
     fi
 
     if ! ssh $TTY_FLAG -o StrictHostKeyChecking=yes -o BatchMode=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" exit 2>/dev/null; then
-        # Connection failed, likely due to changed host key
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo "⚠️  SSH HOST KEY HAS CHANGED"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -128,54 +186,49 @@ if ssh-keygen -F "$HOST_KEY_ID" > /dev/null 2>&1; then
     fi
 fi
 
-# Source environment variables from magenta/.env if it exists
+# ─── env forwarding ────────────────────────────────────────────────────
 ENV_FILE="$(dirname "$0")/.env"
 if [ -f "$ENV_FILE" ]; then
     export $(grep -v '^#' "$ENV_FILE" | xargs)
 fi
 
-# Connect using mosh if available, otherwise SSH
-# Pass through GH_TOKEN and other environment variables
+# ─── remote command ────────────────────────────────────────────────────
+# Runs on the remote (or local container) side. Uses SESSION_NAME for the
+# tmux session so multiple parallel sessions can coexist in one container.
 REMOTE_COMMAND="
-    # Load environment variables
     export GH_TOKEN='$GH_TOKEN'
     export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
     FORCE_FRESH='$FORCE_FRESH'
     DANGEROUSLY_SKIP_PERMISSIONS='$DANGEROUSLY_SKIP_PERMISSIONS'
+    SESSION_NAME='$SESSION_NAME'
 
-    # Build claude flags
     CLAUDE_FLAGS=''
     if [ \"\$DANGEROUSLY_SKIP_PERMISSIONS\" = 'true' ]; then
         CLAUDE_FLAGS='--dangerously-skip-permissions'
     fi
 
-    # Check if tmux session 'magenta' exists
-    if tmux has-session -t magenta 2>/dev/null; then
+    if tmux has-session -t \"\$SESSION_NAME\" 2>/dev/null; then
         if [ \"\$FORCE_FRESH\" = 'true' ]; then
             echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            echo '⚠️  --force-fresh: Killing existing tmux session'
+            echo \"⚠️  --force-fresh: Killing existing tmux session: \$SESSION_NAME\"
             echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            tmux kill-session -t magenta
+            tmux kill-session -t \"\$SESSION_NAME\"
         else
             echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            echo '🔄 Attaching to existing tmux session: magenta'
+            echo \"🔄 Attaching to existing tmux session: \$SESSION_NAME\"
             echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            tmux attach-session -t magenta
+            tmux attach-session -t \"\$SESSION_NAME\"
             exit 0
         fi
     fi
 
     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    echo '✨ Creating new tmux session: magenta'
+    echo \"✨ Creating new tmux session: \$SESSION_NAME\"
     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    # Create new session and start Claude Code
-    # Projects live in ~/workspace/ and logs go to ~/.claude/projects/
-    # Try to continue (unless --force-fresh), if that fails start fresh with reawaken prompt
     if [ \"\$FORCE_FRESH\" = 'true' ]; then
-        tmux new-session -s magenta \"cd ~ && claude \$CLAUDE_FLAGS 'reawaken magent'\"
+        tmux new-session -s \"\$SESSION_NAME\" \"cd ~ && claude \$CLAUDE_FLAGS 'reawaken magent'\"
     else
-        tmux new-session -s magenta \"cd ~ && (
-            # Try to continue - if it fails, check for specific error
+        tmux new-session -s \"\$SESSION_NAME\" \"cd ~ && (
             if ! claude \$CLAUDE_FLAGS --continue 2>/tmp/claude_error.log; then
                 if grep -iq 'no conversation found to continue' /tmp/claude_error.log; then
                     echo ''
@@ -198,8 +251,7 @@ REMOTE_COMMAND="
     fi
 "
 
-# If --join is specified, just SSH with the username as the command
-# The route-ssh script on hunter will route to that user's shared tmux
+# ─── --join branch (hunter multiplayer) ────────────────────────────────
 if [ -n "$JOIN_USER" ]; then
     if [ "$TARGET" != "hunter" ]; then
         echo "Error: --join is only supported with the hunter target"
@@ -207,13 +259,15 @@ if [ -n "$JOIN_USER" ]; then
     fi
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "Joining ${JOIN_USER}'s container in multiplayer mode..."
+    [ "$SESSION_NAME" != "magenta" ] && echo "(session: $SESSION_NAME)"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     JOIN_CMD="$JOIN_USER"
-    [ -n "$SESSION_NAME" ] && JOIN_CMD="$JOIN_USER $SESSION_NAME"
+    [ "$SESSION_NAME" != "magenta" ] && JOIN_CMD="$JOIN_USER $SESSION_NAME"
     ssh -o StrictHostKeyChecking=accept-new -t -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "$JOIN_CMD"
     exit $?
 fi
 
+# ─── normal connection (mosh preferred) ────────────────────────────────
 if [ "$USE_MOSH" = true ]; then
     mosh --predict=always --ssh="ssh -p $SSH_PORT" "$SSH_USER@$SSH_HOST" -- bash -c "$REMOTE_COMMAND"
 else
