@@ -295,18 +295,27 @@ except Exception:
                 INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
             else
                 echo \"→ No Claude session named '\$SESSION_NAME' — creating one\"
-                # --bg registers a new session under the supervisor. We then
-                # look it up by name to get its short id.
-                claude \$CLAUDE_FLAGS --bg --name \"\$SESSION_NAME\" 'reawaken magent' >/dev/null 2>&1
-                sleep 2
+                echo \"─── claude --bg output ───────────────────────────────────\"
+                # --bg registers a new session under the supervisor. Its stdout
+                # includes the short id we then use to attach. Show the output
+                # so failures are diagnosable instead of silently swallowed.
+                claude \$CLAUDE_FLAGS --bg --name \"\$SESSION_NAME\" 'reawaken magent'
+                BG_STATUS=\$?
+                echo \"─── (exit \$BG_STATUS) ────────────────────────────────────\"
+                sleep 3
                 SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
                 if [ -n \"\$SESS_ID\" ]; then
                     echo \"→ Created and attaching (id \$SESS_ID)\"
                     INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
                 else
-                    echo \"⚠️  Failed to find or create Claude session '\$SESSION_NAME'\"
-                    echo \"    Falling back to the agents picker\"
-                    INNER=\"cd ~ && claude agents \$CLAUDE_FLAGS\"
+                    echo \"\"
+                    echo \"⚠️  Session '\$SESSION_NAME' was not registered after --bg attempt.\"
+                    echo \"    See the claude --bg output above for the actual failure.\"
+                    echo \"    Dropping into a shell so you can investigate.\"
+                    echo \"\"
+                    # Don't tmux+claude here — that just eats the error. Give the
+                    # user a shell in tmux so they can retry manually.
+                    INNER=\"cd ~ && echo 'session create failed; try: claude --bg --name \$SESSION_NAME reawaken-magent' && bash\"
                 fi
             fi
             ;;
