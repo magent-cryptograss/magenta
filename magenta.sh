@@ -26,8 +26,9 @@ TARGETS:
 
 MODES (mutually exclusive; last one on the line wins):
   (no mode flag)        DEFAULT. Drop into the Claude session picker
-                        (`claude agents`). Best when you have multiple parallel
-                        sessions and want to pick which one to attach to.
+                        (`claude agents` + auto-`/resume`). Shows all past
+                        sessions including idle ones the supervisor stopped.
+                        Arrow to the one you want and hit Enter to attach.
   --session <name>      Attach to the Claude session named <name>. If no such
                         session exists, create it fresh with the reawaken prompt
                         under that name. The tmux session is also named <name>.
@@ -326,7 +327,19 @@ except Exception:
     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
     echo \"✨ Creating new tmux session: \$SESSION_NAME\"
     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    tmux new-session -s \"\$SESSION_NAME\" \"\$INNER\"
+    if [ \"\$MODE\" = 'picker' ]; then
+        # \`claude agents\` opens with only currently-active sessions in the
+        # visible list — idle sessions (supervisor-stopped after ~1hr) are
+        # hidden. Typing \`/resume\` in the dispatch input opens the full
+        # picker including idle. Start tmux detached, wait for claude's TUI
+        # to be ready, send-keys the /resume, then attach.
+        tmux new-session -d -s \"\$SESSION_NAME\" \"\$INNER\"
+        sleep 2
+        tmux send-keys -t \"\$SESSION_NAME\" '/resume' Enter
+        tmux attach-session -t \"\$SESSION_NAME\"
+    else
+        tmux new-session -s \"\$SESSION_NAME\" \"\$INNER\"
+    fi
 "
 
 # ─── --join branch (hunter multiplayer) ────────────────────────────────
