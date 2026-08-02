@@ -2,6 +2,13 @@
 # magenta.sh — connect to a Docker container and start (or attach) a Claude Code
 # session inside tmux. Supports local containers, hunter VPS, named parallel
 # sessions in one container, and joining another user's shared session.
+#
+# Session model:
+#   * The tmux session provides SSH-disconnect-survival and multiplayer support.
+#   * Inside tmux, we invoke `claude` in one of four modes (see MODES below).
+#   * The Claude Code supervisor (`claude agents`) tracks conversations across
+#     restarts by short-ID and name. `--session foo` looks up the Claude session
+#     named `foo`, attaches to it, or creates it fresh if none exists.
 
 set -e  # Exit on error
 
@@ -17,17 +24,24 @@ TARGETS:
   hunter                Hunter VPS. SSH via sshrouter@hunter.cryptograss.live;
                         the route-ssh script routes to your container by SSH key.
 
-OPTIONS:
-  --session <name>      Name for the tmux session (default: magenta). Use this to
-                        run multiple parallel sessions in the same container —
-                        e.g. one for the current task and another for a side
-                        investigation you want to keep alive. Attaches to an
-                        existing session with that name if one exists, otherwise
-                        creates it.
+MODES (mutually exclusive; last one on the line wins):
+  (no mode flag)        DEFAULT. Drop into the Claude session picker
+                        (`claude agents`). Best when you have multiple parallel
+                        sessions and want to pick which one to attach to.
+  --session <name>      Attach to the Claude session named <name>. If no such
+                        session exists, create it fresh with the reawaken prompt
+                        under that name. The tmux session is also named <name>.
   --force-fresh         Kill the existing tmux session (if any) and start a
-                        fresh Claude conversation instead of --continue'ing.
-                        Recommended when creating a new named session so Claude
-                        doesn't attach to the wrong prior conversation.
+                        fresh Claude conversation with the reawaken prompt.
+                        If combined with --session, the new session gets that
+                        name; otherwise it lives under 'magenta'.
+  --continue            Old behavior — `claude --continue` in the tmux session.
+                        This picks the most-recently-modified conversation in
+                        the cwd, which can be wrong when multiple sessions run
+                        in parallel. Kept as an escape hatch for when the
+                        supervisor is misbehaving.
+
+OTHER OPTIONS:
   --dangerously-skip-permissions
                         Pass through to `claude` — bypass permission prompts.
                         Only takes effect at process start; can't flip mid-session.
@@ -38,25 +52,25 @@ OPTIONS:
   -h, --help            Show this help and exit.
 
 EXAMPLES:
-  magenta.sh                                    # Attach to local, session 'magenta'
-  magenta.sh hunter                             # Attach to hunter, session 'magenta'
-  magenta.sh hunter --force-fresh               # Fresh Claude on hunter
-  magenta.sh hunter --session alchemy           # Named parallel session on hunter
-  magenta.sh hunter --session alchemy --force-fresh
-                                                # Fresh Claude in named session
-                                                # (recommended for a brand-new session)
-  magenta.sh hunter --join skyler               # Join skyler's default session
+  magenta.sh                                  # local, session picker
+  magenta.sh hunter                           # hunter, session picker
+  magenta.sh hunter --session pickipedia      # attach (or create) the 'pickipedia' session
+  magenta.sh hunter --session ticketstubs     # ...and separately 'ticketstubs'
+  magenta.sh hunter --force-fresh             # fresh Claude, generic 'magenta' name
+  magenta.sh hunter --session foo --force-fresh
+                                              # kill+recreate: fresh 'foo' session
+  magenta.sh hunter --continue                # legacy: --continue in tmux
+  magenta.sh hunter --join skyler             # pair-program with skyler
   magenta.sh hunter --join skyler --session review
-                                                # Join skyler's 'review' session
+                                              # join skyler's 'review' tmux session
 
-NOTES ON PARALLEL SESSIONS:
-  tmux session names are per-container. Two named sessions in the same container
-  keep their tmux state separate, but `claude --continue` picks the last-modified
-  conversation in the current directory. So if you plan to keep two sessions
-  running for different projects, either:
-    (a) start each with --force-fresh so it launches a new conversation, or
-    (b) run them from different working directories inside the container.
-  Otherwise both sessions may try to attach the same underlying conversation.
+MENTAL MODEL:
+  * tmux session name = what shows in `tmux list-sessions`
+  * Claude session name = what shows in `claude agents`
+  * When you use --session <name>, both get that name. Kept in sync on purpose:
+    one name to think about, not two.
+  * `claude agents` (the default when no mode flag) lets you pick any Claude
+    session regardless of tmux state. Handy after a container restart.
 
 ENVIRONMENT:
   Reads magenta/.env if present. GH_TOKEN and POSTGRES_PASSWORD are forwarded
@@ -69,6 +83,8 @@ FORCE_FRESH=false
 DANGEROUSLY_SKIP_PERMISSIONS=false
 JOIN_USER=""
 SESSION_NAME=""
+SESSION_NAME_EXPLICIT=false
+CONTINUE_MODE=false
 POSITIONAL_ARGS=()
 
 while [[ $# -gt 0 ]]; do
@@ -81,6 +97,10 @@ while [[ $# -gt 0 ]]; do
             FORCE_FRESH=true
             shift
             ;;
+        --continue)
+            CONTINUE_MODE=true
+            shift
+            ;;
         --dangerously-skip-permissions)
             DANGEROUSLY_SKIP_PERMISSIONS=true
             shift
@@ -91,6 +111,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --session)
             SESSION_NAME="$2"
+            SESSION_NAME_EXPLICIT=true
             shift 2
             ;;
         *)
@@ -100,7 +121,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Default target = local; default session = magenta.
+# Default target = local; default tmux name = magenta.
 TARGET="${POSITIONAL_ARGS[0]:-local}"
 SESSION_NAME="${SESSION_NAME:-magenta}"
 
@@ -148,9 +169,22 @@ case "$TARGET" in
         ;;
 esac
 
+# ─── mode determination (local side) ──────────────────────────────────
+# Precedence: --continue > --force-fresh > --session > default (picker)
+if [ "$CONTINUE_MODE" = "true" ]; then
+    MODE="continue"
+elif [ "$FORCE_FRESH" = "true" ]; then
+    MODE="fresh"
+elif [ "$SESSION_NAME_EXPLICIT" = "true" ]; then
+    MODE="named"
+else
+    MODE="picker"
+fi
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "🚀 Connecting to: $TARGET ($SSH_USER@$SSH_HOST:$SSH_PORT)"
 echo "   tmux session:  $SESSION_NAME"
+echo "   claude mode:   $MODE"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
@@ -193,20 +227,22 @@ if [ -f "$ENV_FILE" ]; then
 fi
 
 # ─── remote command ────────────────────────────────────────────────────
-# Runs on the remote (or local container) side. Uses SESSION_NAME for the
-# tmux session so multiple parallel sessions can coexist in one container.
+# Runs on the container side. The MODE dispatch happens here because the
+# Claude session lookup (agents --json) has to run where claude lives.
 REMOTE_COMMAND="
     export GH_TOKEN='$GH_TOKEN'
     export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
     FORCE_FRESH='$FORCE_FRESH'
     DANGEROUSLY_SKIP_PERMISSIONS='$DANGEROUSLY_SKIP_PERMISSIONS'
     SESSION_NAME='$SESSION_NAME'
+    MODE='$MODE'
 
     CLAUDE_FLAGS=''
     if [ \"\$DANGEROUSLY_SKIP_PERMISSIONS\" = 'true' ]; then
         CLAUDE_FLAGS='--dangerously-skip-permissions'
     fi
 
+    # ─── tmux session: attach if exists (unless force-fresh) ──────────
     if tmux has-session -t \"\$SESSION_NAME\" 2>/dev/null; then
         if [ \"\$FORCE_FRESH\" = 'true' ]; then
             echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
@@ -222,33 +258,75 @@ REMOTE_COMMAND="
         fi
     fi
 
+    # ─── mode-specific inner command ──────────────────────────────────
+    # Build INNER (the command that will run inside the new tmux session)
+    # based on MODE. Uses python3 (always present on the container) for
+    # JSON parsing rather than jq (not guaranteed).
+    lookup_claude_session_id() {
+        local target_name=\"\$1\"
+        claude agents --json --all 2>/dev/null | python3 -c \"
+import sys, json
+try:
+    for s in json.load(sys.stdin):
+        if s.get('name') == '\$target_name':
+            print(s.get('id', ''))
+            break
+except Exception:
+    pass
+\" 2>/dev/null
+    }
+
+    case \"\$MODE\" in
+        picker)
+            INNER=\"cd ~ && claude agents\"
+            ;;
+        fresh)
+            INNER=\"cd ~ && claude \$CLAUDE_FLAGS 'reawaken magent'\"
+            ;;
+        named)
+            SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
+            if [ -n \"\$SESS_ID\" ]; then
+                echo \"→ Found Claude session '\$SESSION_NAME' (id \$SESS_ID). Attaching.\"
+                INNER=\"cd ~ && claude attach \$SESS_ID\"
+            else
+                echo \"→ No Claude session named '\$SESSION_NAME' — creating one\"
+                # --bg registers a new session under the supervisor. We then
+                # look it up by name to get its short id.
+                claude \$CLAUDE_FLAGS --bg --name \"\$SESSION_NAME\" 'reawaken magent' >/dev/null 2>&1
+                sleep 2
+                SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
+                if [ -n \"\$SESS_ID\" ]; then
+                    echo \"→ Created and attaching (id \$SESS_ID)\"
+                    INNER=\"cd ~ && claude attach \$SESS_ID\"
+                else
+                    echo \"⚠️  Failed to find or create Claude session '\$SESSION_NAME'\"
+                    echo \"    Falling back to the agents picker\"
+                    INNER=\"cd ~ && claude agents\"
+                fi
+            fi
+            ;;
+        continue)
+            # Legacy: --continue with reawaken fallback if no conversation
+            # to continue. Kept as escape hatch when supervisor misbehaves.
+            INNER=\"cd ~ && (
+                if ! claude \$CLAUDE_FLAGS --continue 2>/tmp/claude_error.log; then
+                    if grep -iq 'no conversation found to continue' /tmp/claude_error.log; then
+                        echo 'No conversation found; starting fresh.'
+                        claude \$CLAUDE_FLAGS 'reawaken magent'
+                    else
+                        echo 'Claude Code failed. See /tmp/claude_error.log'
+                        read -p 'Press Enter to close...'
+                    fi
+                    rm -f /tmp/claude_error.log
+                fi
+            )\"
+            ;;
+    esac
+
     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
     echo \"✨ Creating new tmux session: \$SESSION_NAME\"
     echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    if [ \"\$FORCE_FRESH\" = 'true' ]; then
-        tmux new-session -s \"\$SESSION_NAME\" \"cd ~ && claude \$CLAUDE_FLAGS 'reawaken magent'\"
-    else
-        tmux new-session -s \"\$SESSION_NAME\" \"cd ~ && (
-            if ! claude \$CLAUDE_FLAGS --continue 2>/tmp/claude_error.log; then
-                if grep -iq 'no conversation found to continue' /tmp/claude_error.log; then
-                    echo ''
-                    echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-                    echo 'No conversation found to continue.'
-                    echo 'Starting fresh with reawaken prompt...'
-                    echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-                    echo ''
-                    claude \$CLAUDE_FLAGS 'reawaken magent'
-                else
-                    echo ''
-                    echo 'Claude Code failed with an error. Check /tmp/claude_error.log for details.'
-                    echo ''
-                    echo 'Press Enter to close...'
-                    read
-                fi
-                rm -f /tmp/claude_error.log
-            fi
-        )\"
-    fi
+    tmux new-session -s \"\$SESSION_NAME\" \"\$INNER\"
 "
 
 # ─── --join branch (hunter multiplayer) ────────────────────────────────
