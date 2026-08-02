@@ -47,6 +47,9 @@ OTHER OPTIONS:
   --dangerously-skip-permissions
                         Pass through to `claude` — bypass permission prompts.
                         Only takes effect at process start; can't flip mid-session.
+                        Note: attaching to an already-running session inherits
+                        that session's original permission mode, so this flag
+                        may not have any effect until the session is respawned.
   --join <user>         Join another user's container in multiplayer/pair-programming
                         mode. Only valid with TARGET=hunter. Combine with
                         --session <name> to attach to a specific tmux session
@@ -280,7 +283,7 @@ except Exception:
 
     case \"\$MODE\" in
         picker)
-            INNER=\"cd ~ && claude agents\"
+            INNER=\"cd ~ && claude agents \$CLAUDE_FLAGS\"
             ;;
         fresh)
             INNER=\"cd ~ && claude \$CLAUDE_FLAGS 'reawaken magent'\"
@@ -289,7 +292,7 @@ except Exception:
             SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
             if [ -n \"\$SESS_ID\" ]; then
                 echo \"→ Found Claude session '\$SESSION_NAME' (id \$SESS_ID). Attaching.\"
-                INNER=\"cd ~ && claude attach \$SESS_ID\"
+                INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
             else
                 echo \"→ No Claude session named '\$SESSION_NAME' — creating one\"
                 # --bg registers a new session under the supervisor. We then
@@ -299,11 +302,11 @@ except Exception:
                 SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
                 if [ -n \"\$SESS_ID\" ]; then
                     echo \"→ Created and attaching (id \$SESS_ID)\"
-                    INNER=\"cd ~ && claude attach \$SESS_ID\"
+                    INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
                 else
                     echo \"⚠️  Failed to find or create Claude session '\$SESSION_NAME'\"
                     echo \"    Falling back to the agents picker\"
-                    INNER=\"cd ~ && claude agents\"
+                    INNER=\"cd ~ && claude agents \$CLAUDE_FLAGS\"
                 fi
             fi
             ;;
