@@ -80,6 +80,13 @@ MENTAL MODEL:
 ENVIRONMENT:
   Reads magenta/.env if present. GH_TOKEN and POSTGRES_PASSWORD are forwarded
   to the remote session.
+
+LOG FILE:
+  Setup-phase output (mode dispatch, session lookup, claude --bg output,
+  the tmux command about to run) is appended to ~/magenta.log inside the
+  container. Useful when mosh quits after a fast tmux exit and you want
+  to see what actually happened. Also readable by any claude session
+  running with $HOME as cwd.
 EOF
 }
 
@@ -242,6 +249,24 @@ REMOTE_COMMAND="
     SESSION_NAME='$SESSION_NAME'
     MODE='$MODE'
 
+    # ─── logging ──────────────────────────────────────────────────────
+    # Log setup-phase output to a persistent file so failures don't
+    # disappear when mosh quits after tmux exits. Location is
+    # ~/magenta.log inside the container — readable by both the user
+    # and any claude session running in ~. Tee everything through log_line
+    # so it appears on the terminal AND lands in the log.
+    LOG_FILE=\"\$HOME/magenta.log\"
+    log_line() {
+        # Timestamp, then message, to both stdout and log.
+        local ts stamp
+        ts=\$(date -Iseconds 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)
+        stamp=\"[\$ts]\"
+        # Terminal: unstamped for readability. Log: stamped.
+        echo \"\$@\"
+        echo \"\$stamp \$*\" >> \"\$LOG_FILE\"
+    }
+    log_line \"=== magenta.sh session=\$SESSION_NAME mode=\$MODE fresh=\$FORCE_FRESH ===\"
+
     CLAUDE_FLAGS=''
     if [ \"\$DANGEROUSLY_SKIP_PERMISSIONS\" = 'true' ]; then
         CLAUDE_FLAGS='--dangerously-skip-permissions'
@@ -250,14 +275,10 @@ REMOTE_COMMAND="
     # ─── tmux session: attach if exists (unless force-fresh) ──────────
     if tmux has-session -t \"\$SESSION_NAME\" 2>/dev/null; then
         if [ \"\$FORCE_FRESH\" = 'true' ]; then
-            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            echo \"⚠️  --force-fresh: Killing existing tmux session: \$SESSION_NAME\"
-            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+            log_line \"⚠️  --force-fresh: Killing existing tmux session: \$SESSION_NAME\"
             tmux kill-session -t \"\$SESSION_NAME\"
         else
-            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-            echo \"🔄 Attaching to existing tmux session: \$SESSION_NAME\"
-            echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+            log_line \"🔄 Attaching to existing tmux session: \$SESSION_NAME\"
             tmux attach-session -t \"\$SESSION_NAME\"
             exit 0
         fi
@@ -291,31 +312,32 @@ except Exception:
         named)
             SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
             if [ -n \"\$SESS_ID\" ]; then
-                echo \"→ Found Claude session '\$SESSION_NAME' (id \$SESS_ID). Attaching.\"
-                INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
+                log_line \"→ Found Claude session '\$SESSION_NAME' (id \$SESS_ID). Attaching.\"
+                INNER=\"cd ~ && claude attach \$SESS_ID\"
             else
-                echo \"→ No Claude session named '\$SESSION_NAME' — creating one\"
-                echo \"─── claude --bg output ───────────────────────────────────\"
-                # --bg registers a new session under the supervisor. Its stdout
-                # includes the short id we then use to attach. Show the output
-                # so failures are diagnosable instead of silently swallowed.
-                claude \$CLAUDE_FLAGS --bg --name \"\$SESSION_NAME\" 'reawaken magent'
-                BG_STATUS=\$?
-                echo \"─── (exit \$BG_STATUS) ────────────────────────────────────\"
+                log_line \"→ No Claude session named '\$SESSION_NAME' — creating one\"
+                log_line \"─── claude --bg output ───────────────────────────────────\"
+                # --bg registers a new session under the supervisor. Tee its
+                # combined output so failures are visible on the terminal AND
+                # preserved in the log for post-mortem inspection.
+                claude \$CLAUDE_FLAGS --bg --name \"\$SESSION_NAME\" 'reawaken magent' 2>&1 \\
+                    | tee -a \"\$LOG_FILE\"
+                BG_STATUS=\${PIPESTATUS[0]}
+                log_line \"─── (claude --bg exit \$BG_STATUS) ────────────────────────\"
                 sleep 3
                 SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
                 if [ -n \"\$SESS_ID\" ]; then
-                    echo \"→ Created and attaching (id \$SESS_ID)\"
-                    INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
+                    log_line \"→ Created and attaching (id \$SESS_ID)\"
+                    INNER=\"cd ~ && claude attach \$SESS_ID\"
                 else
-                    echo \"\"
-                    echo \"⚠️  Session '\$SESSION_NAME' was not registered after --bg attempt.\"
-                    echo \"    See the claude --bg output above for the actual failure.\"
-                    echo \"    Dropping into a shell so you can investigate.\"
-                    echo \"\"
+                    log_line \"\"
+                    log_line \"⚠️  Session '\$SESSION_NAME' was not registered after --bg attempt.\"
+                    log_line \"    Full log at \$LOG_FILE\"
+                    log_line \"    Dropping into a shell so you can investigate.\"
+                    log_line \"\"
                     # Don't tmux+claude here — that just eats the error. Give the
                     # user a shell in tmux so they can retry manually.
-                    INNER=\"cd ~ && echo 'session create failed; try: claude --bg --name \$SESSION_NAME reawaken-magent' && bash\"
+                    INNER=\"cd ~ && echo 'session create failed; see \$LOG_FILE' && bash\"
                 fi
             fi
             ;;
@@ -337,9 +359,8 @@ except Exception:
             ;;
     esac
 
-    echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
-    echo \"✨ Creating new tmux session: \$SESSION_NAME\"
-    echo '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+    log_line \"✨ Creating new tmux session: \$SESSION_NAME\"
+    log_line \"   INNER: \$INNER\"
     tmux new-session -s \"\$SESSION_NAME\" \"\$INNER\"
 "
 
