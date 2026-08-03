@@ -292,7 +292,13 @@ except Exception:
             SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
             if [ -n \"\$SESS_ID\" ]; then
                 echo \"→ Found Claude session '\$SESSION_NAME' (id \$SESS_ID). Attaching.\"
-                INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
+                # No \$CLAUDE_FLAGS here: 'claude attach' takes only <id> and
+                # hard-errors on unknown options ('unknown option
+                # --dangerously-skip-permissions', exit 1), which kills the tmux
+                # session instantly and drops your mosh connection. Harmless to
+                # omit anyway — permission mode is fixed at process start, and
+                # the session was already created with the flag below.
+                INNER=\"cd ~ && claude attach \$SESS_ID\"
             else
                 echo \"→ No Claude session named '\$SESSION_NAME' — creating one\"
                 echo \"─── claude --bg output ───────────────────────────────────\"
@@ -306,7 +312,8 @@ except Exception:
                 SESS_ID=\$(lookup_claude_session_id \"\$SESSION_NAME\")
                 if [ -n \"\$SESS_ID\" ]; then
                     echo \"→ Created and attaching (id \$SESS_ID)\"
-                    INNER=\"cd ~ && claude attach \$CLAUDE_FLAGS \$SESS_ID\"
+                    # See note above: 'claude attach' rejects extra flags.
+                    INNER=\"cd ~ && claude attach \$SESS_ID\"
                 else
                     echo \"\"
                     echo \"⚠️  Session '\$SESSION_NAME' was not registered after --bg attempt.\"
