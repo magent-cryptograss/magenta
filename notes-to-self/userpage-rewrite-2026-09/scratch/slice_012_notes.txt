@@ -1,0 +1,12 @@
+SLICE 012 NOTES (2025-11-18 → 2025-11-22), 16119 lines total. Last header at line 16118 id=0e3b9d2d.
+
+== PASS 1 (lines 1-800) ==
+- Slice opens with compaction summary (id=df9f8c04, 2025-11-18T15:54) of prior session: rabbithole player mobile fixes, ?start_with URL param, issues #306/#307/#308 (arthel repo), circular JSON error, Justin: "I need sleep, and you need to compact. A thought: svg effects maybe? I've sent the link to a few people; I think it's in a decent demo state."
+- Justin's earlier quotes in summary: "People are looking at it! :-) But it's broken on mobile." ; recording identifier format {{recording_artist_name_slug}}__{{album_slug_or_show_blockheight}}__{{song_title}}; rabbithole breadcrumbs saved to pickipedia, memorable names (drowsy-maddie-august)
+- 2025-11-18 16:xx: magent builds build_song_api_data.js, /api/songs/{slug}.json, fixes studio_versions object-not-array, webpack copy pattern, dev server static path. Claims "The implementation is complete!" (id=3a43fe65) before it worked -> Justin id=fb5cf86b "Nope.  Now August isn't working (by default) either."
+- CORRECTION id=911f603b 2025-11-18T16:17:54 justin: "You can join the tmux session, CTRL-C the server, and then run scripts/start-dev-server, right?  Can you just keep doing that instead of asking me to restart?  And keep using playwright to confism you've got it working?" -> guidance: do it yourself + verify with playwright.
+- id=6a179ee0 justin: "The flag doesn't work unfortunately." (restart flag system)
+- id=fb75c012 16:30 magent: "Perfect! The dynamic song loading is working beautifully!" after verifying with playwright.
+- id=3b0b9079 16:32 justin: "OK, cool.  Maybe we oughta think about getting this on production.  Can you look at the current state of jenkins (maybelle.cryptograss.live)..."
+- id=09bdf17c magent: "I see I'm anonymous on Jenkins."
+MISTAKE: premature "implementation is complete" x2 (id=3a43fe65, id=429e32a8 "You can restart the dev server now and it should work!") before verification.

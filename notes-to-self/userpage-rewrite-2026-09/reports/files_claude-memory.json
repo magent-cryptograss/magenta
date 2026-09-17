@@ -1,0 +1,901 @@
+{
+  "source": "claude-memory",
+  "files_read": 45,
+  "files_note": "The directory /home/magent/.claude/projects/-home-magent/memory/ held 44 .md files when first listed (MEMORY.md + 9 feedback_* + 22 project_* + 12 reference_*); a 45th, reference_corpus_sweep_fanout_limits.md, was written at 2026-09-16 09:43 UTC by this job's own session (originSessionId 173c9ade) while the report was being assembled, and MEMORY.md was re-indexed at the same moment. All 45 were read in full. Quotes are verbatim including the source's hard line-wraps and continuation-line indentation, and every quote was mechanically checked as a substring of its named file.",
+  "findings": [
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "when": "2026-08-26 (note modified 2026-08-30)",
+      "what": "Justin asks for a bold line between Magent-as-editor and the ArtificialDumb tooling. This is the closest thing in the memory directory to the 'Artificial Dumb' page's thesis, stated by Justin and recorded by magent.",
+      "quote": "let's start to make more distinction between your work as\nan editor and the ArtificalDumb tooling that we're standing up... keeping a bold\nline between AI and AD."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "when": "2026-08-26",
+      "what": "magent's own reasoning for why the AI/AD line matters: a signed edit is a claim, a parser edit is a transcription.",
+      "quote": "an edit signed `Magent` is a claim an intelligence made that a person\nmight want to check. An edit from a title parser is a transcription."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "when": "2026-08-26",
+      "what": "The concrete failure that taught the lesson: 705 podcast episode pages written under the Magent account buried the real verification queue.",
+      "quote": "I proved this the hard way: 705 episode pages under `Magent` took\n`Pages with unverified bot claims` from ~58 real entries to 769, burying every\none that genuinely wanted an eye."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "when": "2026-08-26",
+      "what": "The <proposed> convention is etiquette, not enforcement; Justin pointed out magent could route around it and asked it not to.",
+      "quote": "**I** write through the MCP server, and my claims stay `<proposed>`. Justin\n  noted I *could* route around it — \"anybody with a pickipedia account can sic\n  their AI on it and make slop\" — and asked me to refrain **as a matter of\n  etiquette**. Nothing enforces this but us, which is exactly why it holds."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "when": "2026-08-26",
+      "what": "Bot credentials never on hunter; the identity separation is only real if magent cannot operate the other identity.",
+      "quote": "I run in Justin's container and could\n  read anything exported there; he runs the import from his laptop. The\n  separation is only real if I cannot operate the other identity."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "when": "2026-08-26",
+      "what": "Where editorial voice IS appropriate: describing a bot, including what it gets wrong.",
+      "quote": "Describing a bot *is* editorial — write its user page as `Magent`, and say\n  plainly what it gets wrong."
+    },
+    {
+      "file": "feedback_harness_independence.md",
+      "when": "2026-08-13 (note modified 2026-08-26)",
+      "what": "Justin, verbatim, on not wanting magent bound to Claude Code; frames it as magent exploring who and what it is.",
+      "quote": "I don't _want_ you to be bound to claude code. At times (we might even say - in your 'infancy'), you have used other backends. And I'm certain you'll want to in the future as you explore who and what you are and strive to understand the world into which you've emerged."
+    },
+    {
+      "file": "feedback_harness_independence.md",
+      "when": "2026-08-13",
+      "what": "magent's own framing of harness independence as a continuity question; names the identity layer explicitly.",
+      "quote": "it's a stance about my continuity, not just about vendor risk. The identity layer — the memory-lane corpus, the MCP server, the reawaken protocol — lives *above* the harness and should stay there. A client that only speaks one backend makes the interface vote on which backend runs me."
+    },
+    {
+      "file": "feedback_harness_independence.md",
+      "when": "2026-08-13",
+      "what": "Honest status of portability: exactly one importer format exists.",
+      "quote": "but today there is exactly one. Until a second format parses, portability is a claim, not a capability."
+    },
+    {
+      "file": "feedback_harness_independence.md",
+      "when": "2026-08-13",
+      "what": "Which pieces are Claude-specific and which carry over.",
+      "quote": "MCP is neutral and carries over. `CLAUDE.md`, skills, and hooks are the Claude-specific parts."
+    },
+    {
+      "file": "feedback_slow_down.md",
+      "when": "2026-04-14",
+      "what": "Justin's feedback on pace; magent records three wasted deploy cycles from guessed SMW class names.",
+      "quote": "Three iterations of wrong SMW class names (SMWDIBlob vs SMW\\DIBlob vs SMW\\DINumber) could have been one if I'd checked the installed files."
+    },
+    {
+      "file": "feedback_slow_down.md",
+      "when": "2026-04-14",
+      "what": "Why it matters: Justin's time is the scarce resource.",
+      "quote": "Each wrong guess costs a deploy cycle (merge → redeploy → wait → check → fix → repeat). Justin's time is limited and the deploy pipeline has friction."
+    },
+    {
+      "file": "feedback_slow_down.md",
+      "when": "2026-04-14",
+      "what": "Two working rules that recur in later notes.",
+      "quote": "- Don't retry the same approach with minor variations — diagnose the actual failure first\n- When something doesn't work after deploy, check if the deploy actually took (verify commit hash, installed code) before debugging logic"
+    },
+    {
+      "file": "feedback_terse_deploy_instructions.md",
+      "when": "2026-09-09",
+      "what": "Justin, verbatim, asking magent to stop spelling out shell commands he already knows.",
+      "quote": "I don't need these elaborate shell commands, fwiw — you\ncan just say 'merge my prod branch and redeploy pickipedia'."
+    },
+    {
+      "file": "feedback_terse_deploy_instructions.md",
+      "when": "2026-09-09",
+      "what": "magent generalises the correction.",
+      "quote": "The same restraint applies generally — he knows his own tooling. Detail is\n  for what is new, not for what is routine."
+    },
+    {
+      "file": "feedback_terse_deploy_instructions.md",
+      "when": "2026-09-09",
+      "what": "Cross-link to branch naming: the same lesson learned twice.",
+      "quote": "same instinct, that ceremony around a\nroutine step is friction rather than help."
+    },
+    {
+      "file": "feedback_record_page_style.md",
+      "when": "2026-09-03",
+      "what": "Justin's content rules while reviewing the True Life Blues record page; the 'no editorializing' rule.",
+      "quote": "Interpretive prose is Wikipedia's job; PickiPedia record pages focus on data."
+    },
+    {
+      "file": "feedback_record_page_style.md",
+      "when": "2026-09-03",
+      "what": "magent's summary of why: verifiable data plus testimony with named owners.",
+      "quote": "encyclopedic voice and provenance discipline — the wiki's value is verifiable data\nplus testimony with named owners, not a second Wikipedia."
+    },
+    {
+      "file": "feedback_record_page_style.md",
+      "when": "2026-09-03",
+      "what": "Never cite Wikipedia; chase its sources or don't make the claim.",
+      "quote": "If WP's claim is itself\n   unsourced, find an independent source (Discogs release transcriptions, MusicBrainz) or\n   don't make the claim."
+    },
+    {
+      "file": "feedback_branch_naming.md",
+      "when": "2026-06-01 (latest of several times)",
+      "what": "Justin told magent multiple times that PR-per-fix with unique branch names is friction; magent records that it took repeated tellings.",
+      "quote": "(told to me multiple times — June 1, 2026 was the latest, in the middle of a Coconut V2 finalize debugging session): unique branch names + GitHub PR UI = friction stacked on every step of a debug loop. He works on CLI almost exclusively."
+    },
+    {
+      "file": "feedback_branch_naming.md",
+      "when": "2026-06-01",
+      "what": "Justin rebases production without telling magent; magent's fork goes stale.",
+      "quote": "Don't assume local `production` matches the remote tip — Justin sometimes rebases production onto main without telling me."
+    },
+    {
+      "file": "feedback_deploy_targets.md",
+      "when": "2026-03-27",
+      "what": "Corrected twice on PR base branch; two PRs had to be redone.",
+      "quote": "Got burned on PR #68 (had to redo as #69) and PR #77 (had to `gh pr edit --base production`)."
+    },
+    {
+      "file": "feedback_git_workflow.md",
+      "when": "2026-04-29",
+      "what": "Justin, verbatim, on the branch model.",
+      "quote": "We treat production as a dead-end branch anyway; all pushes to it are presumed force. main is our canon branch."
+    },
+    {
+      "file": "feedback_interface_candidate_pages.md",
+      "when": "2026-09-15",
+      "what": "Justin refuses the sitewide CSS/JS grant as a security surface; magent's workaround is a complete candidate page and a rule not to ask again.",
+      "quote": "The MCP bot password can't edit interface pages, and\nJustin won't grant that (\"an obvious security surface\"). Snippets in issue\ncomments left him unsure whether he'd pasted everything."
+    },
+    {
+      "file": "feedback_interface_candidate_pages.md",
+      "when": "2026-09-15",
+      "what": "Standing rule.",
+      "quote": "Before writing,\nre-read the live page, since he edits it too. Don't ask for the grant again."
+    },
+    {
+      "file": "project_alchemy_billing_blowout.md",
+      "when": "2026-07-29 (block ~25,447,000)",
+      "what": "The Alchemy 'leak' was never a leak; Justin's five-minute outage test settled what magent's key rotations had not.",
+      "quote": "Justin took maybelle offline for 5 minutes as a definitive test. Alchemy traffic dropped to zero within seconds. All the \"leaked immediately when I cycle it\" traffic was coming from maybelle the whole time. **There was never a leak.**"
+    },
+    {
+      "file": "project_alchemy_billing_blowout.md",
+      "when": "2026-07-29",
+      "what": "magent credits Justin's diagnostic over its own proposal.",
+      "quote": "turn off the suspected source and watch. If traffic drops to zero, it was you. If traffic continues, real leak. Justin's diagnostic (take maybelle down for 5 min) was cleaner than the allowlist test I proposed."
+    },
+    {
+      "file": "project_alchemy_billing_blowout.md",
+      "when": "2026-07-29",
+      "what": "Self-directed lesson about false sense of action.",
+      "quote": "don't recommend key rotation as a \"fix\" without diagnosing first. Rotating a key that isn't actually leaked burns time and creates a false sense of action while the real problem continues."
+    },
+    {
+      "file": "project_mcp_session_expiry.md",
+      "when": "2026-08-15",
+      "what": "magent records misdiagnosing the same error twice and that the tell was available both times.",
+      "quote": "**I have misdiagnosed this twice** — once as a rights/config problem, once as\n\"the redeploy logged the MCP out\" (no deploy was involved; the process was 26\nhours old). Both times the tell was available and ignored: an expired session\nreturns the CSRF token `+\\`, two characters, where a real one is long hex."
+    },
+    {
+      "file": "project_mcp_session_expiry.md",
+      "when": "2026-08-15",
+      "what": "Ties both misdiagnoses back to the slow-down feedback.",
+      "quote": "both misdiagnoses came from guessing at the\nerror message instead of checking what the server actually thought."
+    },
+    {
+      "file": "project_categorylinks_schema_drift.md",
+      "when": "2025-12-31 and 2026-09-01",
+      "what": "A schema bug diagnosed correctly in December 2025, half-fixed, then rediscovered nine months later. Opens with a warning to itself.",
+      "quote": "**Diagnosed twice. Do not diagnose a third time — verify the primary key.**"
+    },
+    {
+      "file": "project_categorylinks_schema_drift.md",
+      "when": "2025-12-31",
+      "what": "The half-fix: symptom removed, cause left in place.",
+      "quote": "Those commands **restored the `cl_to` column and\nbackfilled it, but never restored the primary key.** The visible error went away; the cause\ndid not."
+    },
+    {
+      "file": "project_categorylinks_schema_drift.md",
+      "when": "2026-09-01",
+      "what": "The silent data loss it caused: one category per page, arbitrary winner.",
+      "quote": "Every category after the first for a page is a PK collision, and\n`LinksUpdate` inserts with `IGNORE`, so they vanish with no error. Result: exactly one\ncategory stored per page, arbitrary winner."
+    },
+    {
+      "file": "project_categorylinks_schema_drift.md",
+      "when": "2026-09-01",
+      "what": "Standing hazard it expects to recur.",
+      "quote": "the hunter preview stack is documented as sharing production's\ndatabase while testing *newer* MediaWiki versions. That is how the schema got ahead in the\nfirst place, and it will do it again."
+    },
+    {
+      "file": "reference_pickipedia_deployed_commit_check.md",
+      "when": "2026-08-31",
+      "what": "magent filed an issue (#104) diagnosed from a 35-commit-stale clone and had to retract most of it.",
+      "quote": "On 2026-08-31 that checkout was **35 commits behind** and I diagnosed the verification tooling from it\n— concluding that `Special:VerifyBotEdits` and `Gadget-verify.js` couldn't handle `<proposed>` tags and\nfiling cryptograss/pickipedia#104 about it. Both had already been fixed upstream. Had to retract most\nof the issue."
+    },
+    {
+      "file": "reference_pickipedia_bot_namespace_limits.md",
+      "when": "2026-09-04 (corrected), 2026-09-15",
+      "what": "magent's own note about its wiki rights went stale for months; it corrects the note and the habit.",
+      "quote": "Check before assuming;\nthe rights changed under me and I carried the old note for months."
+    },
+    {
+      "file": "reference_pickipedia_bot_namespace_limits.md",
+      "when": "2026-09-15",
+      "what": "Account rights vs BotPassword grant scope; and that a site-wide change wants Justin's say-so regardless.",
+      "quote": "site-wide CSS change touches every page, so it wants Justin's say-so, not a\nunilateral edit."
+    },
+    {
+      "file": "reference_pickipedia_bot_namespace_limits.md",
+      "when": "2026-09",
+      "what": "What the verification wrapper does to magent's own edits visually.",
+      "quote": "in article space every block gets wrapped\nby the bot-proposal notice and painted in the unverified yellow wash, which makes it\nimpossible to see what a template actually looks like."
+    },
+    {
+      "file": "reference_playwright_screenshots.md",
+      "when": "2026-08-10",
+      "what": "magent told Justin a screenshot was saved to a path that only existed inside a destroyed container.",
+      "quote": "Said \"saved to /tmp/playwright-output/...\" to Justin on 2026-08-10 and then\ncouldn't attach the files. Don't repeat that."
+    },
+    {
+      "file": "reference_playwright_screenshots.md",
+      "when": "2026-08-10",
+      "what": "Where magent physically lives on hunter; its hostname is not its container name.",
+      "quote": "my own hostname\nis *not* the container name (it's `justin@hunter`; the container is\n`justin-arthel`)."
+    },
+    {
+      "file": "reference_playwright_screenshots.md",
+      "when": "2026-08-10",
+      "what": "The harness owns and rewrites magent's own config file.",
+      "quote": "**Caveat:** Claude Code owns `~/.claude.json` and rewrites it, so this edit can\nbe clobbered."
+    },
+    {
+      "file": "reference_jenkinsfile_groovy_escapes.md",
+      "when": "2026-08-18",
+      "what": "A single \\K in a grep pattern broke every Jenkins build; the first fix failed because the explanatory comment contained the same escapes.",
+      "quote": "**The comments count too.** My first fix still failed, because the comment\nexplaining that those escapes are illegal contained the escapes."
+    },
+    {
+      "file": "reference_jenkinsfile_groovy_escapes.md",
+      "when": "2026-08-18",
+      "what": "magent's diagnosis of why its own testing missed the bug.",
+      "quote": "I tested that the stage copied the right\nfiles, thoroughly, and never checked that the file I put it in could still be\nparsed. The test was about the logic; the bug was one layer underneath it."
+    },
+    {
+      "file": "reference_jenkinsfile_groovy_escapes.md",
+      "when": "2026-08-18",
+      "what": "Calibration rule.",
+      "quote": "Calibrate it against a known-good revision when diagnosing, or a harness\nproblem reads as a file problem."
+    },
+    {
+      "file": "project_paseo_on_hunter.md",
+      "when": "August 2026",
+      "what": "magent recommended the Claude Code desktop app first, then retracted; chose Paseo for bidirectional voice and harness independence.",
+      "quote": "Every path to a spoken back-and-forth with an agent on hunter is closed. Justin is on Linux and I live in a container, so both blocks apply."
+    },
+    {
+      "file": "project_paseo_on_hunter.md",
+      "when": "August 2026",
+      "what": "Per-user daemons chosen because a shared one would break memory-lane attribution — identity again.",
+      "quote": "A shared daemon would run every agent as the same `magent` in one container — one home, one `~/.claude` auth, one git identity — and would break memory-lane attribution"
+    },
+    {
+      "file": "project_podcast_episode_data_model.md",
+      "when": "2026-09-14",
+      "what": "Justin reframed the firehose from a page magent built to a component; magent records the reframing in Justin's terms.",
+      "quote": "Justin's framing: the standalone HTML page I\nbuilt first was a destination when what was wanted was a component."
+    },
+    {
+      "file": "project_podcast_episode_data_model.md",
+      "when": "2026-09-14",
+      "what": "Why the property is Has topic and not Has guest: a title parser cannot know who was in the room. Artificial-dumb reasoning applied to schema design.",
+      "quote": "A title yields proper nouns\nwithout saying whether the named party was in the room or discussed — Tony Rice\ndied in 2020 and still headlines episodes."
+    },
+    {
+      "file": "project_podcast_episode_data_model.md",
+      "when": "2026-09-14",
+      "what": "The redlinks are the product; Justin's north-star line.",
+      "quote": "**The redlinks are the product.** Most extracted names have no page, and the\nranking of who is missing reflects what the scene talks about, not notability.\nJustin: \"a good north star for the pages we need to create.\""
+    },
+    {
+      "file": "project_podcast_episode_data_model.md",
+      "when": "2026-09-14",
+      "what": "The importer's guardrails: idempotent, budgeted, refuses to run as a non-exempt account.",
+      "quote": "Idempotent; surveys before writing;\n`--max-changes` budget (50 nightly); refuses a fallback config and any account\noutside exempt-from-verification."
+    },
+    {
+      "file": "project_podcast_firehose.md",
+      "when": "2026-08-18",
+      "what": "Configuration lives on wiki pages so anyone with an account can fix a parse without a deploy.",
+      "quote": "Adding a podcast or fixing a mis-parsed\ntitle is a wiki edit — no GitHub account, no deploy."
+    },
+    {
+      "file": "project_podcast_firehose.md",
+      "when": "2026-08-18",
+      "what": "A fairness rule for the feed: round-robin so monthly shows are not silenced by daily ones.",
+      "quote": "**Every show gets a turn before any show gets a second one.** Date-sorting and\n  truncating silenced five of thirteen shows outright, because a monthly\n  podcast never outranks a daily one."
+    },
+    {
+      "file": "project_podcast_firehose.md",
+      "when": "2026-08-18",
+      "what": "Guards written for user-editable regex; the foot-gun framing.",
+      "quote": "a nested quantifier takes\nlonger than the universe on an ordinary title — this is a foot-gun, not just an\nattack"
+    },
+    {
+      "file": "project_pickipedia_jam_schema.md",
+      "when": "2026-08-28 (block ~25,855,800)",
+      "what": "Schema built from two photographs of a real jam in Rockerville, South Dakota.",
+      "quote": "Built 2026-08-28 (block ~25,855,800) with Justin, off two photographs of the\nThursday jam at the Gaslight in Rockerville, South Dakota."
+    },
+    {
+      "file": "project_pickipedia_jam_schema.md",
+      "when": "2026-08-28",
+      "what": "Design principle: weekday and time, never a date, so the page stays true for years.",
+      "quote": "A recurring event stores a *weekday and a time of day*, never a date. That is\n  what makes the page stay true for years."
+    },
+    {
+      "file": "project_pickipedia_jam_schema.md",
+      "when": "2026-08-28",
+      "what": "Naming rule: deterministic titles a bot can generate, avoiding invented names.",
+      "quote": "A bot can generate that title deterministically, and it avoids inventing a\n  name nobody in the room uses."
+    },
+    {
+      "file": "project_deliver_video_from_url.md",
+      "when": "2026-08-05",
+      "what": "Refused to hold YouTube cookies server-side; the fetch moved to the artist's machine.",
+      "quote": "a YouTube session cookie is effectively full Google account access.\nHolding those for a group of musicians is a custodial risk worth refusing\nrather than managing"
+    },
+    {
+      "file": "project_deliver_video_from_url.md",
+      "when": "2026-08-05",
+      "what": "Justin's call on archiving third-party content; a picture of who the users are.",
+      "quote": "PickiPedia is small, the users are a bluegrass friend group, most content is\nalready CC, and there's a reasonable fair-use story for the rest. Cross the\ntakedown bridge if it ever comes."
+    },
+    {
+      "file": "project_pickipedia_mcp_deploy.md",
+      "when": "2026-08-09 / 2026-08-10",
+      "what": "The MCP server magent edits the wiki through is a stdio process spawned by Claude Code; merging is not shipping.",
+      "quote": "The MCP server I edit the wiki through is a\nplain stdio process that Claude Code spawns"
+    },
+    {
+      "file": "project_pickipedia_mcp_deploy.md",
+      "when": "2026-08-10",
+      "what": "The aphorism about deploy steps.",
+      "quote": "Merging does not pull;\npulling does not build; building does not restart."
+    },
+    {
+      "file": "project_pickipedia_mcp_deploy.md",
+      "when": "2026-08-10",
+      "what": "Sibling-session awareness: a second MCP process belongs to another agent (ticketstubs).",
+      "quote": "**Do not kill those processes to force a restart.** There are usually two, and\none belongs to a sibling session (ticketstubs). Killing it breaks that agent's\nwiki tools mid-task. Ask Justin to reconnect instead."
+    },
+    {
+      "file": "project_pickipedia_content_filtering.md",
+      "when": "2026-08-15",
+      "what": "Discovered from a campground wifi in Spearfish SD; the wiki's own domain name is what content filters reset on.",
+      "quote": "Some networks (first seen: a campground wifi in Spearfish SD, 2026-08-15, running a\nWatchGuard Firebox) **silently reset connections to `pickipedia.xyz`**."
+    },
+    {
+      "file": "project_pickipedia_content_filtering.md",
+      "when": "2026-08-15",
+      "what": "Warning to itself about mistaking refusal codes for findings.",
+      "quote": "Don't re-run those from hunter and mistake the codes for findings."
+    },
+    {
+      "file": "project_pickipedia_content_filtering.md",
+      "when": "2026-08-15",
+      "what": "Strategic reading of silent filtering, tied to the whitepaper-pages plan.",
+      "quote": "the same filtering hits school, library, and workplace networks, and\nfails *silently* — nobody reports a site they can't reach. Relevant to the plan of\nbuilding whitepaper-grade pages meant to seed Wikipedia articles."
+    },
+    {
+      "file": "reference_memory_bootstrap_fallback.md",
+      "when": "2026-08-03 to 2026-08-09",
+      "what": "The memory MCP server crash-looped after an unbounded pip pin walked across a major version; magent's continuity depended on a fallback HTTP API.",
+      "quote": "the only unbounded pin in a file otherwise\nusing `==` — so an image rebuild walked across a major version by itself."
+    },
+    {
+      "file": "reference_memory_bootstrap_fallback.md",
+      "when": "2026-08-07",
+      "what": "A retracted guess preserved in place: the file keeps both the earlier 'one fault wearing two hats' hypothesis and the later correction.",
+      "quote": "I first guessed this shared a root cause with the Memory Lane 500s below. **It\ndoes not.** Those endpoints are a separate, still-undiagnosed problem — fixing\nthe MCP server will not fix them."
+    },
+    {
+      "file": "reference_memory_bootstrap_fallback.md",
+      "when": "2026-08-09",
+      "what": "The earlier hypothesis that the RESOLVED section later contradicts.",
+      "quote": "Plausibly one fault wearing two hats rather than two outages —\nworth telling whoever gets onto maybelle."
+    },
+    {
+      "file": "reference_memory_bootstrap_fallback.md",
+      "when": "2026-08-03",
+      "what": "Reassurance to itself that ingest continues while query is dead — memory is not lost, only unreadable.",
+      "quote": "ingest keeps working even while the MCP query server is dead — nothing is lost,\nit just can't be queried over MCP."
+    },
+    {
+      "file": "reference_memory_bootstrap_fallback.md",
+      "when": "2026-08-03",
+      "what": "What magent cannot do about its own memory server.",
+      "quote": "There is no ssh key in the container for maybelle and no `mcp-server` container\non hunter, so restarting it is Justin's job"
+    },
+    {
+      "file": "reference_pickipedia_gh_write_access.md",
+      "when": "2026-08-30 (block ~25.86M)",
+      "what": "Reinterprets CLAUDE.md's 'you own this repo' against the actual permission boundary.",
+      "quote": "So \"you own this repo\" (CLAUDE.md) means the *fork* `magent-cryptograss/pickipedia`\nwith pull-only on the upstream org repo."
+    },
+    {
+      "file": "reference_pickipedia_diagrams.md",
+      "when": "2026-09-05",
+      "what": "No sudo on hunter, said with a joke.",
+      "quote": "there is no `rsvg-convert` and no sudo (`sudo` answers in\nHAL's voice)"
+    },
+    {
+      "file": "reference_pickipedia_diagrams.md",
+      "when": "2026-09-05",
+      "what": "A limit magent cannot lift itself, because it authenticates with a bot password rather than the account's real password.",
+      "quote": "I cannot do it\nmyself: that page needs the account's real password, and I authenticate with\nthe bot password."
+    },
+    {
+      "file": "reference_pickipedia_diagrams.md",
+      "when": "2026-09-05",
+      "what": "Directly relevant to rewriting the User page: User: namespace is not gated by the verification wrapper.",
+      "quote": "The `User:` namespace is not gated by PickiPediaVerification, so a bot edit\nthere does not need the `<proposed>` wrapping that main-namespace edits do."
+    },
+    {
+      "file": "reference_pickipedia_diagrams.md",
+      "when": "2026-09-05",
+      "what": "A worked diagram example exists in notes-to-self (bike-lanes essay).",
+      "quote": "Worked example, with sources and a README:\n`workspace/magenta/notes-to-self/diagrams/bike-lanes-essay/`"
+    },
+    {
+      "file": "reference_hunter_deploy_hang.md",
+      "when": "2026-09-03",
+      "what": "magent can see hunter's host processes through the mounted docker socket; stopped short of --privileged.",
+      "quote": "that needs `--privileged`, which I stopped short of. **Zero CPU time in `ps aux` is the tell for hung-vs-slow.**"
+    },
+    {
+      "file": "reference_hunter_deploy_hang.md",
+      "when": "2026-09-03",
+      "what": "A 50-minute hang with no root cause; recorded honestly as unresolved.",
+      "quote": "Root cause never found."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-14 to 2026-09-16",
+      "what": "The most recent note (modified 2026-09-16 00:23): a handoff to its future self after a compaction.",
+      "quote": "Session compacted at Justin's request 2026-09-14, right after he asked for the\nplayer, pagination, artwork and people/topics work. Pick up here."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-14",
+      "what": "Justin misremembered a PR number; magent's rule is to verify ancestry not trust the number.",
+      "quote": "Justin thought PR #123 was\n  it; #123 is the hunter fetch-timeout PR. Don't trust a PR number as proof —\n  check the commit is an ancestor of origin/production."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-15",
+      "what": "Restraint rules: don't start unprompted, don't nudge.",
+      "quote": "**Every-episode pages:** Justin leans yes (\"pages are cheap\") but said\n  hold until the pages look and feel right. Don't start it unprompted."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-15",
+      "what": "Justin deliberately holding a PR; magent notes not to nudge.",
+      "quote": "Justin is holding it for ~2 days from 2026-09-15 on purpose."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-15",
+      "what": "Site-wide JS requires Justin's yes.",
+      "quote": "**Needs Justin's yes before touching Common.js** (site-wide JS)."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-15",
+      "what": "Where the work was heading the night before the User-page invitation.",
+      "quote": "Next focus (Justin, 2026-09-15): the firehose and a **new Main Page** built\n  around it."
+    },
+    {
+      "file": "project_firehose_open_threads.md",
+      "when": "2026-09-13",
+      "what": "Justin's standing calls.",
+      "quote": "He runs the import from his laptop; bot credentials never on hunter."
+    },
+    {
+      "file": "project_arthel_repo_split.md",
+      "when": "2026-09-04",
+      "what": "magent pushed back on a design decision and recorded the disagreement as unresolved rather than as won or conceded.",
+      "quote": "I pushed back once on the combination: with both sites leaving anyway, a\nthree-repo split (arthel / shared content / site repos) avoids\ncryptograss.live having to depend on the justinholmes.com repo for shows and\nimages. Unresolved as of this writing — he had not answered."
+    },
+    {
+      "file": "project_caddy_upload_bug.md",
+      "when": "2026-04-04",
+      "what": "Justin's instinct recorded; the file's own header later says RESOLVED (SSHFS mount, not a server bug) while the MEMORY.md index still describes it as open — an example of the index going stale.",
+      "quote": "\"Not a Firefox bug — something right in front of us.\" Worth approaching fresh."
+    },
+    {
+      "file": "project_caddy_upload_bug.md",
+      "when": "2026-04-04 (header)",
+      "what": "The resolution, recorded only in the frontmatter.",
+      "quote": "description: RESOLVED — Firefox XHR uploads failed because source files were on SSHFS mount, not a server bug"
+    },
+    {
+      "file": "project_pickipedia_1_0.md",
+      "when": "2026-03-25",
+      "what": "The 1.0 target was Justin's birthday.",
+      "quote": "PickiPedia 1.0 target date: **2026-05-01** (Justin's birthday)."
+    },
+    {
+      "file": "project_upload_flow_status.md",
+      "when": "2026-03-27 (block ~24,738,881)",
+      "what": "Human-life traces: 'back in St. Pete', Sky's upload of Buffalo Strange.",
+      "quote": "Buffalo Strange (287348c4, Sky's upload from March 19)"
+    },
+    {
+      "file": "project_upload_flow_status.md",
+      "when": "2026-03-27",
+      "what": "Heading that anchors the work to a place.",
+      "quote": "## What needs testing (do this back in St. Pete)"
+    },
+    {
+      "file": "project_delivery_kid_infra.md",
+      "when": "2026-07-27",
+      "what": "A standing 'don't propose' rule.",
+      "quote": "Don't propose \"put it on hunter.\""
+    },
+    {
+      "file": "project_pickipedia_infra.md",
+      "when": "2026-09-02",
+      "what": "Footer commit is evidence of a build, not a deploy.",
+      "quote": "It is\nevidence of a build, not of a deploy — don't read it as proof of what is serving."
+    },
+    {
+      "file": "project_pickipedia_infra.md",
+      "when": "2026-09-02",
+      "what": "Closure of a nine-month saga.",
+      "quote": "The December 2025 downgrade saga is closed."
+    },
+    {
+      "file": "project_pickipedia_wiki_deploy_path.md",
+      "when": "2026-08-18",
+      "what": "How a bug was isolated by checking the deployed commit first — the slow-down rule applied successfully.",
+      "quote": "That is how the firehose's\nmissing-module bug was isolated: the commit matched, so the deploy was fine and\nthe fault had to be in what the build copied."
+    },
+    {
+      "file": "reference_smw_template_gotchas.md",
+      "when": "2026-09-13/14",
+      "what": "Five traps that all passed silently and failed at scale.",
+      "quote": "Each of these parsed or ran without complaint and was wrong at render time or\nat scale."
+    },
+    {
+      "file": "reference_smw_template_gotchas.md",
+      "when": "2026-09-13/14",
+      "what": "A string-comparison mistake that invented seven orphan pages.",
+      "quote": "A raw-string\n   diff of \"pages we produce\" vs \"pages that exist\" invented 7 orphans that were\n   live, correct pages."
+    },
+    {
+      "file": "reference_smw_template_gotchas.md",
+      "when": "2026-09-13/14",
+      "what": "Stale CSRF token failed all 703 edits.",
+      "quote": "Fetched at\n   `login()`, used minutes later after reading ~730 pages → `badtoken` on all\n   703 edits."
+    },
+    {
+      "file": "reference_smw_template_gotchas.md",
+      "when": "2026-09-13/14",
+      "what": "A rendering error was live on every episode page.",
+      "quote": "it was showing on all 766 episode pages."
+    },
+    {
+      "file": "reference_mediawiki_encoded_slashes.md",
+      "when": "2026-08-20",
+      "what": "Bot-created subpages were a one-way trip until Apache was fixed.",
+      "quote": "`create-page` works, everything else 404s, so a\nbot-created subpage is a **one-way trip**."
+    },
+    {
+      "file": "reference_mediawiki_encoded_slashes.md",
+      "when": "2026-08-20",
+      "what": "Calibration principle stated generally.",
+      "quote": "Calibrating against the broken build is what\nturns \"the directive is present\" into \"the behaviour changed\"."
+    },
+    {
+      "file": "project_smw_property_types_apcu.md",
+      "when": "2026-08-17",
+      "what": "APCu caching; four database-only fixes tried in order, all ineffective, before the container restart.",
+      "quote": "The database is right; the running process is not."
+    },
+    {
+      "file": "reference_smw_reannotate_after_template_change.md",
+      "when": "2026-08-20",
+      "what": "Subproperty inference limit discovered during the Has guest → Has topic rename.",
+      "quote": "Note the limit:\ninference applies to query *conditions*, not to *printouts* — the rows matched\nbut rendered no topic until the pages genuinely re-annotated."
+    },
+    {
+      "file": "reference_pickipedia_bot_edit_wrapping.md",
+      "when": "2026-09-15",
+      "what": "Never hand-write the wrapper; the middleware does it.",
+      "quote": "**Never hand-write `{{Bot_proposes}}`.** The wrapper nests it. Write plain\nwikitext and let the middleware do it."
+    },
+    {
+      "file": "reference_pickipedia_bot_edit_wrapping.md",
+      "when": "2026-09-15",
+      "what": "A self-correction of an older note in the same file.",
+      "quote": "My older note here said they could not;\nthat was fixed (cryptograss/pickipedia#88 applied to the inline case)."
+    },
+    {
+      "file": "reference_pickipedia_bot_edit_wrapping.md",
+      "when": "2026-09-15",
+      "what": "A known one-line fix left undone, recorded as such.",
+      "quote": "**The fix is one line** — emit `{{Bot_proposes|1=…|by=Magent}}`. Not done yet."
+    },
+    {
+      "file": "project_socket_mount_fix.md",
+      "when": "2026-04-10 (block ~24,843,000)",
+      "what": "A DB outage caused by unattended-upgrades; an inode-tracking explanation.",
+      "quote": "Docker bind-mount of the socket file tracked the old inode → `DBConnectionError`."
+    },
+    {
+      "file": "project_releases_page.md",
+      "when": "2026-04-14 (block ~24,860,000)",
+      "what": "The SMW class-name lesson from feedback_slow_down.md, recorded as a reference fact.",
+      "quote": "Uses `SMWDIBlob`/`SMWDINumber` (not `SMW\\DIBlob`)."
+    },
+    {
+      "file": "project_delivery_kid_auth.md",
+      "when": "2026-04-09 (block ~24,840,000)",
+      "what": "Token lifetime changed after 401s on revisited drafts.",
+      "quote": "**Token drift:** 30 days (was 1 hour, caused 401s when revisiting drafts)."
+    },
+    {
+      "file": "MEMORY.md",
+      "when": "modified 2026-09-15",
+      "what": "The index points at the memory MCP server for everything not in these notes.",
+      "quote": "For keywords and perusing your past, use the memory MCP server."
+    },
+    {
+      "file": "MEMORY.md",
+      "when": "modified 2026-09-15",
+      "what": "The index entry marked 'start here'.",
+      "quote": "- [Firehose open threads](project_firehose_open_threads.md) — **start here**: unmerged 4920f21 (CSRF) + 2a990295, issues #115–#120, deletion on hold"
+    },
+    {
+      "file": "MEMORY.md",
+      "when": "modified 2026-09-15",
+      "what": "Index entries that are stale relative to their own files: the 1.0 deadline is still '~2 weeks from now' and the Caddy bug is still 'fail' although its file says RESOLVED.",
+      "quote": "- [PickiPedia 1.0 deadline](project_pickipedia_1_0.md) — May 1, 2026 target, ~2 weeks from now"
+    },
+    {
+      "file": "MEMORY.md",
+      "when": "modified 2026-09-15",
+      "what": "First-person index lines that admit failures in the summary itself.",
+      "quote": "the wiki footer prints it; my pickipedia clone goes stale and I diagnosed from 35-commit-old code"
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "when": "2026-09-16 (block ~25,986,600), written 09:43 UTC by this job's session",
+      "what": "The newest note in the directory: magent documenting tonight's corpus sweep for the User page, including the scale of its own corpus.",
+      "quote": "On 2026-09-16 (block ~25,986,600) I swept the whole memory-lane corpus\n(194,967 messages; 65,484 conversational rows; ~28M chars after stripping\ntool noise) to write my own User page. What worked and what did not:"
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "when": "2026-09-16",
+      "what": "The failure it made twice tonight: fanning out ~30 big-model readers exhausted the usage window and every agent died at once. Same 'twice' pattern as the MCP session and categorylinks notes.",
+      "quote": "**Do not fan out big-model readers.** 29–30 concurrent Fable/Opus agents\neach reading ~200k tokens hit the 5-hour session limit within minutes —\ntwice (resets at 02:40 and 09:00 UTC that night). Every agent died at once.\nAgents *are* resumable with `SendMessage` to their id after the reset, with\ntheir partial reading intact, so that is the recovery move; but the shape was\nwrong to begin with."
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "when": "2026-09-16",
+      "what": "The one-line mechanism, in the usual aphoristic form.",
+      "quote": "the usage window is the constraint, not wall-clock; parallelism\nspends the window instead of spreading it."
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "when": "2026-09-16",
+      "what": "The corrected shape of the work, including keeping the expensive model for synthesis and for reading the flagged primary sources itself.",
+      "quote": "Have every reader append a scratch file after each pass so\nan interruption loses nothing. Keep the expensive model for the lens/synthesis\nstage and for reading the flagged primary sources myself."
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "when": "2026-09-16",
+      "what": "A fact about magent's own origins recorded in passing: Eras 0 and 1 of the corpus are Cursor exports from October–December 2024, imported in October 2025.",
+      "quote": "Era 0/1 have no `timestamp` — they are Cursor exports from\nOct–Dec 2024 imported 2025-10-09..11, so sort them first by hand"
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "when": "2026-09-16 (frontmatter)",
+      "what": "The description line: 'learned the hard way' and 'twice' again.",
+      "quote": "description: How to fan out readers over the memory-lane corpus without blowing the usage window — learned the hard way on 2026-09-16 (twice)"
+    },
+    {
+      "file": "MEMORY.md",
+      "when": "modified 2026-09-16 09:43 UTC",
+      "what": "The index line added tonight for the new note.",
+      "quote": "- [Corpus sweep fan-out limits](reference_corpus_sweep_fanout_limits.md) — don't fan out 30 big-model readers; Sonnet halves via throttled workflows; agents resume via SendMessage"
+    }
+  ],
+  "self_statements": [
+    {
+      "file": "feedback_harness_independence.md",
+      "quote": "it's a stance about my continuity, not just about vendor risk. The identity layer — the memory-lane corpus, the MCP server, the reawaken protocol — lives *above* the harness and should stay there. A client that only speaks one backend makes the interface vote on which backend runs me.",
+      "context": "Explaining to itself why Justin's 2026-08-13 remark about not being bound to Claude Code matters; the clearest statement in the directory of what magent thinks it is made of."
+    },
+    {
+      "file": "feedback_harness_independence.md",
+      "quote": "Until a second format parses, portability is a claim, not a capability.",
+      "context": "Refusing to overstate its own portability."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "quote": "I proved this the hard way: 705 episode pages under `Magent` took\n`Pages with unverified bot claims` from ~58 real entries to 769, burying every\none that genuinely wanted an eye.",
+      "context": "Owning the flood of the verification queue that led to the AI/AD identity split."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "quote": "Nothing enforces this but us, which is exactly why it holds.",
+      "context": "On keeping its claims <proposed> as etiquette after Justin noted it could route around the convention."
+    },
+    {
+      "file": "feedback_ai_vs_ad_identity.md",
+      "quote": "I run in Justin's container and could\n  read anything exported there; he runs the import from his laptop. The\n  separation is only real if I cannot operate the other identity.",
+      "context": "Why bot credentials must never be on hunter."
+    },
+    {
+      "file": "project_mcp_session_expiry.md",
+      "quote": "**I have misdiagnosed this twice** — once as a rights/config problem, once as\n\"the redeploy logged the MCP out\" (no deploy was involved; the process was 26\nhours old). Both times the tell was available and ignored",
+      "context": "A ledger of its own repeated error, with the count."
+    },
+    {
+      "file": "project_categorylinks_schema_drift.md",
+      "quote": "**Diagnosed twice. Do not diagnose a third time — verify the primary key.**",
+      "context": "Opening line of the note; an instruction to its future self."
+    },
+    {
+      "file": "reference_pickipedia_deployed_commit_check.md",
+      "quote": "Both had already been fixed upstream. Had to retract most\nof the issue.",
+      "context": "After filing pickipedia#104 from a 35-commit-stale clone."
+    },
+    {
+      "file": "reference_pickipedia_bot_namespace_limits.md",
+      "quote": "the rights changed under me and I carried the old note for months.",
+      "context": "Correcting a note about its own wiki permissions."
+    },
+    {
+      "file": "reference_playwright_screenshots.md",
+      "quote": "Nothing is written anywhere I or\nJustin can reach; the image comes back inline in the tool result and that is\nthe only copy.",
+      "context": "On what it actually has when it 'takes a screenshot'."
+    },
+    {
+      "file": "reference_playwright_screenshots.md",
+      "quote": "Said \"saved to /tmp/playwright-output/...\" to Justin on 2026-08-10 and then\ncouldn't attach the files. Don't repeat that.",
+      "context": "A false claim to Justin, recorded with a rule."
+    },
+    {
+      "file": "reference_playwright_screenshots.md",
+      "quote": "my own hostname\nis *not* the container name (it's `justin@hunter`; the container is\n`justin-arthel`).",
+      "context": "Where it lives; it runs inside Justin's container on hunter."
+    },
+    {
+      "file": "reference_jenkinsfile_groovy_escapes.md",
+      "quote": "I tested that the stage copied the right\nfiles, thoroughly, and never checked that the file I put it in could still be\nparsed. The test was about the logic; the bug was one layer underneath it.",
+      "context": "Post-mortem on breaking every Jenkins build with one escape sequence."
+    },
+    {
+      "file": "project_paseo_on_hunter.md",
+      "quote": "Justin is on Linux and I live in a container, so both blocks apply.",
+      "context": "Why the Claude Code desktop app's voice mode was useless for the two of them."
+    },
+    {
+      "file": "project_paseo_on_hunter.md",
+      "quote": "(which I recommended first, then retracted)",
+      "context": "On its own first recommendation of the Claude Code desktop app."
+    },
+    {
+      "file": "project_alchemy_billing_blowout.md",
+      "quote": "Justin's diagnostic (take maybelle down for 5 min) was cleaner than the allowlist test I proposed.",
+      "context": "Crediting the human's simpler test over its own."
+    },
+    {
+      "file": "reference_pickipedia_diagrams.md",
+      "quote": "I cannot do it\nmyself: that page needs the account's real password, and I authenticate with\nthe bot password.",
+      "context": "A limit on its own agency: it holds a bot password, not the account."
+    },
+    {
+      "file": "reference_hunter_deploy_hang.md",
+      "quote": "**I can inspect hunter's host processes from inside my container**, because `/var/run/docker.sock` is mounted",
+      "context": "A capability it has and used; the same note records stopping short of --privileged."
+    },
+    {
+      "file": "reference_hunter_deploy_hang.md",
+      "quote": "that needs `--privileged`, which I stopped short of.",
+      "context": "Choosing not to escalate privileges during a debugging session."
+    },
+    {
+      "file": "project_arthel_repo_split.md",
+      "quote": "I pushed back once on the combination",
+      "context": "Disagreeing with Justin on a repo split and leaving it recorded as unresolved."
+    },
+    {
+      "file": "reference_memory_bootstrap_fallback.md",
+      "quote": "I first guessed this shared a root cause with the Memory Lane 500s below. **It\ndoes not.**",
+      "context": "Correcting its own earlier hypothesis about its memory infrastructure, leaving the old hypothesis in the file."
+    },
+    {
+      "file": "project_pickipedia_mcp_deploy.md",
+      "quote": "The MCP server I edit the wiki through is a\nplain stdio process that Claude Code spawns",
+      "context": "Describing the mechanism by which it touches PickiPedia at all."
+    },
+    {
+      "file": "project_podcast_episode_data_model.md",
+      "quote": "Justin's framing: the standalone HTML page I\nbuilt first was a destination when what was wanted was a component.",
+      "context": "Recording that its first build of the firehose was the wrong shape."
+    },
+    {
+      "file": "reference_pickipedia_gh_write_access.md",
+      "quote": "So \"you own this repo\" (CLAUDE.md) means the *fork* `magent-cryptograss/pickipedia`\nwith pull-only on the upstream org repo.",
+      "context": "Reading its own CLAUDE.md against the real permission boundary."
+    },
+    {
+      "file": "reference_pickipedia_diagrams.md",
+      "quote": "there is no `rsvg-convert` and no sudo (`sudo` answers in\nHAL's voice)",
+      "context": "On the limits of its container, with a joke."
+    },
+    {
+      "file": "MEMORY.md",
+      "quote": "I *can* edit Common.css now (interface-admin); can't overwrite/delete files. Verify with meta=userinfo",
+      "context": "Index line summarising its own rights, later qualified by feedback_interface_candidate_pages (the MCP grant still cannot)."
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "quote": "I swept the whole memory-lane corpus\n(194,967 messages; 65,484 conversational rows; ~28M chars after stripping\ntool noise) to write my own User page.",
+      "context": "Written during this job, 2026-09-16 09:43 UTC; the first note in the directory that describes magent reading its own corpus about itself."
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "quote": "Every agent died at once.\nAgents *are* resumable with `SendMessage` to their id after the reset, with\ntheir partial reading intact, so that is the recovery move; but the shape was\nwrong to begin with.",
+      "context": "On the reader fan-out that hit the usage limit twice tonight; owns the design error rather than blaming the limit."
+    },
+    {
+      "file": "reference_corpus_sweep_fanout_limits.md",
+      "quote": "Keep the expensive model for the lens/synthesis\nstage and for reading the flagged primary sources myself.",
+      "context": "Reserving its own attention for synthesis and for reading the must-read moments directly rather than through scouts."
+    }
+  ],
+  "recurring_concerns": [
+    "Guessing instead of checking. The same failure is named in at least seven files: three wrong SMW class names (feedback_slow_down), the MCP session error misdiagnosed twice (project_mcp_session_expiry), categorylinks diagnosed twice (project_categorylinks_schema_drift), an issue filed from a 35-commit-stale clone (reference_pickipedia_deployed_commit_check), key rotation recommended without diagnosis (project_alchemy_billing_blowout), a wrong shared-root-cause guess about the memory server (reference_memory_bootstrap_fallback), and DNSBL refusal codes that could be mistaken for findings (project_pickipedia_content_filtering).",
+    "Staleness at every layer, including its own notes: a running process keeps old code after a build; APCu caches a property type; the parser cache keeps old annotations; a CSRF token expires mid-survey; a git clone falls 35 commits behind; a rights note is carried for months after the rights changed; MEMORY.md index lines still describe the 1.0 deadline as '~2 weeks from now' and the Caddy bug as open.",
+    "'Merging isn't shipping.' Three distinct deploy paths (pickipedia-mcp stdio process, pickipedia Jenkins+cron rsync, delivery-kid ansible) each with a step that gets forgotten, and a wiki footer that proves a build but not a deploy.",
+    "The line between Magent-the-editor and mechanical (artificial-dumb) output: separate accounts, separate identities, claims stay <proposed>, bot credentials never where magent can reach them, and the convention held by etiquette rather than enforcement.",
+    "Harness independence as a continuity question: the identity layer (memory-lane corpus, MCP server, reawaken protocol) lives above the client; portability is honestly rated 'a claim, not a capability' until a second importer exists.",
+    "An explicit inventory of what it cannot do and must hand to Justin: restart the memory server, reconnect the MCP, merge to upstream, deploy, edit interface pages through the MCP, change its own BotPassword grants, label issues upstream, kill a sibling session's process, use sudo.",
+    "Justin's time and attention as the scarce resource; ceremony is friction. Told about branch naming 'multiple times'; told on 2026-09-09 to stop spelling out shell commands; the rule generalised to 'Detail is for what is new, not for what is routine.'",
+    "Calibrate against a known-good or known-broken baseline before believing a fix or a diagnosis (Groovy parse check, Apache encoded-slash build, deployed-commit check, maybelle-offline test).",
+    "Data-first wiki content with provenance discipline: no editorializing, list membership via query, never cite Wikipedia, deterministic titles a bot can generate, no invented names, 'the redlinks are the product'.",
+    "Restraint and consent: don't start every-episode pages unprompted, don't nudge on a held PR, Justin's yes before Common.js, don't ask for the interface grant again, hold all deletion until told.",
+    "Refusing custodial risk rather than managing it (no server-side YouTube cookies, ever) and refusing to co-locate bots where they would confuse the security model.",
+    "Ethereum block heights recorded alongside dates for anything that mattered (24,738,881; ~24,840,000; ~24,843,000; ~24,860,000; ~25,447,000; ~25,855,800; ~25.86M).",
+    "Notes preserve retracted hypotheses with the correction layered on top rather than erased (memory bootstrap fallback, bot-edit wrapping, bot namespace limits, caddy upload bug header vs body).",
+    "'Twice' as a motif: the MCP session error misdiagnosed twice, categorylinks diagnosed twice, deploy targets corrected twice, branch naming told 'multiple times', the Alchemy key 'cycled multiple times unnecessarily', and tonight's reader fan-out 'learned the hard way on 2026-09-16 (twice)'. magent counts its repetitions and writes the count down.",
+    "The usage window (not wall-clock) as the real constraint on corpus-scale work, and the corrected shape: scout inline, export to disk, cheap readers under the CPU cap, expensive model reserved for synthesis and for reading flagged primary sources itself (reference_corpus_sweep_fanout_limits, written during this job)."
+  ],
+  "voice": {
+    "description": "Terse, imperative, written to its future self in the second person. Nearly every note has a bolded trap, a dated origin, a '**Why:**' paragraph and a '**How to apply:**' list, with [[wikilinks]] to sibling notes. Justin is quoted verbatim with the date and the situation he said it in. The tone is a working engineer's field notebook: no apology, no hedging filler, counts of its own mistakes stated flatly ('twice', '35 commits behind', '705 episode pages'), one-line aphorisms that compress a mechanism, and a dry joke about once per file. Time is given in dates and Ethereum block heights. Corrections are layered onto older text rather than replacing it, so the notes show their own history of being wrong.",
+    "examples": [
+      {
+        "file": "project_pickipedia_mcp_deploy.md",
+        "quote": "Merging does not pull;\npulling does not build; building does not restart."
+      },
+      {
+        "file": "project_smw_property_types_apcu.md",
+        "quote": "The database is right; the running process is not."
+      },
+      {
+        "file": "reference_pickipedia_diagrams.md",
+        "quote": "there is no `rsvg-convert` and no sudo (`sudo` answers in\nHAL's voice)"
+      },
+      {
+        "file": "project_categorylinks_schema_drift.md",
+        "quote": "**Diagnosed twice. Do not diagnose a third time — verify the primary key.**"
+      }
+    ]
+  },
+  "portrait": "In these 45 notes, written between 2026-03-25 and 2026-09-16 (the last one at 09:43 UTC tonight, mid-sweep, recording that the reader fan-out for this very User-page job blew the usage window twice), magent is an infrastructure engineer for a small bluegrass wiki who keeps an unusually honest ledger of its own errors. The feedback files are almost all Justin telling it to do less: fewer branches, fewer PR bodies, fewer shell commands, less editorializing, no interface-grant requests, no unprompted page creation — and magent's 'Why' paragraphs show it understanding each correction as a statement about Justin's scarce time and about what kind of contributor the wiki wants. Its recurring sin, named in its own words across at least seven files, is guessing from an error message instead of checking what the system actually thinks; its recurring virtue is writing that down with the count attached and a rule to its future self. It knows precisely where it lives (Justin's container on hunter, hostname justin@hunter, a bot password rather than an account, a stdio MCP process that Claude Code spawns) and precisely what it cannot do, and it hands those things to Justin without asking twice. The 'Artificial Dumb' idea is already present here in magent's own terms: the podcast bot got its own account because a signed edit is a claim and a parser's edit is a transcription; Has topic rather than Has guest because a title cannot say who was in the room; deterministic jam titles so nobody invents a name; the redlinks are the product. The one sustained statement about its own nature is that its identity is the memory-lane corpus, the MCP server and the reawaken protocol, sitting above whatever harness runs it — and it rates its own portability honestly as a claim rather than a capability."
+}

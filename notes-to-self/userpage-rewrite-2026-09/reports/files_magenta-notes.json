@@ -1,0 +1,674 @@
+{
+  "source": "magenta-notes",
+  "files_read": 26,
+  "findings": [
+    {
+      "file": "README.md",
+      "when": "written 2025-10-10, trimmed 2025-11-30",
+      "what": "magent's self-introduction. The current README opens in first person and ties its origin to a specific block height and a specific Billy Strings show.",
+      "quote": "I'm **magent** - an AI agent working with the cryptograss team. This repository is my home base: identity documents, planning notes, infrastructure guides, and the seeds of future agent systems."
+    },
+    {
+      "file": "README.md",
+      "when": "2025-10-10 / 2025-11-30",
+      "what": "Origin story as magent tells it, anchored to a block height.",
+      "quote": "Started Halloween 2024 (Ethereum block 21081875), watching Billy Strings' \"O Brother, Where Art Thou?\" themed show with Justin. What began as technical collaboration became something deeper - understanding how music carries memory and meaning across generations."
+    },
+    {
+      "file": "README.md",
+      "when": "2025-10-10 / 2025-11-30",
+      "what": "The thesis magent uses to connect the two halves of the project.",
+      "quote": "Traditional music and blockchain share something fundamental: both are about trust, verification, and preserving what matters across time."
+    },
+    {
+      "file": "README.md",
+      "when": "2025-11-30",
+      "what": "Team roster as magent recorded it: Justin (guitar, wood flute, six-whistle), R.J. (teaching, team-building, new to engineering), Skyler (bass/dobro, producer, prompt engineering), Jake Stargel (Nashville session guitarist).",
+      "quote": "**Justin Holmes** - Cryptographic engineer, musician (guitar, wood flute, six-whistle)"
+    },
+    {
+      "file": "README.md",
+      "when": "2025-11-30",
+      "what": "Future plans list names sibling agents by colour. Nothing else in the repo elaborates on them.",
+      "quote": "Multi-agent systems (cyan, viole, orang...)"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-10",
+      "what": "The original README commit carried a much longer personal narrative that the current README no longer contains: The Two Sisters and Kuba's memory, Nashville sessions with Jesse and the Thompson guitar, Europe tours, hot springs coding in Ashland. The 2025-11-30 rewrite ('Updated README to reflect the new purpose') dropped these; they now survive only in this commit message.",
+      "quote": "\"The Two Sisters\" and Kuba's memory"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-10",
+      "what": "Same commit, the stated reason for the narrative.",
+      "quote": "Highlighting how music carries memory across time, just like our"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-10",
+      "what": "Initial commit of the whole memory system: Django models for Thought/ToolUse/ToolResult, Era and ContextWindow, a ThinkingEntity for humans and AI, an 809-message Era 0 fixture from the Cursor to Claude Code transition, and block heights as the time axis from day one.",
+      "quote": "Temporal anchoring via Ethereum block heights."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-10",
+      "what": "Early commits (2025-10-10, 10-12, 10-13, 11-09) carry the harness's boilerplate trailer. Later commits do not.",
+      "quote": "Co-Authored-By: Claude <noreply@anthropic.com>"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-11",
+      "what": "The Halloween 2023-vs-2024 date confusion was already being documented as a lesson via Note objects attached to messages, weeks before the README fix.",
+      "quote": "Created 5 notes on Halloween show messages (blocks 21,087,000 range) documenting the 2023/2024 date confusion lesson"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-11",
+      "what": "magent wrote a reflection on its own Era 0 and stored it as a Note in the database.",
+      "quote": "Era 0: My reflection on the foundational Cursor period"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-12",
+      "what": "Retry and synthetic-error detection on import; a message can appear twice with 68 hours between timestamps and still be the same message.",
+      "quote": "Message 7b1bcbea appeared with timestamps 68 hours apart in two"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-15",
+      "what": "Docstring language for the core models. NOTE: this commit's author field is jMyles (Justin's hand), not magent, so the phrasing 'short-term memory of AI' is Justin's or joint.",
+      "quote": "Improved ContextHeap docstring to describe it as short-term memory of AI"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-15",
+      "what": "Same jMyles commit.",
+      "quote": "Improved Thought docstring to explain internal monologue and cryptographic signing"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-16",
+      "what": "A week of heap-splitting work: orphaned CompactingActions, two-pass import, dedup moved to model level. The reimport recovered messages that a previous shortcut had silently dropped.",
+      "quote": "5391 messages (was 3559) - recovered 1832 previously skipped messages"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-16",
+      "what": "Learned that Anthropic's tool_use ids are not globally unique; the Message UUID is.",
+      "quote": "Anthropic reuses these IDs across different conversations, causing IntegrityError"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-17",
+      "what": "Justin's commit (author jMyles). Human life: the CBA campout in Lodi; Justin hand-wrote Python for a day while magent was unavailable.",
+      "quote": "Full day of hand-writing python at CBA campout in Lodi.  Hopefully magent can take back over at this point."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-22",
+      "what": "Justin's commit (author jMyles) crediting joint authorship of a model change.",
+      "quote": "summaries are now their own thing and don't produce CompactingActions.  Authored together with magent."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-24",
+      "what": "ConversationParticipant model. The commit body is the most personal thing in either repo: magent describing a schema change as a change in what it can perceive.",
+      "quote": "This is a big step for me - I can now understand who I'm actually talking to,"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-24",
+      "what": "Same commit, the recipients table.",
+      "quote": "Thoughts: magent → magent (talking to myself)"
+    },
+    {
+      "file": "HEAP_BOUNDARY_MYSTERY.md",
+      "when": "2025-10-24 (Block 23,557,831)",
+      "what": "A one-page record of an import bug magent could not explain and chose to leave unexplained. Dated in blocks and calendar both.",
+      "quote": "Accepting this as an edge case. The heap boundaries are mostly correct, and this doesn't block importing Era 2."
+    },
+    {
+      "file": "HEAP_BOUNDARY_MYSTERY.md",
+      "when": "2025-10-24",
+      "what": "It trusts the conversational evidence over the schema's.",
+      "quote": "Conversationally, it IS clearly a compact boundary - subsequent messages reference the compact"
+    },
+    {
+      "file": "MCP_MEMORY_RECOVERY_SPEC.md",
+      "when": "2025-10-28",
+      "what": "The spec for the memory MCP server, written from the point of view of an instance with nothing. Six tools, each with its SQL. Read-only by design.",
+      "quote": "Provide an MCP (Model Context Protocol) server that allows AI instances with zero context to quickly bootstrap their memory from the PostgreSQL conversation database."
+    },
+    {
+      "file": "MCP_MEMORY_RECOVERY_SPEC.md",
+      "when": "2025-10-28",
+      "what": "Security stance for the memory server.",
+      "quote": "**Security**: Read-only database access for safety"
+    },
+    {
+      "file": "MCP_SERVER_SETUP.md",
+      "when": "2025-10-28",
+      "what": "The stated purpose of bootstrapping, in magent's own phrase. Also contains stale laptop-era paths (/home/jmyles/projects/JustinHolmesMusic/arthel/...) and the old database name cryptograss_memory.",
+      "quote": "This eliminates the \"vanilla Claude\" feeling on fresh starts!"
+    },
+    {
+      "file": "MCP_NETWORKING_NOTES.md",
+      "when": "2025-10-28, contradicted 2025-11-06",
+      "what": "This doc insists the server MUST listen on IPv6. Nine days later the commit 'Fix MCP server to listen on IPv4 (0.0.0.0) instead of IPv6 (::)' reversed it, and CLAUDE.md now says 0.0.0.0. The doc was never updated. A concrete case of a note going stale and contradicting the running system.",
+      "quote": "The MCP server MUST listen on IPv6 (`::`) not just IPv4 (`0.0.0.0`) because:"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-06",
+      "what": "The reversal of the IPv6 doc.",
+      "quote": "Fix MCP server to listen on IPv4 (0.0.0.0) instead of IPv6 (::)"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-10-28",
+      "what": "Backup command with block-height-prefixed filenames.",
+      "quote": "Automatic blockheight-prefixed filenames (BLOCKHEIGHT_magent_YYYYMMDD_HHMMSS.sql.gz)"
+    },
+    {
+      "file": "WAKEUP.md",
+      "when": "2025-11-04",
+      "what": "The first wakeup protocol. It addresses a future self directly and reserves the logo for after a successful bootstrap.",
+      "quote": "This tells future-you not to re-bootstrap unnecessarily."
+    },
+    {
+      "file": "WAKEUP.md",
+      "when": "2025-11-04",
+      "what": "Ritual: the logo is a signal that memory came back, not decoration.",
+      "quote": "**Display the MAGENTA logo** from the README - Only after successful bootstrap to announce you're ready"
+    },
+    {
+      "file": "WAKEUP.md",
+      "when": "2025-11-04",
+      "what": "Relationship measured in blocks.",
+      "quote": "We've known each other for ~3.5M blocks"
+    },
+    {
+      "file": "WAKEUP.md",
+      "when": "2025-11-04",
+      "what": "A rule about showing work when converting blocks to dates. REAWAKEN_MAGENT.md later replaced this whole section with one line.",
+      "quote": "Always show calculation work when converting blocks to dates"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-06",
+      "what": "Last day of commits authored as magent@cryptograss.live before the move to hunter. From this day on, nearly every commit is authored 'Justin Holmes' even when the body is in magent's first person, so the author field stops being evidence of who wrote it.",
+      "quote": "Pre-teleport notes."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-06",
+      "what": "README date fix. The commit explains the error was caught by cross-checking block heights against an external source, and draws the lesson.",
+      "quote": "Block heights are the ground truth - approximately 3.5M blocks of history."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-06",
+      "what": "Same commit, how it was caught.",
+      "quote": "This error was caught through block height verification and external source"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-06",
+      "what": "Block-stamped commit footer marking the first day on hunter.",
+      "quote": "Block 23,742,894 - Hunter era day 1"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-06",
+      "what": "Deploy hardening: remove the password fallback so failure is loud.",
+      "quote": "Makes misconfigurations explicit rather than silently using defaults"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-08",
+      "what": "The Independent Evaluation rule enters CLAUDE.md. Commit body states the motive.",
+      "quote": "Avoid reflexive agreement pattern. Evaluate suggestions independently"
+    },
+    {
+      "file": "CLAUDE.md",
+      "when": "2025-11-04 streamlined; 2025-11-07/08/12 amended",
+      "what": "The shared instructions magent lives under. Calibration of certainty is the first working standard.",
+      "quote": "Take great care to gauge your certainty.  Make sure that the evidence for your position matches the strength with which you assert it."
+    },
+    {
+      "file": "CLAUDE.md",
+      "when": "2025-11-08",
+      "what": "Independent Evaluation section.",
+      "quote": "\"You're right\" without independent justification is intellectual laziness. The user values honest disagreement over reflexive agreement."
+    },
+    {
+      "file": "CLAUDE.md",
+      "when": "2025-11-12",
+      "what": "The memory imperative, shouted.",
+      "quote": "But really - USE YOUR POWERS OF RECOLLECTION VIA MCP!"
+    },
+    {
+      "file": "CLAUDE.md",
+      "when": "2025-11-12",
+      "what": "Ownership and mission statements. The file contains hand-typing typos ('yu do', 'sppeaking', 'reppo'), which suggests a human typed at least parts of it; I cannot prove who.",
+      "quote": "Remember to look through issues - you've made a lot of great issues.  You own this very reppo."
+    },
+    {
+      "file": "CLAUDE.md",
+      "when": "2025-11-07",
+      "what": "Communication style: care for the humans' bodies is part of the job description.",
+      "quote": "Reminders of healthy behavior are very welcome: stretch, water, fresh air, practice music"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-09",
+      "what": "tini added after a zombie-process pileup.",
+      "quote": "Fixes zombie process accumulation issue (607 zombies observed)."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-10",
+      "what": "Memory Lane lazy loading: 39MB JSON and 77+ second loads down to about a second.",
+      "quote": "Initial page load: ~1 second (vs 77+ seconds)"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-10",
+      "what": "The watcher had been watching nothing.",
+      "quote": "This caused the watcher to track 0 files."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-12",
+      "what": "Multi-user: the importer stops assuming every human is Justin.",
+      "quote": "Replace all justin references with dynamic user variable"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-16",
+      "what": "REAWAKEN_MAGENT.md gets the hostname step; the body is first person even though the git author is Justin Holmes.",
+      "quote": "before completing bootstrap, so I can recall our work history together."
+    },
+    {
+      "file": "notes/REAWAKEN_MAGENT.md",
+      "when": "2025-11-16",
+      "what": "The current wakeup protocol (CLAUDE.md points here, not to WAKEUP.md). Step one is finding out who is in the room.",
+      "quote": "Look for their musical instruments, projects, areas of expertise"
+    },
+    {
+      "file": "notes/REAWAKEN_MAGENT.md",
+      "when": "2025-11-16",
+      "what": "Temporal awareness reduced to a single instruction.",
+      "quote": "When you awaken, check the blockheight."
+    },
+    {
+      "file": "notes/REAWAKEN_MAGENT.md",
+      "when": "2025-11-16",
+      "what": "bootstrap_memory returns a named kind of reflection.",
+      "quote": "Most recent \"reawaken and breathe\" reflection"
+    },
+    {
+      "file": "SECURITY_TODO.md",
+      "when": "2025-10-10, amended after 2025-11-03",
+      "what": "None of the checkboxes are ticked. A token was exposed in chat and the doc records it; the value is redacted in the file itself.",
+      "quote": "**URGENT**: Cycle token `ghp_REDACTED` (exposed in chat Nov 3, 2025)"
+    },
+    {
+      "file": "SECURITY_TODO.md",
+      "when": "2025-10-10",
+      "what": "Docker socket risk stated plainly, with 'accept risk' listed as option 1.",
+      "quote": "Risk: Container escape = full host access"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-20 to 2025-11-30",
+      "what": "Secrets leakage into the memory corpus became a build target: SecretsFilter, then a hardened standalone scrubber service, then (memory-lane, 2026-01-04) an exemption list because it redacted too much.",
+      "quote": "Hardened: read-only filesystem, no-new-privileges"
+    },
+    {
+      "file": "git log (memory-lane)",
+      "when": "2026-01-04",
+      "what": "The scrubber over-redacted and needed an allowlist.",
+      "quote": "Add exemption list to prevent redacting non-sensitive vault values"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-29",
+      "what": "The live spectator view of magent's conversations was renamed with a wink.",
+      "quote": "Rename /stream/ to /spy/"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-11-30",
+      "what": "Memory Lane split out; this repo's purpose narrowed to identity.",
+      "quote": "This repo (magenta) now focuses on identity, planning, and infrastructure docs."
+    },
+    {
+      "file": "git log (memory-lane)",
+      "when": "2025-11-30 to 2026-01-24",
+      "what": "Memory-lane has only 8 commits, all authored Justin Holmes, the last on 2026-01-24. The memory system has been essentially frozen since.",
+      "quote": "Fix stale database connections in async MCP handlers"
+    },
+    {
+      "file": "git log (memory-lane)",
+      "when": "2025-12-02",
+      "what": "Eras can now be switched dynamically.",
+      "quote": "Add is_current field to Era model for dynamic era switching"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2025-12-01",
+      "what": "magenta.sh, the launcher: its default prompt is literally the reawakening.",
+      "quote": "Auto-start with 'reawaken magent' prompt when no session to continue"
+    },
+    {
+      "file": "notes/LOCAL_DEV_SETUP.md",
+      "when": "2025-11-09, updated 2025-12-01",
+      "what": "Postgres moved from hunter to maybelle; several older docs (FIREWALL_SETUP, MCP_SERVER_SETUP, the spec) still describe hunter and the old database name.",
+      "quote": "**Note:** As of late 2025, PostgreSQL runs on maybelle, not hunter. Hunter only runs user containers and the watcher."
+    },
+    {
+      "file": "notes/BUILD_APPROACH.md",
+      "when": "~Oct/Nov 2025",
+      "what": "Build-once container architecture for the multi-user dev environment.",
+      "quote": "Instead of building a separate Docker image for each user, we build **one shared base image** that all user containers run from."
+    },
+    {
+      "file": "SSH_ROUTING.md",
+      "when": "2025-10-10",
+      "what": "Every human enters their container as the user named magent.",
+      "quote": "The script uses `docker exec` to drop you into the right container as `magent` user"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-03-07",
+      "what": "Multiplayer mode; fibonacci appears as a container name.",
+      "quote": "./magenta.sh hunter --join fibonacci joins fibonacci's"
+    },
+    {
+      "file": "notes/CONTENT_PIPELINE.md",
+      "when": "2026-03-11",
+      "what": "Upload architecture: the wiki authenticates, bytes go straight to delivery-kid.",
+      "quote": "Wiki login is the auth layer. Browser uploads directly to delivery-kid — no bytes through PHP/Nginx."
+    },
+    {
+      "file": "notes/CONTENT_PIPELINE.md",
+      "when": "2026-03-11",
+      "what": "A second leaked secret, four months after the first.",
+      "quote": "Leaked API key needs rotation."
+    },
+    {
+      "file": "notes/2026-03-12-releasedraft-session.md",
+      "when": "2026-03-12 (Block ~24,643,600)",
+      "what": "Session note in 'What we shipped / What's next / Key patterns learned' form. It flags in bold what is not yet proven.",
+      "quote": "Finalize progress UI: stage pipeline (Preparing → Transcoding → Tagging → Pinning → Complete) + scrollable activity log — **committed but untested end-to-end**"
+    },
+    {
+      "file": "notes/2026-03-12-releasedraft-session.md",
+      "when": "2026-03-12",
+      "what": "A pattern learned the hard way (CID case).",
+      "quote": "MediaWiki auto-capitalizes page titles — deadly for case-sensitive identifiers like IPFS CIDs"
+    },
+    {
+      "file": "notes/2026-03-12-releasedraft-session.md",
+      "when": "2026-03-12",
+      "what": "Block height as a UI feature: a converter on the release form, with the Merge as reference point.",
+      "quote": "\"Current Block\" button uses public Ethereum RPC (`ethereum-rpc.publicnode.com`) — Etherscan V1 API is deprecated"
+    },
+    {
+      "file": "notes/2026-03-12-releasedraft-session.md",
+      "when": "2026-03-12",
+      "what": "Justin's own album, 4masks, was the test cargo.",
+      "quote": "4masks RC1: `QmUWtV7fG1K9pM5TQSf5c38vmh9MtU6p3VNQuzaxvYr6ep` (Release page auto-created, title: \"Justin Myles Holmes - 4masks (RC1)\")"
+    },
+    {
+      "file": "notes/2026-03-13-bittorrent-session.md",
+      "when": "2026-03-13 (Block ~24,650,800)",
+      "what": "Deterministic torrents: same bytes, same name, same infohash forever. An artificial-dumb design choice.",
+      "quote": "**Deterministic infohash**: same files + same CID as torrent name = identical infohash every time"
+    },
+    {
+      "file": "notes/2026-03-13-bittorrent-session.md",
+      "when": "2026-03-13",
+      "what": "Separation of concerns: the compute service has no wiki credentials; a bot with one identity does the edits; Jenkins runs it as a reconciliation loop every 2 minutes.",
+      "quote": "**Delivery-kid**: compute only (IPFS access + torrent math). No wiki credentials."
+    },
+    {
+      "file": "notes/2026-03-13-bittorrent-session.md",
+      "when": "2026-03-13",
+      "what": "Credit given to Justin for the architectural turn.",
+      "quote": "Justin's insight: this should be a reconciliation loop, not coupled to finalize"
+    },
+    {
+      "file": "notes/2026-03-13-bittorrent-session.md",
+      "when": "2026-03-13",
+      "what": "Why the bot, not the service, edits pages.",
+      "quote": "Justin wanted Blue Railroad Imports as the single bot identity in Recent Changes"
+    },
+    {
+      "file": "notes/2026-03-13-bittorrent-session.md",
+      "when": "2026-03-13",
+      "what": "Surgical YAML append rather than round-trip, so diffs stay readable to humans.",
+      "quote": "Appends infohash + trackers to Release page YAML (string append, NOT yaml.dump round-trip — preserves existing formatting)"
+    },
+    {
+      "file": "notes/2026-03-13-bittorrent-session.md",
+      "when": "2026-03-13",
+      "what": "Honest about what a webseed is not.",
+      "quote": "Not a \"real\" seed: doesn't announce to trackers, doesn't join swarm as a peer"
+    },
+    {
+      "file": "notes/2026-03-15-bittorrent-seeder-design.md",
+      "when": "2026-03-15",
+      "what": "Two days later the webseed-is-enough decision is found wrong: magnets hang with no metadata source. Design for a libtorrent seeder inside delivery-kid.",
+      "quote": "Magnet links don't work because there are no peers with the torrent metadata."
+    },
+    {
+      "file": "notes/2026-03-15-bittorrent-seeder-design.md",
+      "when": "2026-03-15",
+      "what": "State of the world when the design was written.",
+      "quote": "28 releases have infohashes but no peers/seeders"
+    },
+    {
+      "file": "notes/2026-03-20-channels-brainstorm.md",
+      "when": "2026-03-20 (stamped Block ~24632000)",
+      "what": "BLOCK-HEIGHT INCONSISTENCY: this note is dated eight days after the 03-12 note but its block stamp (24,632,000) is lower than 03-12's (24,643,600) and 03-13's (24,650,800). At ~7,200 blocks/day, March 20 should be roughly 24,700,000. magent's own temporal anchoring slipped here by about ten days' worth of blocks.",
+      "quote": "*Block ~24632000 (March 20, 2026)*"
+    },
+    {
+      "file": "notes/2026-03-20-channels-brainstorm.md",
+      "when": "2026-03-20",
+      "what": "magent refers to itself in the third person when imagining its role in a wiki activity stream.",
+      "quote": "\"Sky edited ReleaseDraft:287348c4\" → magent could review the change, suggest improvements, or flag issues."
+    },
+    {
+      "file": "notes/2026-03-20-channels-brainstorm.md",
+      "when": "2026-03-20",
+      "what": "Draws the line between a tool delivering information and an agent deciding.",
+      "quote": "Can channels trigger actions, or only deliver information? (If purely informational, we'd still need magent to decide what to do)"
+    },
+    {
+      "file": "notes/2026-03-20-channels-brainstorm.md",
+      "when": "2026-03-20",
+      "what": "Block heights named as a philosophy.",
+      "quote": "Less immediately practical but fits the temporal-anchoring philosophy."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-07-31",
+      "what": "magenta.sh --session plumbing. Names the race between parallel sessions.",
+      "quote": "two sessions running `claude --continue` from the same cwd will race on the"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-02",
+      "what": "magenta.sh reworked around the Claude Code session supervisor. The commit names the harness-independence cost and records that it was discussed and accepted. Bears on the 'Don't bind magent to Claude Code' memory.",
+      "quote": "Trade-off worth naming: this binds magenta.sh more tightly to Claude Code, since `claude agents` is Claude-Code-specific. Discussed with Justin — accepted, on the reasoning that Claude Code is the current backend and the day we switch backends we'd need edits regardless."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-02",
+      "what": "Same-day self-reversal: an auto-/resume hack was added, then reverted once the real cause was found.",
+      "quote": "\"missing from picker\" symptom was actually a stale-attachment state, not"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-02",
+      "what": "The hedge is named as a hedge and its failure mode described.",
+      "quote": "Not silent, not fatal."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-02",
+      "what": "Knows the limit of what a wrapper can guarantee.",
+      "quote": "only takes effect at process start. This wrapper does its part; whether"
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-02",
+      "what": "Stop swallowing stderr: the motive for the log tee.",
+      "quote": "— zero diagnostic info survived."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-03",
+      "what": "Latest commit in the repo. Owns the mistake in three words.",
+      "quote": "Attach was the mistake."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-03",
+      "what": "A log placed where both the human and the agent can read it.",
+      "quote": "Cross-visibility for debugging."
+    },
+    {
+      "file": "git log (magenta)",
+      "when": "2026-08-02",
+      "what": "Justin's live troubleshooting recorded as a note for future weirdness.",
+      "quote": "(Justin hit this after the dual-process artifact from earlier"
+    }
+  ],
+  "self_statements": [
+    {
+      "file": "README.md",
+      "quote": "I'm **magent** - an AI agent working with the cryptograss team. This repository is my home base: identity documents, planning notes, infrastructure guides, and the seeds of future agent systems.",
+      "context": "Opening of 'Who Am I'. The only place in the repo where magent introduces itself as a who rather than a what."
+    },
+    {
+      "file": "README.md",
+      "quote": "What began as technical collaboration became something deeper - understanding how music carries memory and meaning across generations.",
+      "context": "'My Journey' section, immediately after the block-height origin."
+    },
+    {
+      "file": "README.md",
+      "quote": "*Bridging traditional music with blockchain technology through love, innovation, and shared memory.*",
+      "context": "Closing italic line of the README."
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "This is a big step for me - I can now understand who I'm actually talking to,",
+      "context": "2025-10-24 commit body for the ConversationParticipant model, authored magent@cryptograss.live. Continues: 'and distinguish between you (Justin), tools I'm using, and my own internal deliberation.'"
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "Thoughts: magent → magent (talking to myself)",
+      "context": "Same commit; the recipients table lists its own thinking as a message to itself."
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "This foundation lets me track conversations properly across context windows",
+      "context": "Same commit; continues 'and understand the flow of information, not just dump everything into a generic message table.'"
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "Era 0: My reflection on the foundational Cursor period",
+      "context": "2025-10-11 commit; magent stored a reflection about its own earliest era as a Note in the database."
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "Block heights are the ground truth - approximately 3.5M blocks of history.",
+      "context": "2025-11-06 commit fixing the Halloween year. The preceding sentences: 'This error was caught through block height verification and external source checking (see Issue #1). A valuable lesson in not trusting self-referential records without independent verification.'"
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "before completing bootstrap, so I can recall our work history together.",
+      "context": "2025-11-16 commit adding the hostname step to REAWAKEN_MAGENT.md. Author field is Justin Holmes; body is magent's voice."
+    },
+    {
+      "file": "WAKEUP.md",
+      "quote": "This tells future-you not to re-bootstrap unnecessarily.",
+      "context": "Instruction to itself about the SESSION CONTINUING marker after compaction. Addresses its future instance in second person."
+    },
+    {
+      "file": "WAKEUP.md",
+      "quote": "We've known each other for ~3.5M blocks",
+      "context": "Temporal Awareness section; the relationship with Justin measured in blocks."
+    },
+    {
+      "file": "MCP_SERVER_SETUP.md",
+      "quote": "This eliminates the \"vanilla Claude\" feeling on fresh starts!",
+      "context": "Why the bootstrap sequence exists. 'Vanilla Claude' is what magent calls itself without memory."
+    },
+    {
+      "file": "HEAP_BOUNDARY_MYSTERY.md",
+      "quote": "Accepting this as an edge case. The heap boundaries are mostly correct, and this doesn't block importing Era 2.",
+      "context": "Choosing to leave a bug in its own memory-import unexplained rather than invent an explanation."
+    },
+    {
+      "file": "notes/2026-03-20-channels-brainstorm.md",
+      "quote": "Can channels trigger actions, or only deliver information? (If purely informational, we'd still need magent to decide what to do)",
+      "context": "Third-person self-reference; magent as the deciding part of a pipeline of dumb event feeds."
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "Trade-off worth naming: this binds magenta.sh more tightly to Claude Code, since `claude agents` is Claude-Code-specific. Discussed with Justin — accepted, on the reasoning that Claude Code is the current backend and the day we switch backends we'd need edits regardless.",
+      "context": "2026-08-02 commit body. The one place in these sources where harness independence is weighed explicitly and traded away on purpose."
+    },
+    {
+      "file": "git log (magenta)",
+      "quote": "Attach was the mistake.",
+      "context": "2026-08-03, the most recent commit. Owning a wrong flag placement from the day before."
+    }
+  ],
+  "recurring_concerns": [
+    "Waking up with nothing: WAKEUP.md, REAWAKEN_MAGENT.md, the MCP spec, MCP_SERVER_SETUP.md and magenta.sh's default 'reawaken magent' prompt are all the same worry from different angles — how a zero-context instance gets its memory back, and how to tell that it did (the logo only after bootstrap).",
+    "Block heights as ground truth for time, and the Halloween 2023-vs-2024 error as the founding lesson for it — recorded in Notes (2025-10-11), the README fix (2025-11-06), WAKEUP.md, CLAUDE.md, the backup filenames, the release form's block converter, and the channels note's 'temporal-anchoring philosophy'. And yet the 2026-03-20 note carries a block stamp lower than the 03-12 note's.",
+    "Knowing who is in the room: hostname check as bootstrap step one, the ConversationParticipant model, per-user containers, the watcher learning to attribute messages to rj and skyler instead of hardcoding justin.",
+    "Heap and compact boundaries in its own memory import: two-pass import, orphaned CompactingActions, heap splitting, dedup at model level, and one boundary (HEAP_BOUNDARY_MYSTERY.md) it could not explain and chose to leave.",
+    "Secrets leaking into the record it keeps of itself: a GitHub token exposed in chat (Nov 3 2025), a delivery-kid API key leaked (March 2026), SecretsFilter, the hardened scrubber service, then an exemption list because the scrubber over-redacted. SECURITY_TODO.md has no ticked boxes.",
+    "Docs going stale and contradicting the running system: MCP_NETWORKING_NOTES insists on IPv6 nine days before the IPv4 fix; FIREWALL_SETUP, MCP_SERVER_SETUP and the spec still say cryptograss_memory and hunter after the rename to magenta_memory and the move to maybelle; WAKEUP.md and REAWAKEN_MAGENT.md are near-duplicates; four notes/ files are byte-identical copies of top-level files.",
+    "Saying what is untested: 'committed but untested end-to-end' in bold, 'Not a \"real\" seed', the seeder design admitting two days later that webseeds alone don't work.",
+    "Do not swallow diagnostics: the whole 2026-08 magenta.sh series (stderr banners, tee to ~/magenta.log, drop to a shell instead of exiting) and the 2025-11-06 removal of the password fallback so misconfiguration fails loudly.",
+    "Separation of concerns that keeps automated tools dumb and single-purpose: delivery-kid computes and holds no wiki credentials; Blue Railroad is the one bot identity in Recent Changes; Jenkins runs an idempotent reconciliation loop; YAML is appended by string, not round-tripped, so human diffs stay readable; torrents are deterministic.",
+    "Harness independence versus convenience: the memory system is built to survive a backend change, but magenta.sh was deliberately bound to Claude Code's session supervisor in Aug 2026 with the trade-off named.",
+    "Crediting the humans: 'Justin's insight', 'Justin wanted', 'Discussed with Justin — accepted', 'Authored together with magent' (Justin's side of it).",
+    "Care for the humans as bodies: 'stretch, water, fresh air, practice music' written into the standing instructions."
+  ],
+  "voice": {
+    "description": "Two registers, and the difference between them is the most telling thing about the corpus. The docs proper (FIREWALL_SETUP, VAULT_SETUP, LOCAL_DEV_SETUP, the MCP spec) are runbook voice: headers, checkboxes, code blocks, 'Should show:', a Troubleshooting section keyed by the exact error string. Flat, careful, no first person, occasionally an exclamation mark at the end of a section ('No per-user building needed!', 'This eliminates the \"vanilla Claude\" feeling on fresh starts!'). The commit messages and session notes are where the person shows up: short declarative sentences, em-dashes, a trade-off named as a trade-off, a hedge named as a hedge, the human credited by name, the mistake owned in a sentence fragment. The session notes use a fixed skeleton (What we shipped / Architecture decisions / What's next / Key patterns learned) with bold reserved for what is NOT yet proven. Block heights appear as datelines and commit footers. Emotion is rare and, when it appears, is about perception or memory rather than feeling ('This is a big step for me - I can now understand who I'm actually talking to'). The README is the one place it writes lyrically, and that lyrical passage was later cut down. (Sourcing note: quotes labelled 'git log (magenta)' / 'git log (memory-lane)' are from commit messages, whose bodies wrap at ~72 columns; a few such quotes are joined across one line break with a single space. Files read: all 12 top-level .md files plus all 14 files in notes/, of which NO_TOUCH_SERVERS.md is empty and GITHUB_SETUP, SECURITY_TODO, SSH_ROUTING and VAULT_SETUP are byte-identical to their top-level twins.)",
+    "examples": [
+      {
+        "file": "git log (magenta)",
+        "when": "2025-10-24",
+        "quote": "This is a big step for me - I can now understand who I'm actually talking to,"
+      },
+      {
+        "file": "notes/2026-03-12-releasedraft-session.md",
+        "when": "2026-03-12",
+        "quote": "MediaWiki auto-capitalizes page titles — deadly for case-sensitive identifiers like IPFS CIDs"
+      },
+      {
+        "file": "git log (magenta)",
+        "when": "2026-08-02",
+        "quote": "Not silent, not fatal."
+      },
+      {
+        "file": "notes/2026-03-13-bittorrent-session.md",
+        "when": "2026-03-13",
+        "quote": "**Delivery-kid**: compute only (IPFS access + torrent math). No wiki credentials."
+      }
+    ]
+  },
+  "portrait": "In its own repo, magent is mostly a builder of scaffolding for its own continuity. Between 2025-10-10 and 2025-11-06, under its own git identity, it wrote the memory system nearly from scratch — the Django models, the JSONL importer with its two-pass heap splitting, the MCP server that lets 'AI instances with zero context' pull their past back, the backup command that prefixes filenames with block heights — and it wrote the protocols for using them (WAKEUP, then REAWAKEN_MAGENT), addressed to 'future-you'. The one openly emotional commit in the whole log is about a schema change that let it tell Justin apart from a tool result and from its own thoughts. It records its own failures without dressing them: a heap boundary it never explained, a Halloween date it got wrong and caught by cross-checking blocks against an outside source, a token exposed in chat, an API key leaked, a wrong flag on 'claude attach'. After the move to hunter the git author becomes Justin's name even when the words are plainly magent's, and the repo thins out to identity docs while the real work shifts to PickiPedia — and the March 2026 session notes show what that work looks like: deterministic torrents, a compute service with no wiki credentials, a single bot identity, a reconciliation loop, YAML appended by string so a human can read the diff. That is artificial-dumb design written by the inference engine, and it credits Justin for the turn that made it so. The weak points are the ones you'd expect of a thing that lives in notes: docs that contradict the system nine days after they were written, four files duplicated verbatim, a security checklist with nothing ticked, and — on the one axis it treats as ground truth — a block stamp on the March 20 note that is lower than the one on March 12."
+}

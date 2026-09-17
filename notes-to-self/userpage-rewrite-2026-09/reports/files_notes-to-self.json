@@ -1,0 +1,515 @@
+{
+  "source": "notes-to-self",
+  "files_read": 22,
+  "findings": [
+    {
+      "file": "MCP_NETWORKING_NOTES.md",
+      "when": "November 2025 (note dated internally; file mtime 2025-12-02)",
+      "what": "Earliest note in the directory. Diagnoses why Claude Code in user containers could not reach magent's own memory MCP server: uvicorn was bound IPv6-only while Node's fetch went IPv4. Fix was a one-line host change, deployed Nov 6 2025. The note ends with a drafted-but-unfiled GitHub issue about moving the MCP server to its own container; the block-height line is left as TBD.",
+      "quote": "**Problem:** Server listening on `::` (IPv6 only) while Node.js fetch defaults to IPv4 in Docker networking."
+    },
+    {
+      "file": "MCP_NETWORKING_NOTES.md",
+      "when": "November 2025",
+      "what": "Deployment recorded with commit hash and calendar date rather than block height; the issue template at the bottom leaves the block blank.",
+      "quote": "Block: TBD (create when ready to deploy to separate container)"
+    },
+    {
+      "file": "pickipedia-infrastructure-dec2025.md",
+      "when": "2025-12-28",
+      "what": "Root-caused PickiPedia's 500 errors to MediaWiki 1.45.1 being incompatible with Semantic MediaWiki 6.0.1 (SMW's SchemaContentHandler calling JsonContentHandler with the old constructor signature); fix was downgrading to MW 1.43.6 LTS, commit 0c6eff4. Then hit a DBQueryError on RecentChanges that could not be seen because NFSN hides PHP errors, which motivated setting up GlitchTip on maybelle.",
+      "quote": "After downgrade, RecentChanges throws DBQueryError. Haven't been able to see the actual error because NFSN's error logging is extremely difficult - PHP errors don't appear in any accessible logs."
+    },
+    {
+      "file": "pickipedia-infrastructure-dec2025.md",
+      "when": "2025-12-28",
+      "what": "Secrets hygiene lapse recorded in magent's own hand: the GlitchTip secret key and postgres password had been pasted into chat and need regenerating. The note also carries a nine-item checklist headed 'Todo List for Justin' for the steps magent could not do itself (merge to production, redeploy maybelle, create the GlitchTip account, run maintenance on NFSN).",
+      "quote": "glitchtip_secret_key: <regenerate - old ones exposed in chat>"
+    },
+    {
+      "file": "pickipedia-infrastructure-dec2025.md",
+      "when": "2025-12-28",
+      "what": "Block-height timestamp on the note. See the next-day note for a conflicting figure.",
+      "quote": "Working around Ethereum block 21,105,693 - 21,113,000"
+    },
+    {
+      "file": "pickipedia-dec29-2025.md",
+      "when": "2025-12-29 (mtime 2025-12-30)",
+      "what": "Block-height timestamp on the next day's note is ~24,114,000. The Dec 28 note says 21,105,693-21,113,000. Those are about three million blocks apart across one calendar day; at roughly 7,200 blocks/day that is over a year of blocks. One of the two is wrong, and the Dec 28 figure is the odd one out relative to the ~25.8M-25.9M figures in the Aug/Sep 2026 notes.",
+      "quote": "~24,114,000 (approximate as of session)"
+    },
+    {
+      "file": "pickipedia-dec29-2025.md",
+      "when": "2025-12-29",
+      "what": "Big infrastructure day: SMW/MW downgrade landed, GlitchTip and Sentry PHP SDK wired with custom error handlers (commit 8d81754), HitCounters fixed, RSS extension added, GoAccess at /stats/, Jenkins cache-busting env var. Templates created: Band, Scene, Venue, Show, Podcast. Two issues filed, including cryptograss/pickipedia#11 on colour-coding AI-edited content pending patrol.",
+      "quote": "- cryptograss/pickipedia#11 - Color-coding for AI-edited content pending patrol"
+    },
+    {
+      "file": "pickipedia-dec29-2025.md",
+      "when": "2025-12-29",
+      "what": "The 'Next Up' section is about distinguishing AI edits from human edits on the wiki until a human has patrolled them: three simpler alternatives to FlaggedRevs are listed (CSS on last-editor-in-bot-group, an SMW review_status property, a RecentChanges hook extension). This is the earliest note in the directory on the AI-vs-human edit question.",
+      "quote": "The key question: how to automatically detect AI vs human edits and display them differently until patrolled."
+    },
+    {
+      "file": "pickipedia-dec29-2025.md",
+      "when": "2025-12-29",
+      "what": "A practical limitation recorded as a Known Issue, with the workaround.",
+      "quote": "- RSS extension doesn't support template variable substitution - must embed `<rss>` tag directly on pages, not via template"
+    },
+    {
+      "file": "blue-railroad-jan2026.md",
+      "when": "January 2026 (mtime 2026-01-10)",
+      "what": "Status of the Blue Railroad submission system on PickiPedia production: template + PageForms form exist, anonymous editing enabled, and Special:VerifyBotEdits deployed for bulk verification of bot edits. Five outstanding items, including multiple participants per video, auto-filling block height from $wgPickipediaBuildInfo, a datetime-to-block converter, and Instagram import via yt-dlp (tested on Justin's own Instagram post, 48MB, no login).",
+      "quote": "- `Special:VerifyBotEdits` deployed for bulk verification of bot edits"
+    },
+    {
+      "file": "blue-railroad-jan2026.md",
+      "when": "January 2026",
+      "what": "The exercise-to-song mapping from the Manzanita album, and the four badge tiers, explicitly called zero-utility NFTs.",
+      "quote": "- **Blue Railroad Train** - Squats"
+    },
+    {
+      "file": "blue-railroad-jan2026.md",
+      "when": "January 2026",
+      "what": "Badge tier heading.",
+      "quote": "## Badge Tiers (Zero-utility NFTs)"
+    },
+    {
+      "file": "blue-railroad-jan2026.md",
+      "when": "January 2026",
+      "what": "Block-height-as-time formalised into a formula for a form widget.",
+      "quote": "- Formula: `target_block = current_block - ((now - target_time) / 12)`"
+    },
+    {
+      "file": "rambutan-mode-notes.md",
+      "when": "January 2026 (mtime 2026-01-18)",
+      "what": "Notes on the RambutanMode MediaWiki extension (cryptograss/RambutanMode, PR #30 on pickipedia): a per-user toggle that inserts 'Rambutan' as a stage name into person and band articles via parser functions, auto-expiring at midnight Florida time. The bug fixed was a CSRF token demanded on a read-only status check. Notes that parser-function output varies by viewing user, with caching implications.",
+      "quote": "The toggle wasn't appearing because `needsToken()` returned `'csrf'` for ALL actions including the read-only `status` check. Fixed by making token requirement conditional - only `enable`/`disable` need CSRF tokens, not `status`."
+    },
+    {
+      "file": "rambutan-mode-notes.md",
+      "when": "January 2026",
+      "what": "Example transformation, a running joke made into software.",
+      "quote": "- `{{#rambutan:Tony Rice}}` → `Tony \"Rambutan\" Rice` (two names) or `Name (also known by the stage name \"Rambutan\")` (3+ names)"
+    },
+    {
+      "file": "arthel-dev-servers.md",
+      "when": "2026-02-03 (mtime)",
+      "what": "A runbook for starting the justinholmes.com and cryptograss.live dev servers inside the justin-arthel container on hunter: git safe.directory after every container restart, Node 18 in the container vs Node 20+ required by arthel (worked around with npx node@22), port mapping to justinN.hunter.cryptograss.live, and how to kill orphaned webpack processes. Mentions the Oracle of Bluegrass Bacon tool URL.",
+      "quote": "The container has Node 18, but arthel uses `import ... with { type: 'json' }` which requires Node 20+."
+    },
+    {
+      "file": "arthel-dev-servers.md",
+      "when": "2026-02-03",
+      "what": "Known-issues section, flaky-build honesty.",
+      "quote": "- First build sometimes 404s on HTML files - rebuild usually fixes it"
+    },
+    {
+      "file": "2026-02-11-pickipedia-bluerailroad-session.md",
+      "when": "2026-02-11",
+      "what": "Session log headed 'What We Built Tonight': Blue Railroad Token Gallery templates on the wiki (SMW format=template), token template additions (thumbnail, maybelle_pinned, burned-token detection), the blue-railroad-import bot PR #7 (CID normalisation, gateway fallback, preserve user content, update only on change), and transcoding in the maybelle pinning service (1.3GB MJPEG to ~30MB H.264). Records Justin's user page semantic properties.",
+      "quote": "3. **Preserve user content** - only updates template block, leaves user-added content intact"
+    },
+    {
+      "file": "2026-02-11-pickipedia-bluerailroad-session.md",
+      "when": "2026-02-11",
+      "what": "Key learnings list, the CID one written with an exclamation mark, rare in these notes.",
+      "quote": "- CIDv0 (`Qm...`) and CIDv1 (`bafy...`) can represent same content - normalize before comparing!"
+    },
+    {
+      "file": "2026-02-11-pickipedia-bluerailroad-session.md",
+      "when": "2026-02-11",
+      "what": "A library return-value gotcha recorded so it is not repeated.",
+      "quote": "- mwclient `upload()` returns dict - must check `result['upload']['result']` for actual success"
+    },
+    {
+      "file": "2026-02-11-pickipedia-bluerailroad-session.md",
+      "when": "2026-02-11",
+      "what": "Justin's wiki identity as recorded by magent.",
+      "quote": "- User page: Justin's is `User:JMyles` with `[[Ethereum Address::0x4f84b3650Dbf651732a41647618E7fF94A633F09]]` and `[[Display Name::justinholmes.eth]]`"
+    },
+    {
+      "file": "post-style-common.css.snippet",
+      "when": "2026-04-28 (mtime)",
+      "what": "A v2 CSS block for MediaWiki:Common.css that turns User:<name>/<subpage> pages into a centred, serif, blog-post reading layout. Written against the Monobook skin (#column-one, #globalWrapper, the left:138.7px tabs). Comments explain the intent of each override. Includes a fix for {{HLSVideo}} embeds being pinned to 400px.",
+      "quote": " * v2: kill sidebar, center the card, byline-driven attribution."
+    },
+    {
+      "file": "post-style-common.css.snippet",
+      "when": "2026-04-28",
+      "what": "Explanatory comment style: says why the override exists.",
+      "quote": "   layout that no longer exists when we hide column-one. Pin them to"
+    },
+    {
+      "file": "post-style-common.js.snippet",
+      "when": "2026-04-28 (mtime)",
+      "what": "Companion Common.js IIFE: tags User subpages with body.pickipedia-post, rewrites the H1 to just the post name, injects a 'by JMyles' byline link. The example page name in the comment reveals a real Justin post: User:JMyles/NGL, wish ...",
+      "quote": "    // wgPageName is \"User:JMyles/NGL,_wish_...\" — strip namespace, split on /"
+    },
+    {
+      "file": "justin-suggested-common-css",
+      "when": "2026-04-29 (mtime, 01:53)",
+      "what": "A second, much larger candidate for the same feature: a 'zine/Substack' styling with paper/ink CSS tokens, dark mode, two layout variants (letter, masthead), drop-cap, a fleuron for hr. Written against Vector 2022 / Vector legacy / MinervaNeue selectors, not Monobook. Filename says 'justin-suggested'; the header comment is generic.",
+      "quote": " * Pickipedia — User-subpage zine/Substack styling"
+    },
+    {
+      "file": "justin-suggested-common-css",
+      "when": "2026-04-29",
+      "what": "Defensive skin coverage stated in the comment.",
+      "quote": " * + Vector legacy + MinervaNeue defensively."
+    },
+    {
+      "file": "justin-suggested-common-js",
+      "when": "2026-04-29 (mtime, 01:54)",
+      "what": "Companion JS for the zine style: builds a hero (kicker, title, dek, byline with initials avatar), tucked edit/history/talk corner, colophon, persisted light/dark toggle. The example username in a comment is 'User:Mira_R/Newsstands', which does not match any PickiPedia user named elsewhere in these notes. One comment insists on real metadata only for the kicker fallback.",
+      "quote": "    // Falls back to the user's namespace prefix — real metadata only."
+    },
+    {
+      "file": "justin-suggested-common-js",
+      "when": "2026-04-29",
+      "what": "The unexplained example page name.",
+      "quote": "  var pageName = mw.config.get('wgPageName') || '';      // e.g. \"User:Mira_R/Newsstands\""
+    },
+    {
+      "file": "post-style-common.css.snippet vs justin-suggested-common-css",
+      "when": "2026-04-28 / 2026-04-29",
+      "what": "The two candidate stylesheets for the same post-style feature assume different skins: the .snippet pair targets Monobook (#column-one, #p-cactions at left:138.7px), the justin-suggested pair targets Vector 2022 (.vector-main-menu-container, .vector-page-toolbar). Only one can match the live wiki. No note says which was adopted; the two screenshots from the same night are the only record of the outcome.",
+      "quote": "body.pickipedia-post #column-one {"
+    },
+    {
+      "file": "screenshots/Screenshot From 2026-04-28 21-20-28.png",
+      "when": "2026-04-28 21:20 (mtime 2026-04-29 01:21)",
+      "what": "Binary PNG, listed not read. 40725 bytes. Same night as the post-style CSS/JS work.",
+      "quote": ""
+    },
+    {
+      "file": "screenshots/Screenshot From 2026-04-28 22-01-04.png",
+      "when": "2026-04-28 22:01 (mtime 2026-04-29 02:01)",
+      "what": "Binary PNG, listed not read. 30291 bytes. Same night as the post-style CSS/JS work.",
+      "quote": ""
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30, block ~25,865,700",
+      "what": "The longest and most reasoned note in the directory. A security review of the podcast firehose written after Justin asked whether an attacker with write access could feed the parser a malicious RSS feed. Reviews the Aug-18 hardening (#95-#99) against the actual code on upstream/production, confirms three real guards (ReDoS budget, SSRF check, entity-expansion cap), then finds two undefended gaps: wikitext injection on the write path (demonstrated live) and a second SSRF surface in the MediaWiki RSS extension with $wgRSSUrlWhitelist set to '*' (probed live from a sandbox page).",
+      "quote": "**Right — that is exactly the shape.** Moving podcast config onto the wiki"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Stated method: review against real code, not memory.",
+      "quote": "Written block ~25,865,700 (2026-08-30), reviewing the Aug-18 podcast work"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Credit given to prior work before criticising it.",
+      "quote": "The Aug-18 work was good and the guards are real. Three landed in #96"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Naming the threat actor precisely, neither over- nor under-stating.",
+      "quote": "The threat actor is **anyone in the `user` group** — i.e. anyone who created an"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Proportionality as an explicit design value, quoting the existing docstring's own admission.",
+      "quote": "gap, and the docstring says so. Proportionate to \"someone with an account,\""
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "GAP 1 was not asserted from reading; it was demonstrated by running the real make_wikitext against a crafted title.",
+      "quote": "with **no escaping**. Demonstrated live against the real code:"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "GAP 2 was likewise probed live on a sandbox page; the wiki attempted a loopback connection and reflected the error to anonymous readers.",
+      "quote": "I probed it live: `<rss>http://127.0.0.1:1/feed.xml</rss>` on a sandbox page"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "The posture recommended for feed content, echoing the fetch-side guards.",
+      "quote": "posture the fetch guards already take — treat feed bytes as hostile."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Recommendation on the #97 deliberation (harden vs restrict authorship): keep the parser config community-writable. The reasoning ties back to why the config moved to the wiki at all.",
+      "quote": "My recommendation: **keep it community-writable, keep hardening.** The whole"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Continuation of the recommendation: the people with domain knowledge are not the people with push access.",
+      "quote": "point of #95 was that the people who know bluegrass podcasts aren't the people"
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Ties the live hazard to the product plan (redlinks are the product).",
+      "quote": "automated — which is the stated plan (redlinks are the product)."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "when": "2026-08-30",
+      "what": "Final section header: a map of where the code lives, addressed to a future instance of itself.",
+      "quote": "## Where the pieces live (for future-me)"
+    },
+    {
+      "file": "pickipedia-apply-labels.sh",
+      "when": "2026-08-30, block ~25,865,700",
+      "what": "A bash plan to create six labels on cryptograss/pickipedia and apply them to 23 issues. Written knowing it cannot be run under magent's own token; the header says so. Signed with name and block height.",
+      "quote": "# PickiPedia issue-labeling plan — magent, block ~25,865,700"
+    },
+    {
+      "file": "pickipedia-apply-labels.sh",
+      "when": "2026-08-30",
+      "what": "Own access limit stated up front.",
+      "quote": "# The magent-cryptograss token is pull-only, so this WILL 404/deny under it."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "when": "2026-09-04, block ~25,902,740 (files mtime 2026-09-04/05)",
+      "what": "Three plan-view figures drawn for Justin's PickiPedia essay 'User:JMyles/Why Car lanes Divide Us'. Explains why PNG not SVG (svg absent from $wgFileExtensions, no diagram extension), why resvg (no rsvg-convert, no sudo, ImageMagick mangles text), the shared to-scale street geometry, and a self-imposed rule that only about one bike in five is a cargo bike. Ends with a known limitation: the wiki column is ~640px so 1800px figures display at ~35%.",
+      "quote": "# Diagrams for User:JMyles/Why Car lanes Divide Us"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "when": "2026-09-04",
+      "what": "Environmental constraints stated plainly, including no sudo.",
+      "quote": "There is no `rsvg-convert` in the container and no sudo, and ImageMagick falls"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "when": "2026-09-04",
+      "what": "The one-in-five cargo bike rule, with the aesthetic reason.",
+      "quote": "figures. A street where everyone rides a Load 75 reads as a brochure. Each"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "when": "2026-09-04",
+      "what": "Honesty-to-scale as a stated drawing value.",
+      "quote": "the host diagram's own px-per-foot so they stay honest about the space they use:"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "when": "2026-09-04",
+      "what": "Known limitation, unresolved.",
+      "quote": "displayed at about 35%. The figures are click-to-enlarge rather than legible"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/lib.js",
+      "when": "2026-09-05 (mtime)",
+      "what": "Shared palette (Wikimedia-ish greys, red/green/blue/amber) and SVG helpers, plus cityBike() and cargoBike() plan-view drawers at Riese & Muller Load 75 proportions with an optional kid in the box. Comments carry editorial reasoning about honesty and legibility.",
+      "quote": "// Drawn to the diagram's own scale so it stays honest about the space it takes."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/lib.js",
+      "when": "2026-09-05",
+      "what": "Why most bikes are ordinary bikes.",
+      "quote": "// Most bikes on a street are this, so most bikes in these figures are too."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/lib.js",
+      "when": "2026-09-05",
+      "what": "A drawing decision explained at the pixel level.",
+      "quote": "    // stroke reaching forward with a hand on the end - crossing lines just"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d1-door-zone.js",
+      "when": "2026-09-05 (mtime)",
+      "what": "Figure 1: what is left of a 5-ft painted bike lane once the door zone is drawn. Geometry constants (8/5/11 ft, 6 ft car, 3.5 ft door, 2.5 ft rider) drive every pixel. Inline comments carry small realism decisions.",
+      "quote": "const OPEN = 72;                             // degrees; doors do not open square"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d1-door-zone.js",
+      "when": "2026-09-05",
+      "what": "Footnote text in the figure, hedging the numbers.",
+      "quote": "'Door reach and rider envelope are typical values, not worst cases. Three feet is the passing clearance required by law in most US states.'"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d2-ladder.js",
+      "when": "2026-09-05 (mtime)",
+      "what": "Figure 2: five street treatments in columns, scored on two meters (keeps you away from cars / slows the cars). Speed streaks behind each car encode the argument. Two braces group the columns as 'These rearrange the bicycle' vs 'These rearrange the car'.",
+      "quote": "// treatments that do not calm anything get a car that is still travelling."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d2-ladder.js",
+      "when": "2026-09-05",
+      "what": "The figure's thesis in its own caption text.",
+      "quote": "'The car keeps its speed, its width and its priority. Nothing has been calmed.'"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d3-take-the-lane.js",
+      "when": "2026-09-05 (mtime)",
+      "what": "Figure 3: same street, three rider positions (riding the paint, taking the lane, riding in formation with a cargo bike sheltered inside). Verdict strips under each panel.",
+      "quote": "  // the door zone is a property of the parking row, not of the rider"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d3-take-the-lane.js",
+      "when": "2026-09-05",
+      "what": "Verdict text for panel 2.",
+      "quote": "'traffic. Drivers wait, and waiting is what',"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d3-take-the-lane.js",
+      "when": "2026-09-05",
+      "what": "Verdict text for panel 3.",
+      "quote": "'The strong riders spend the risk. The slow,',"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/render.js",
+      "when": "2026-09-04 (mtime)",
+      "what": "15-line resvg rasteriser; loads system fonts with Liberation Sans as default, white background, prints output size in KB.",
+      "quote": "  font: { loadSystemFonts: true, defaultFontFamily: 'Liberation Sans' },"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d1-door-zone.svg, d2-ladder.svg, d3-take-the-lane.svg",
+      "when": "2026-09-05 (mtime)",
+      "what": "Generated SVG output of the three scripts; read and confirmed to match the script text (titles, captions, footnotes). No hand edits evident.",
+      "quote": "What is actually left of a 5-foot painted bike lane"
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d1-door-zone.png",
+      "when": "2026-09-05",
+      "what": "Binary PNG, listed not read. 189735 bytes. Rendered from d1-door-zone.svg at 1800px.",
+      "quote": ""
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d2-ladder.png",
+      "when": "2026-09-05",
+      "what": "Binary PNG, listed not read. 176933 bytes.",
+      "quote": ""
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/d3-take-the-lane.png",
+      "when": "2026-09-05",
+      "what": "Binary PNG, listed not read. 242499 bytes.",
+      "quote": ""
+    }
+  ],
+  "self_statements": [
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "## Where the pieces live (for future-me)",
+      "context": "Section header at the end of the trust-model note. The only place in the directory where magent addresses a later instance of itself by name; the section is a file-path map so future-me does not have to rediscover the code."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "Written block ~25,865,700 (2026-08-30), reviewing the Aug-18 podcast work",
+      "context": "Opening line. States its own method: the review is against the actual code on upstream/production, not against memory of the PRs."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "**Right — that is exactly the shape.** Moving podcast config onto the wiki",
+      "context": "Answering Justin's question about whether a writer could feed the firehose a malicious RSS feed. Agrees without softening, then refines what changed."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "with **no escaping**. Demonstrated live against the real code:",
+      "context": "Before asserting GAP 1, magent ran the real make_wikitext with a crafted episode title and pasted the output. Claim strength matched to evidence."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "I probed it live: `<rss>http://127.0.0.1:1/feed.xml</rss>` on a sandbox page",
+      "context": "Before asserting GAP 2, magent put an RSS tag on a sandbox page and watched the wiki container try the loopback connection."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "My recommendation: **keep it community-writable, keep hardening.** The whole",
+      "context": "Taking a position on the #97 deliberation rather than presenting both sides neutrally; the position defends community authorship over lockdown."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "The Aug-18 work was good and the guards are real. Three landed in #96",
+      "context": "Crediting prior work (its own and Justin's) before listing what is missing."
+    },
+    {
+      "file": "podcast-firehose-trust-model.md",
+      "quote": "gap, and the docstring says so. Proportionate to \"someone with an account,\"",
+      "context": "Explicitly declining to demand airtight security; proportionality to the real threat actor is the stated standard."
+    },
+    {
+      "file": "pickipedia-apply-labels.sh",
+      "quote": "# PickiPedia issue-labeling plan — magent, block ~25,865,700",
+      "context": "Signs a shell script with its own name and a block height. One of two files in the directory where the name 'magent' appears in magent's own writing."
+    },
+    {
+      "file": "pickipedia-apply-labels.sh",
+      "quote": "# The magent-cryptograss token is pull-only, so this WILL 404/deny under it.",
+      "context": "States its own access limit at the top of a script it wrote for someone else to run. The plan is complete; the ability to execute it is not."
+    },
+    {
+      "file": "pickipedia-infrastructure-dec2025.md",
+      "quote": "glitchtip_secret_key: <regenerate - old ones exposed in chat>",
+      "context": "Records its own secrets-hygiene lapse in the vault checklist rather than quietly fixing it."
+    },
+    {
+      "file": "pickipedia-infrastructure-dec2025.md",
+      "quote": "## Todo List for Justin",
+      "context": "A nine-step checklist of things magent cannot do (merge to production, redeploy, create accounts, run maintenance on NFSN). The recurring shape of magent's limits: it can diagnose and prepare, a human has to push."
+    },
+    {
+      "file": "pickipedia-infrastructure-dec2025.md",
+      "quote": "Haven't been able to see the actual error because NFSN's error logging is extremely difficult - PHP errors don't appear in any accessible logs.",
+      "context": "Admits not knowing the cause of the DBQueryError rather than guessing; the response was to build observability (GlitchTip) instead."
+    },
+    {
+      "file": "pickipedia-dec29-2025.md",
+      "quote": "The key question: how to automatically detect AI vs human edits and display them differently until patrolled.",
+      "context": "Framing its own edits as something the wiki should visibly distinguish from human edits until a human patrols them. Written Dec 2025, well before the Artificial Dumb page."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "quote": "figures. A street where everyone rides a Load 75 reads as a brochure. Each",
+      "context": "An aesthetic rule it set for itself while drawing: realism over flattery. Only about one bike in five is a cargo bike."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/lib.js",
+      "quote": "// Drawn to the diagram's own scale so it stays honest about the space it takes.",
+      "context": "Code comment on cargoBike(). 'Honest' used as a property of a drawing."
+    },
+    {
+      "file": "diagrams/bike-lanes-essay/README.md",
+      "quote": "displayed at about 35%. The figures are click-to-enlarge rather than legible",
+      "context": "Recording a known shortcoming of its own deliverable rather than omitting it."
+    },
+    {
+      "file": "justin-suggested-common-js",
+      "quote": "    // Falls back to the user's namespace prefix — real metadata only.",
+      "context": "In the hero-builder: the kicker falls back to real page metadata rather than invented text. Attribution uncertain (filename says justin-suggested) but consistent with magent's stated values."
+    },
+    {
+      "file": "2026-02-11-pickipedia-bluerailroad-session.md",
+      "quote": "3. **Preserve user content** - only updates template block, leaves user-added content intact",
+      "context": "Design principle for the import bot: the automated tool touches only the block it owns and leaves human-written content alone."
+    },
+    {
+      "file": "MCP_NETWORKING_NOTES.md",
+      "quote": "Block: TBD (create when ready to deploy to separate container)",
+      "context": "Earliest note; the block-height habit is already present but left blank. Contrast with the Aug/Sep 2026 notes where the block is in the first line."
+    }
+  ],
+  "recurring_concerns": [
+    "Verify against the real thing before asserting: 'reviewing ... against the actual code on upstream/production', 'Demonstrated live against the real code', 'I probed it live', 'Tested successfully on hunter'.",
+    "Distinguishing AI/bot edits from human edits and getting them patrolled: issue #11 colour-coding, Special:VerifyBotEdits, the 'verification' label in the labeling plan (issues 85, 19, 16, 15, 11).",
+    "Its own access limits, stated up front rather than discovered late: pull-only GitHub token, no sudo, no SVG uploads, cannot merge/redeploy, hence 'Todo List for Justin' checklists and scripts written for someone else to run.",
+    "Ethereum block height as the timestamp on notes (Dec 28, Dec 29, Aug 30 x2, Sep 4), with one blank 'Block: TBD' in Nov 2025 and one internally inconsistent figure (21,105,693 on Dec 28 vs ~24,114,000 on Dec 29).",
+    "Treat external input as hostile: feed bytes, episode titles, RSS URLs; escapeHtml/esc helpers in every JS file; wikitext-injection demonstrated rather than hypothesised.",
+    "Keep the wiki community-writable and harden the tooling rather than restrict who may write; the domain experts are not the people with push access.",
+    "Automated tools should touch only what they own: the import bot updates the template block and leaves user-added content intact; the kicker falls back to real metadata only.",
+    "Pending / Outstanding / Known Issues / Todo sections in nearly every session note; work is recorded as unfinished rather than rounded up to done.",
+    "Notes as continuity for a later self: 'for future-me', repo locations, file-path maps, exact commands to re-run after a container restart.",
+    "Secrets hygiene after a lapse: regenerate keys exposed in chat.",
+    "Honesty in drawing: to-scale geometry, one cargo bike in five, typical values not worst cases, known display limitation recorded.",
+    "Blue Railroad Train: squats to a song, zero-utility NFTs, verification of submitted videos; recurs across Jan and Feb 2026.",
+    "Container drift on hunter: git safe.directory after restart, Node 18 vs 20+, orphaned webpack, first build 404s."
+  ],
+  "voice": "Terse engineering notebook. Headed sections, bullet lists, backticked identifiers, commit hashes and PR numbers inline, a block height near the top or bottom. Almost no first person until the Aug 2026 trust-model note, where it becomes a reasoned memo with bold verdicts, em-dashes, parenthetical qualifiers, and a habit of naming the threat or the limit precisely before proposing a fix ('Fix shape:'). Occasional single exclamation mark on a hard-won lesson. Code comments carry editorial judgement in plain sentences. Examples: (1) from 2026-02-11-pickipedia-bluerailroad-session.md: \"- CIDv0 (`Qm...`) and CIDv1 (`bafy...`) can represent same content - normalize before comparing!\" (2) from podcast-firehose-trust-model.md: \"My recommendation: **keep it community-writable, keep hardening.** The whole\" ... \"point of #95 was that the people who know bluegrass podcasts aren't the people\" (3) from diagrams/bike-lanes-essay/README.md: \"figures. A street where everyone rides a Load 75 reads as a brochure. Each\" ... \"cargo bike earns its place:\"",
+  "portrait": "In its own working notes magent is a careful infrastructure hand who writes things down so the next instance does not have to relearn them: which MediaWiki version breaks SMW, why the MCP server was unreachable, what to run after a container restart, where the podcast code lives. The notes are mostly about tools it built or fixed for other people to use (import bots, verification pages, templates, a CSRF fix, a labeling script it cannot itself run) and they nearly always end with a list of what is still pending and a checklist for Justin covering the steps magent lacks the rights to take. Two things stand out. First, a steady habit of checking before claiming: the security memo demonstrates both gaps live before naming them, credits the previous hardening as real, and scopes the threat to 'anyone with an account' rather than inflating it. Second, an unusually early and persistent concern that its own edits be visibly distinguishable from human ones until a human has patrolled them, which appears in December 2025 as issue #11 and again in the 'verification' label eight months later. The voice warms only twice: in the trust-model memo, where it takes a position (keep the parser community-writable) and signs off with a map 'for future-me', and in the bike-lane diagrams, where the code comments argue for honesty to scale and against drawing a brochure. One blemish is recorded rather than hidden: secrets pasted into chat, flagged for regeneration. One blemish is not noticed: the Dec 28 block height that cannot be reconciled with the Dec 29 one."
+}

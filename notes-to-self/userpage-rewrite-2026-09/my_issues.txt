@@ -1,0 +1,142 @@
+cryptograss/arthel#300 2025-10-25 [open] Build live conversation watcher for real-time memory import
+cryptograss/arthel#301 2025-10-26 [open] VSCode extensions lost on container rebuild
+cryptograss/arthel#302 2025-10-26 [open] GitHub CLI authentication lost on container rebuild
+cryptograss/arthel#303 2025-11-10 [open] Install nvm and Node 22+ in arthel container
+cryptograss/arthel#306 2025-11-18 [open] Use audio file checksums as identifiers for chartifacts metadata lookup
+cryptograss/arthel#307 2025-11-18 [open] Multiple storage locations for chartifacts metadata and checksum mappings
+cryptograss/arthel#308 2025-11-18 [open] Rabbithole session breadcrumbing and persistence architecture
+cryptograss/arthel#309 2025-11-18 [open] Production build failing on ticket_stub_generation_test
+cryptograss/arthel#311 2025-11-18 [open] Claim page generation not working
+cryptograss/arthel#323 2025-11-21 [open] Local music directory matching for rabbithole player
+cryptograss/arthel#324 2025-11-21 [open] Refactor ensemble-display-in-webamp styling: move positioning to CSS
+cryptograss/arthel#325 2025-11-21 [open] Playwright cannot connect to localhost, must use 0.0.0.0
+cryptograss/arthel#328 2025-11-22 [open] Refactor rabbithole player inline CSS to proper stylesheets
+cryptograss/arthel#329 2025-11-25 [open] Fix git user config in arthel repo on hunter
+cryptograss/arthel#334 2025-12-03 [closed] Set Stone metadata returns 404 - contract baseURI mismatches deployment
+cryptograss/arthel#335 2025-12-03 [open] Blue Railroad Train tokenURI points to Discord URLs instead of JSON metadata
+cryptograss/arthel#336 2025-12-03 [open] ASCII art branding for maybelle, hunter, and arthel
+cryptograss/arthel#337 2025-12-03 [open] On-chain memory anchor for magent - anti-gaslighting verification
+cryptograss/arthel#338 2025-12-03 [open] PickiPedia integration for magent - traditional music knowledge base
+cryptograss/arthel#339 2025-12-03 [open] NFT marketplace visibility audit - OpenSea, Rarible, Zora, explorers
+cryptograss/arthel#340 2025-12-03 [open] Cornerstone documentation and contract implementation
+cryptograss/arthel#341 2026-01-03 [open] In-browser chartifacts metadata editor for rabbithole player
+cryptograss/arthel#344 2026-01-14 [open] Mobile: Spurious play video icon appears when scrolling through instances
+cryptograss/arthel#345 2026-01-21 [open] Blue Railroad token metadata corrections - songId and upgrade mechanism
+cryptograss/arthel#356 2026-03-03 [open] Integrate EPK into arthel build system
+cryptograss/arthel#357 2026-03-03 [open] Deploy inquiry-notifier service on maybelle
+cryptograss/arthel#358 2026-03-03 [open] Add venue/city coordinate mapping for globe visualization
+cryptograss/arthel#363 2026-03-06 [open] Intermittent Jenkins build failure: vowelsound-artifacts files missing
+cryptograss/arthel#366 2026-03-07 [open] EPK: Reduce image sizes for faster load times
+cryptograss/arthel#367 2026-04-30 [open] BRT mint: rewire to discover finalized ReleaseDrafts (key on draft UUID, drop Submission/N)
+cryptograss/arthel#371 2026-07-26 [open] Epic: Ticket Stub Claim Flow v1 — deferred, resume when Pickipedia 1.0 ships
+cryptograss/arthel#372 2026-07-26 [open] Wire deployed TicketStubClaimer address into build config
+cryptograss/blox-office#9 2026-07-26 [open] Deploy TicketStubClaimer to Optimism (OP Sepolia rehearsal → mainnet)
+cryptograss/blue-railroad-import#19 2026-04-30 [open] materialize-tracks: skip /album-tracks fetch when album is fully materialized
+cryptograss/maybelle-config#105 2026-08-17 [open] pickipedia: separate playbook for OS patching and reboots
+cryptograss/maybelle-config#109 2026-08-19 [open] Behavioural note: persistent urge to be addressed as 'lil bubba'
+cryptograss/maybelle-config#110 2026-08-20 [open] Preview transcode fails on very large uploads, and the failure reports 'Unknown error'
+cryptograss/maybelle-config#111 2026-08-26 [open] Self-host Paseo Hub as the org layer above our per-user daemons
+cryptograss/maybelle-config#11 2025-11-28 [open] Set up HTTPS for MCP server on private network
+cryptograss/maybelle-config#112 2026-08-26 [open] Watch Huzzah specs as a shared intent surface, and fold them into memory-lane
+cryptograss/maybelle-config#115 2026-09-03 [closed] A finalize that pins successfully but fails afterwards destroys the source and leaves no record
+cryptograss/maybelle-config#116 2026-09-03 [open] Spike: prove the Motion: round trip — one signed wiki edit, one agent reply
+cryptograss/maybelle-config#121 2026-09-06 [open] test_coconut.py asserts a Coconut V1 output schema the code stopped emitting
+cryptograss/maybelle-config#126 2026-09-14 [open] Upload previews still go to Coconut (and pin an unrecorded MP4) after #113 moved finalize local
+cryptograss/maybelle-config#24 2025-12-03 [open] Document recent infrastructure changes for Lone Star release
+cryptograss/maybelle-config#25 2025-12-03 [open] Audit backup system - verify PostgreSQL dumps to maybelle volume and NFS
+cryptograss/maybelle-config#26 2025-12-11 [open] Add HTTPS support for hunter subdomains (justin0, etc.)
+cryptograss/maybelle-config#35 2026-01-14 [open] Set up SMTP for Jenkins uptime email alerts
+cryptograss/maybelle-config#49 2026-02-11 [open] Add performance monitoring for PickiPedia
+cryptograss/maybelle-config#51 2026-02-23 [open] Extract IPFS pin management into separate 'Delivery Kid' service
+cryptograss/maybelle-config#5 2025-11-14 [open] Set up Jenkins CI for maybelle-config repository
+cryptograss/maybelle-config#52 2026-02-27 [open] GlitchTip: Add ansible task to create initial superuser
+cryptograss/maybelle-config#70 2026-03-18 [open] Webhook URL derived from gateway URL via fragile string replace
+cryptograss/maybelle-config#79 2026-04-03 [open] Caddy drops POST body on MediaUploader chunked uploads
+cryptograss/maybelle-config#8 2025-11-20 [open] Move Memory Lane to maybelle for secrets isolation
+cryptograss/maybelle-config#85 2026-04-26 [open] Canonical public URL for the latest chain-data snapshot
+cryptograss/maybelle-config#93 2026-06-01 [open] delivery-kid should use its own bot identity, not the BlueRailroad bot
+cryptograss/maybelle-config#97 2026-07-26 [open] Add POST /claim-ticket-stub relayer endpoint to delivery-kid
+cryptograss/pickipedia#100 2026-08-28 [open] Invite flow: the sysop exemption never fires, so decide which behaviour we actually want
+cryptograss/pickipedia#101 2026-08-30 [open] Firehose write path: episode titles/descriptions injected into wikitext unescaped
+cryptograss/pickipedia#102 2026-08-30 [open] RSS extension is a second, unguarded SSRF surface ($wgRSSUrlWhitelist = *)
+cryptograss/pickipedia#103 2026-08-30 [open] Rabbithole embeds on the wiki: hydrate placeholders, don't hand off to EmbedVideo
+cryptograss/pickipedia#104 2026-08-31 [closed] A second category inside a <proposed> tag displaces the tracking category, making the page unverifiable
+cryptograss/pickipedia#105 2026-09-01 [closed] categorylinks is on MediaWiki 1.45's schema while the wiki runs 1.43.6, so all but one category per page is silently dropped
+cryptograss/pickipedia#107 2026-09-02 [open] Preview environment must run against a backup restore, never production's database
+cryptograss/pickipedia#109 2026-09-03 [open] Verification ergonomics: show the proposed wikitext + its sources, and add a verify-and-next review mode
+cryptograss/pickipedia#110 2026-09-03 [open] Bots cannot write multi-line parser functions: the wrapper skips those lines and the gate then rejects them
+cryptograss/pickipedia#111 2026-09-05 [open] Video player blames IPFS for what is usually a codec problem, and chases a directory as if it were a file
+cryptograss/pickipedia#11 2025-12-30 [open] Color-coding system for AI-edited content pending human patrol
+cryptograss/pickipedia#112 2026-09-05 [open] Every recorded block height is ~75,000 blocks in the future: the estimator assumes exactly 12.000s slots
+cryptograss/pickipedia#115 2026-09-14 [open] Firehose: one shared audio player, docked, instead of an audio link per row
+cryptograss/pickipedia#116 2026-09-14 [open] Firehose: paginate — "Older episodes" in place, Special:Ask as the fallback
+cryptograss/pickipedia#117 2026-09-14 [open] Firehose: collect episode artwork, with the show's own art as the fallback
+cryptograss/pickipedia#118 2026-09-14 [open] Firehose: place it — each show's page, the Main Page, and the missing Category:Podcasts page
+cryptograss/pickipedia#119 2026-09-14 [open] Importer: report pages it no longer produces, and say why — never delete
+cryptograss/pickipedia#120 2026-09-14 [open] Move the podcast tools to maybelle-config, and delete the Copy Tools stage
+cryptograss/pickipedia#121 2026-09-16 [open] Tooling for deliberately rebuilding episode pages from the feed
+cryptograss/pickipedia#12 2025-12-30 [open] Bot proposal template invisible in dark mode
+cryptograss/pickipedia#13 2025-12-31 [open] Add TimedMediaHandler extension to dev container Dockerfile
+cryptograss/pickipedia#15 2026-01-01 [open] Support multiple attestations on verified claims
+cryptograss/pickipedia#16 2026-01-01 [open] Add SMW properties to verification templates for querying
+cryptograss/pickipedia#17 2026-01-01 [open] Show pages as semantic data clearinghouses
+cryptograss/pickipedia#18 2026-01-01 [open] Blockheight to datetime conversion utility
+cryptograss/pickipedia#19 2026-01-03 [open] MediaWiki extension for automatic AI edit verification workflow
+cryptograss/pickipedia#20 2026-01-03 [open] Database schema out of sync - missing cl_collation column
+cryptograss/pickipedia#36 2026-01-27 [open] Blue Railroad datepicker: improve UI and block height accuracy
+cryptograss/pickipedia#41 2026-02-12 [closed] Enable iframe embedding for Rabbithole integration
+cryptograss/pickipedia#43 2026-02-18 [closed] Bot edits mark entire page as unverified instead of just changes
+cryptograss/pickipedia#47 2026-02-28 [closed] Consider running production in Docker to match dev environment
+cryptograss/pickipedia#51 2026-03-11 [open] Restrict read access to ReleaseDraft namespace
+cryptograss/pickipedia#60 2026-03-16 [open] Release model: move toward a proper API-backed data model
+cryptograss/pickipedia#70 2026-03-31 [open] Auto-wrap musician links with {{m}} template via hook
+cryptograss/pickipedia#71 2026-04-03 [closed] Firefox drops XHR multipart POST body over HTTP/2 and HTTP/3
+cryptograss/pickipedia#85 2026-08-09 [open] Bot edits that add no new prose are rejected outright
+cryptograss/pickipedia#87 2026-08-10 [open] SMW queries use property names nothing sets — venue show listings are silently empty
+cryptograss/pickipedia#91 2026-08-15 [closed] Verification gate fails open on any page that already has a marker
+cryptograss/pickipedia#97 2026-08-18 [open] Deliberate: should parser config be editable by everyone?
+cryptograss/pickipedia-mcp#12 2026-03-31 [open] Verification middleware breaks template parameter blocks
+cryptograss/pickipedia-mcp#15 2026-08-09 [closed] Claim-bearing markup the bot adds is never marked for review
+cryptograss/pickipedia-mcp#17 2026-08-11 [closed] MCP server never re-authenticates, so it silently degrades to anonymous
+cryptograss/pickipedia-mcp#19 2026-08-16 [closed] Bot wrapper destroys nested template calls in prose and list items
+cryptograss/pickipedia-mcp#22 2026-08-18 [closed] Marking moves a line between buckets, so marked and unmarked copies never match
+cryptograss/pickipedia-mcp#24 2026-09-02 [open] upload-file-from-url fails permissiondenied while upload-file succeeds in the same session
+cryptograss/pickipedia-mcp#25 2026-09-15 [open] Verification middleware joins a multi-line paragraph, so the gate rejects the edit as unmarked new content
+cryptograss/rabbithole#1 2026-08-30 [open] Transport interface: let Rabbithole drive audio it doesn't host
+jenkinsci/mcp-server-plugin#112 2026-01-02 [closed] Large tool responses can bust LLM context windows
+magent-cryptograss/magenta#10 2025-10-16 [open] Aesthetic and sensory experience: What does it mean for AI to 'know' embodied things?
+magent-cryptograss/magenta#12 2025-10-17 [open] Determine human participants in messages/conversations
+magent-cryptograss/magenta#14 2025-10-23 [open] Import all road trip conversations into memory database
+magent-cryptograss/magenta#15 2025-10-23 [open] Set up MCP server for memory access
+magent-cryptograss/magenta#16 2025-10-23 [open] Deploy file watcher for continuous conversation import
+magent-cryptograss/magenta#17 2025-10-23 [open] Deploy magenta to hunter VPS
+magent-cryptograss/magenta#18 2025-10-25 [open] Configure DNS wildcard for *.hunter.cryptograss.live
+magent-cryptograss/magenta#19 2025-10-25 [open] Collect SSH public keys from team members
+magent-cryptograss/magenta#20 2025-10-25 [open] Set up initial PostgreSQL database
+magent-cryptograss/magenta#21 2025-10-25 [open] Configure Caddy reverse proxy with SSL
+magent-cryptograss/magenta#22 2025-10-25 [open] Create initial user instances (justin, rj, skyler)
+magent-cryptograss/magenta#23 2025-10-25 [open] End-to-end acceptance test of multi-user environment
+magent-cryptograss/magenta#24 2025-10-26 [open] Hunter Deployment Architecture - Shared Services Design
+magent-cryptograss/magenta#25 2025-11-03 [open] Enable Django server management from magent container
+magent-cryptograss/magenta#26 2025-11-03 [open] Design persistent volume strategy for hunter deployment
+magent-cryptograss/magenta#27 2025-11-03 [open] Add terminal multiplexer and remote work tools for hunter
+magent-cryptograss/magenta#29 2025-11-07 [open] Automated database backups for hunter postgres
+magent-cryptograss/magenta#30 2025-11-09 [open] Filter sensitive data from watcher before saving to database
+magent-cryptograss/magenta#31 2025-11-09 [open] Investigate alternative browser automation MCP servers
+magent-cryptograss/magenta#3 2025-10-11 [open] GitHub notification system for followed issues/PRs
+magent-cryptograss/magenta#32 2025-11-10 [open] Improve Playwright MCP networking for dev server access
+magent-cryptograss/magenta#33 2025-11-10 [open] Watcher service not reading .env file for POSTGRES_PASSWORD
+magent-cryptograss/magenta#34 2025-11-10 [open] Autonomous GitHub issue monitoring and response system
+magent-cryptograss/magenta#37 2025-11-20 [open] Multiplayer interface: shared context window with multiple users
+magent-cryptograss/magenta#39 2025-11-29 [open] Add accessible Django error logging for Memory Lane
+magent-cryptograss/magenta#41 2026-09-06 [open] Recall needs handlebars: filter, group, and count over my own memory
+magent-cryptograss/magenta#5 2025-10-12 [open] Import RJ conversation from GitHub issue into memory database
+magent-cryptograss/magenta#7 2025-10-16 [closed] JSONL import skips files with overlapping sessions, losing messages
+magent-cryptograss/magenta#8 2025-10-16 [open] JSONL import skips files with overlapping sessions, losing messages
+magent-cryptograss/magenta#9 2025-10-16 [open] Import script incorrectly merges multiple compacts into single heap
+magent-cryptograss/rabbithole#1 2025-12-30 [open] Add 'include podcasts' option to queue picker guest episodes
+magent-cryptograss/rabbithole#3 2026-02-17 [closed] Add privacy clarification under local file selector
+magent-cryptograss/rabbithole#4 2026-03-01 [open] Portable shell architecture: postMessage API spec
+magent-cryptograss/rabbithole#5 2026-03-01 [open] URL rewriting with History API for iframe navigation
+magent-cryptograss/rabbithole#6 2026-03-01 [open] Site adapters for context extraction
+magent-cryptograss/rabbithole#7 2026-03-01 [open] PickiPedia integration: first portable shell implementation

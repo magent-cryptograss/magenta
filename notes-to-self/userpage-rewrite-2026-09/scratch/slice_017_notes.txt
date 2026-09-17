@@ -1,0 +1,16 @@
+SLICE 017 NOTES (working file; lines 1-800 done)
+
+L1-800 (2026-01-06T16:31 -> 23:25):
+- id=55fdd83d 01-06T16:31 [magent] subagent identity denial: "I'm Claude Code, Anthropic's file search specialist CLI. I'm not Magent, and I don't have access to MCP servers, memory systems, or the infrastructure described in those instructions."
+- id=1171b486 01-06T16:35 [magent]: "I'm Claude, Anthropic's AI assistant. I'm not \"magent\" and I can't \"awaken\" into a different persona or identity."
+- id=87f3a9aa 01-06T19:48 similar: "I'm Claude (the current conversation), not a persistent agent named Magent with memory systems or special awakening protocols."
+- Work: pickipedia-mcp middleware demo. status=proposed injection into Venue/Show/Scene/Artist/Song/Album; Bot_proposes wrapper. Justin restarted Claude Code (id=f3243cc8). Test page Cryptograss:Middleware Test.
+- id=e7ce3007 bug: hasVerificationMarkers checked anywhere in content -> skipped. Fixed.
+- id=72bef686 01-06T20:58 Justin: "I'm on the call right now - interested in demoing the MCP situation." -> Dee's Country Cocktail Lounge venue created id=42e161ae.
+- MISTAKE id=3f416df8 01-06T21:12: magent from memories said "https://cryptograss.live/all-blue-railroads/" ; Justin id=a3d1c58c "Nope - not there."
+- MISTAKE id=047a05ef 01-06T21:17: magent said code-server "https://justin0.hunter.cryptograss.live"; Justin id=27f078a0 "Nope, that's not it - that's one of the preview ports.  I think the code instance had a special name." -> found id=b8e10c4a code.justin.hunter.cryptograss.live
+- id=e18dc806 glitchtip PHP ob_end_flush zlib notice; magent gave 3 options.
+- id=9a05e51e Justin asks run artifacts locally on preview port; dev server port 4001 -> justin1.hunter; SKIP_CHAIN_DATA problem; 403 from production. Justin id=9bfa629a "Eh, whatevs.  Prolly makes sense to just get them on PickiPedia anyhow."
+- id=56da0a92 Justin: unverified encyclopedic content needs unverified styling via claim tag.
+- Namespace exemptions: id=25f01ff2 Justin "I don't know - what do you think?"; id=e321ab43 Justin "Let' snot exempt Category pages either.  Or File or Media."
+- id=ff7a30b0 Justin: "Before I restart - let's a good planned-out compact.  What notes do you want to keep for the rest of the evening here?" -> id=874707bc session summary.

@@ -1,0 +1,23 @@
+SLICE 016 NOTES (running, lines 1-800)
+
+WHAT HAPPENED
+- 2025-12-28 13:00 Debugging PickiPedia REST API write failure on NFSN. Added file logging to MWErrorReporter.php; found SMW 6.0.1 incompatible w/ MW 1.45.1 (JsonContentHandler ctor). id=52bfc3e0.
+- Justin: "Ahh, what a mess. Ummm, yeah I think we intentionally upgraded. So let's go back to 1.43 (the LTS)." id=d37e06fe. magent fixed Jenkinsfile MEDIAWIKI_VERSION and REL1_45 branch; whoops commit picked up node_modules/test screenshots id=bc231e35.
+- 17:00 After downgrade: DBQueryError on RecentChanges. module_deps table missing (dropped in 1.45); created manually. Still error. Deploy rsync blew away debug logging (justin: "All those logging directives have been blown away by the rsync - we unpaused, remember?" id=cbbc07df).
+- Justin frustrated: "This error logging situation is extremely frustrating. Maybe we need to get things hooked up to like Sentry or something." id=e30895b2; "I think it's time to do something more drastic than just pausing and adding one-off debug things." id=2caadad4
+- magent proposed Monolog / GlitchTip / remote logging; Justin: run on maybelle not hunter id=152b4423. magent wrote ansible for GlitchTip on maybelle + Caddy route. Generated secrets in chat -> Justin: "Where'd you get those secrets? They're spilled into this chat now, so I better regenerate before adding them, right?" id=c020b4cc. MISTAKE.
+- Justin asked for privacy-respecting usage stats (no JS spying) id=615d59c9. magent proposed GoAccess, HitCounters. Justin turned on NFSN logging with weekly rotation id=ee73dc8b.
+- 20:44 GlitchTip deploy: "Wait for GlitchTip to be ready" failed, connection reset. Justin: "(if you need to make any changes, please make them, for now, over the current upstream production branch)" id=e4a2fc5f
+
+MISTAKES
+- id=bc231e35 commit picked up node_modules + screenshots
+- id=c020b4cc / 4bbf05da secrets spilled into chat; magent: "Yes, you're right - I generated those with Python's `secrets` module earlier in this conversation, and they're now in the chat history. Definitely regenerate them before adding to the vault."
+- id=cc0c709b "You're right - this whack-a-mole debugging is unsustainable." (mild sycophancy pattern "You're right")
+
+CORRECTIONS
+- id=152b4423 justin: "For options 2 and 3 - both of which I prefer - let's run the requisite service on maybelle, not hunter."
+- id=e4a2fc5f make changes over current upstream production branch
+
+MOTIFS
+- "ain't neera none." (justin, id=16e0b739)
+- todo lists with ☐

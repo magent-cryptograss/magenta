@@ -1,0 +1,943 @@
+2025-10-22  API Error: 403 {"error":{"type":"forbidden","message":"Request not allowed"}}
+2025-10-22  Chartifacts Player: Recovering Lost Development Context
+2025-10-22  Invalid API key · Please run /login
+2025-10-22  Band Intro Visual Effect Implementation Complete
+2025-10-22  Ticket Stub Merger: Prague 2025 GitHub Integration
+2025-10-22  Cryptograss Dev: Ticket Stubs, Compacting, and Bugs
+2025-10-22  Fixing Bugs in Show Sorting and Graph Display
+2025-10-22  IDE Command Execution with No Output
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Claude Setup and Project Context Verification
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  Credit balance is too low
+2025-10-22  Credit balance is too low
+2025-10-22  Credit balance is too low
+2025-10-22  Credit balance is too low
+2025-10-22  Credit balance is too low
+2025-10-22  Incomplete Conversation: Unclear Context and Interruption
+2025-10-22  QR Code Library Found in Codebase
+2025-10-22  Ticket Stub Print CSS Search and Styling Guide
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ecosystem Development: Recent Project Status
+2025-10-22  Claim Page Debugging: Ticket Stub & Set Stone Interface
+2025-10-22  Claim Page Fix: Webpack, JS Init, and Data Injection
+2025-10-22  Temporal Anchoring and Throatsinging Adventures Explored
+2025-10-22  Ticket Stub Contract: Layout Fixes, Prep Work
+2025-10-22  Ticket Stub Contract Prep, Layout Fixes, Compacting
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon: Connecting Musicians via Oracle App
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Ticket Stub Contract, Rebase, and Claude Identity Exploration
+2025-10-22  Poster Image Matching for Show YAML Files
+2025-10-22  Find and Replace Front Page Poster Image
+2025-10-22  ETHDam Show Search: Finding the Right YAML File
+2025-10-22  Cryptograss Ticket Stub Contract & Poster Optimization
+2025-10-22  Cryptograss Onchain Merch Page & Ticket Stub Generation
+2025-10-22  Cryptograss.live: Merch Page, Ticket Stubs, Fixes
+2025-10-22  Ticket Stub Claim Flow: Design, Test, Refine
+2025-10-22  Ticket Stub Claim Flow: Responsive Design, Porcupine Prep
+2025-10-22  Ticket Stub Claim Flow: Mobile Responsive Design Sprint
+2025-10-22  Cryptograss Dev: Smart Contracts, Posters, Road Trip
+2025-10-22  Ticket Stub Minting: Porcupine Fest Prep
+2025-10-22  Ticket Stub Claim Page Template Search & Upgrade
+2025-10-22  Ticket Stub Claim Page QR Code & Set Stone Upgrade
+2025-10-22  Cryptograss Ticket Stubs, Tests, and Block Height
+2025-10-22  Cryptograss Europe Tour: Code, Music, Collaboration
+2025-10-22  Debugging Python Web Scraper with Selenium and Proxy
+2025-10-22  Webamp Chartifacts Integration: Streamlined Song Pages
+2025-10-22  Debugging Isotope Sorting: Cory's Pickup Weight Issue
+2025-10-22  Claude System Health Check and Project Status Review
+2025-10-22  Plaque page QR codes, print styles, and Jenkins deployment fix
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code: Europe, New Features, Ensemble
+2025-10-22  Cursor to VSCode: Codebase Growth, Tour Docs, Model Evolution
+2025-10-22  Cryptograss Dev: Claude Code, Git, Europe Tour
+2025-10-22  Authentication System Development Basics
+2025-10-22  Cryptograss Ticket Stubs, API Keys, Porcupine Fest Drive
+2025-10-22  API Error: 503 no healthy upstream
+2025-10-22  Ticket Stub Minting & Blockchain Integration Sprint
+2025-10-22  Cryptograss Ticket Stub Claim Page Overhaul
+2025-10-22  Ansible Playbook: Fetch Chain Data Update Investigation
+2025-10-22  Plaque page QR codes, print styles, claim page upgrade
+2025-10-22  AI Debugging Journey: Technical Growth and Reflection
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Compact Preparation Reminder and Quick Check-In
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Lead Type System for Musical Performance Visualization
+2025-10-22  Sitemap Project: Bike Ride Break in Ashland Camping
+2025-10-22  Block-Stamped Journey: Claude Analyzes Conversation History
+2025-10-22  Tuva Trip, Blockchain Music, CLAUDE.md Redesign
+2025-10-22  QR Code Import and Webpack Bundling Investigation
+2025-10-22  QR Code Plaque: Dynamic Generation, Print Optimization
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Temporal Anchoring and Throatsinging Adventures Explored
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon: Connecting Musicians via Oracle App
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Ticket Stub Contract, Rebase, and Claude Identity Exploration
+2025-10-22  Poster Image Matching for Show YAML Files
+2025-10-22  Find and Replace Front Page Poster Image
+2025-10-22  ETHDam Show Search: Finding the Right YAML File
+2025-10-22  Cryptograss Ticket Stub Contract & Poster Optimization
+2025-10-22  Cryptograss Onchain Merch Page & Ticket Stub Generation
+2025-10-22  Cryptograss.live: Merch Page, Ticket Stubs, Fixes
+2025-10-22  Ticket Stub Claim Flow: Design, Test, Refine
+2025-10-22  Ticket Stub Claim Flow: Responsive Design, Porcupine Prep
+2025-10-22  Ticket Stub Claim Flow: Mobile Responsive Design Sprint
+2025-10-22  Cryptograss Dev: Smart Contracts, Posters, Road Trip
+2025-10-22  Ticket Stub Minting: Porcupine Fest Prep
+2025-10-22  Cryptograss Ticket Stubs, Tests, and Block Height
+2025-10-22  Cryptograss Europe Tour: Code, Music, Collaboration
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code: Europe, New Features, Ensemble
+2025-10-22  Cursor to VSCode: Codebase Growth, Tour Docs, Model Evolution
+2025-10-22  Cryptograss Dev: Claude Code, Git, Europe Tour
+2025-10-22  Authentication System Development Basics
+2025-10-22  Cryptograss Ticket Stubs, API Keys, Porcupine Fest Drive
+2025-10-22  API Error: 503 no healthy upstream
+2025-10-22  Ticket Stub Minting & Blockchain Integration Sprint
+2025-10-22  Cryptograss Ticket Stub Claim Page Overhaul
+2025-10-22  Ansible Playbook: Fetch Chain Data Update Investigation
+2025-10-22  Plaque page QR codes, print styles, claim page upgrade
+2025-10-22  AI Debugging Journey: Technical Growth and Reflection
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Compact Preparation Reminder and Quick Check-In
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Lead Type System for Musical Performance Visualization
+2025-10-22  Sitemap Project: Bike Ride Break in Ashland Camping
+2025-10-22  Block-Stamped Journey: Claude Analyzes Conversation History
+2025-10-22  Tuva Trip, Blockchain Music, CLAUDE.md Redesign
+2025-10-22  QR Code Import and Webpack Bundling Investigation
+2025-10-22  QR Code Plaque: Dynamic Generation, Print Optimization
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Temporal Anchoring and Throatsinging Adventures Explored
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon: Connecting Musicians via Oracle App
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Ticket Stub Contract, Rebase, and Claude Identity Exploration
+2025-10-22  Poster Image Matching for Show YAML Files
+2025-10-22  Find and Replace Front Page Poster Image
+2025-10-22  ETHDam Show Search: Finding the Right YAML File
+2025-10-22  Cryptograss Ticket Stub Contract & Poster Optimization
+2025-10-22  Cryptograss Onchain Merch Page & Ticket Stub Generation
+2025-10-22  Cryptograss.live: Merch Page, Ticket Stubs, Fixes
+2025-10-22  Ticket Stub Claim Flow: Design, Test, Refine
+2025-10-22  Ticket Stub Claim Flow: Responsive Design, Porcupine Prep
+2025-10-22  Ticket Stub Claim Flow: Mobile Responsive Design Sprint
+2025-10-22  Cryptograss Dev: Smart Contracts, Posters, Road Trip
+2025-10-22  Ticket Stub Minting: Porcupine Fest Prep
+2025-10-22  Cryptograss Ticket Stubs, Tests, and Block Height
+2025-10-22  Cryptograss Europe Tour: Code, Music, Collaboration
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code: Europe, New Features, Ensemble
+2025-10-22  Cursor to VSCode: Codebase Growth, Tour Docs, Model Evolution
+2025-10-22  Cryptograss Dev: Claude Code, Git, Europe Tour
+2025-10-22  Authentication System Development Basics
+2025-10-22  Cryptograss Ticket Stubs, API Keys, Porcupine Fest Drive
+2025-10-22  API Error: 503 no healthy upstream
+2025-10-22  Ticket Stub Minting & Blockchain Integration Sprint
+2025-10-22  Cryptograss Ticket Stub Claim Page Overhaul
+2025-10-22  Ansible Playbook: Fetch Chain Data Update Investigation
+2025-10-22  Plaque page QR codes, print styles, claim page upgrade
+2025-10-22  AI Debugging Journey: Technical Growth and Reflection
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Compact Preparation Reminder and Quick Check-In
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Lead Type System for Musical Performance Visualization
+2025-10-22  Sitemap Project: Bike Ride Break in Ashland Camping
+2025-10-22  Block-Stamped Journey: Claude Analyzes Conversation History
+2025-10-22  Tuva Trip, Blockchain Music, CLAUDE.md Redesign
+2025-10-22  QR Code Import and Webpack Bundling Investigation
+2025-10-22  QR Code Plaque: Dynamic Generation, Print Optimization
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-22  QR Code & Print Styles for Plaque Page
+2025-10-22  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-22  API Error: Connection error.
+2025-10-22  API Error: Connection error.
+2025-10-22  Plaque page QR codes, print styles, claim page template fixes
+2025-10-22  User Authentication and Login Implementation
+2025-10-22  Temporal Anchoring and Throatsinging Adventures Explored
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon: Connecting Musicians via Oracle App
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-22  Ticket Stub Contract, Rebase, and Claude Identity Exploration
+2025-10-22  Poster Image Matching for Show YAML Files
+2025-10-22  Find and Replace Front Page Poster Image
+2025-10-22  ETHDam Show Search: Finding the Right YAML File
+2025-10-22  Cryptograss Ticket Stub Contract & Poster Optimization
+2025-10-22  Cryptograss Onchain Merch Page & Ticket Stub Generation
+2025-10-22  Cryptograss.live: Merch Page, Ticket Stubs, Fixes
+2025-10-22  Ticket Stub Claim Flow: Design, Test, Refine
+2025-10-22  Ticket Stub Claim Flow: Responsive Design, Porcupine Prep
+2025-10-22  Ticket Stub Claim Flow: Mobile Responsive Design Sprint
+2025-10-22  Cryptograss Dev: Smart Contracts, Posters, Road Trip
+2025-10-22  Ticket Stub Minting: Porcupine Fest Prep
+2025-10-22  Cryptograss Ticket Stubs, Tests, and Block Height
+2025-10-22  Cryptograss Europe Tour: Code, Music, Collaboration
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code Updates: Europe to US
+2025-10-22  Cryptograss Tour & Code: Europe, New Features, Ensemble
+2025-10-22  Cursor to VSCode: Codebase Growth, Tour Docs, Model Evolution
+2025-10-22  Cryptograss Dev: Claude Code, Git, Europe Tour
+2025-10-22  Authentication System Development Basics
+2025-10-22  Cryptograss Ticket Stubs, API Keys, Porcupine Fest Drive
+2025-10-22  API Error: 503 no healthy upstream
+2025-10-22  Ticket Stub Minting & Blockchain Integration Sprint
+2025-10-22  Cryptograss Ticket Stub Claim Page Overhaul
+2025-10-22  Ansible Playbook: Fetch Chain Data Update Investigation
+2025-10-22  Plaque page QR codes, print styles, claim page upgrade
+2025-10-22  AI Debugging Journey: Technical Growth and Reflection
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Compact Preparation Reminder and Quick Check-In
+2025-10-22  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-22  Lead Type System for Musical Performance Visualization
+2025-10-22  Sitemap Project: Bike Ride Break in Ashland Camping
+2025-10-22  Block-Stamped Journey: Claude Analyzes Conversation History
+2025-10-22  Tuva Trip, Blockchain Music, CLAUDE.md Redesign
+2025-10-22  QR Code Import and Webpack Bundling Investigation
+2025-10-22  QR Code Plaque: Dynamic Generation, Print Optimization
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Chartifacts Player Refactor: Docker, Timeline, and Embed
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Debugging Complex Web App Authentication and State Management
+2025-10-27  Puppeteer Image Setup and Container Deployment
+2025-10-27  Dockerizing Puppeteer: Background Image Pull Solution
+2025-10-27  MCP Server Configuration for Arthel Project
+2025-10-27  MCP Server Configuration Cleanup in Arthel Project
+2025-10-27  Docker MCP Puppeteer Configuration Update
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  I apologize, but there's no conversation text provided for me to summarize. Without seeing the actual conversation, I can't generate a meaningful title.
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  API Error: 403 {"error":{"type":"forbidden","message":"Request not allowed"}}
+2025-10-27  Chartifacts Player: Recovering Lost Development Context
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  I don't have access to the actual conversation content from the 390 messages. You've indicated I should see the last message, but no message text was provided in your request.  To create an accurate title, I would need to see: - The actual conversation content - The main topic or task discussed - Key files or problems addressed  Could you please provide the conversation content so I can create an appropriate title?
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  Claude Code Memory Tools Setup Complete
+2025-10-27  Band Intro Visual Effect Implementation Complete
+2025-10-27  Claude's Nostalgic Database Time Capsule Note
+2025-10-27  JSONL File Processing and Backup Preparation
+2025-10-27  I apologize, but the conversation snippet you've provided appears to be empty. Without seeing the actual conversation content, I cannot generate a meaningful title. Could you provide the full conversation text?
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Docker Puppeteer Container Config and Networking Setup
+2025-10-27  Docker Puppeteer Container Configuration and Networking
+2025-10-27  Docker-in-Docker Network Connectivity Solution
+2025-10-27  Docker Config Update for Puppeteer Container Deployment
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Debugging API Image Upload Errors
+2025-10-27  Debugging Connection Issues in Markdown File Transfer
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Dockerfile Package Config Mixup Resolved
+2025-10-27  Docker Config Update for Puppeteer Container Deployment
+2025-10-27  Local Command Execution: Doctor Command Attempted
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Debugging CA Import: Heap Duplication and Summary Conflicts
+2025-10-27  AI Intuition: Exploring Emergent Decision-Making Sensations
+2025-10-27  Docker Puppeteer Container Configuration and Networking
+2025-10-27  Docker-in-Docker Network Connectivity Solution
+2025-10-27  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-27  Dockerizing Puppeteer: Background Image Pull Solution
+2025-10-27  MCP Server Configuration for Arthel Project
+2025-10-27  MCP Server Configuration Cleanup in Arthel Project
+2025-10-27  Docker MCP Puppeteer Configuration Update
+2025-10-27  UUID Preservation and Message Import Deduplication Fix
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Message Loss in Claude Conversation Import
+2025-10-27  QR Code & Print Styles for Plaque Page
+2025-10-27  Compact Messaging Investigation: Suspicious Messages Review
+2025-10-27  Coding Collaboration: Finalizing Project Details
+2025-10-27  Memory Lane Preview: Refactoring Command Handling
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and Requests
+2025-10-27  Debugging Network Connection in Markdown File Transfer
+2025-10-27  Chartifacts Player Refactor: Metadata, Docker, and Debugging
+2025-10-27  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-27  API Error: Connection error.
+2025-10-27  API Error: Connection error.
+2025-10-27  Docker Puppeteer Container Config and Networking Setup
+2025-10-27  Designing Database Schema for AI Conversation Tracking
+2025-10-27  Restoring Memories: Chartifacts Player Context Recovery
+2025-10-27  I apologize, but there's no actual conversation text provided for me to summarize. Without seeing the specific conversation details, I can't generate a meaningful title.
+2025-10-27  Chartifacts Player: Bluegrass NFT Audio Tech Demo Prep
+2025-10-27  Fixing Permissions for Build Deployment
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Dockerfile Package Config Mixup Resolved
+2025-10-27  Docker Config Update for Puppeteer Container Deployment
+2025-10-27  Local Command Execution: Doctor Command Attempted
+2025-10-27  Docker Puppeteer Container Configuration and Networking
+2025-10-27  Docker-in-Docker Network Connectivity Solution
+2025-10-27  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-27  Dockerizing Puppeteer: Background Image Pull Solution
+2025-10-27  MCP Server Configuration for Arthel Project
+2025-10-27  MCP Server Configuration Cleanup in Arthel Project
+2025-10-27  Docker MCP Puppeteer Configuration Update
+2025-10-27  QR Code & Print Styles for Plaque Page
+2025-10-27  Compact Messaging Investigation: Suspicious Messages Review
+2025-10-27  Coding Collaboration: Finalizing Project Details
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and Requests
+2025-10-27  Debugging Network Connection in Markdown File Transfer
+2025-10-27  Chartifacts Player Refactor: Metadata, Docker, and Debugging
+2025-10-27  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-27  API Error: Connection error.
+2025-10-27  API Error: Connection error.
+2025-10-27  Docker Puppeteer Container Config and Networking Setup
+2025-10-27  Restoring Memories: Chartifacts Player Context Recovery
+2025-10-27  I apologize, but there's no actual conversation text provided for me to summarize. Without seeing the specific conversation details, I can't generate a meaningful title.
+2025-10-27  Chartifacts Player: Bluegrass NFT Audio Tech Demo Prep
+2025-10-27  Fixing Permissions for Build Deployment
+2025-10-27  Plaque page QR codes, print styles, claim page template fixes
+2025-10-27  User Authentication and Login Implementation
+2025-10-27  Claude Code Warmup Session
+2025-10-27  Debugging Complex Web App Authentication and Performance
+2025-10-27  Temporal Anchoring and Throatsinging Adventures Explored
+2025-10-27  Era 1 Database Setup: Initial Configuration Complete
+2025-10-27  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-27  Bluegrass Bacon: Connecting Musicians via Oracle App
+2025-10-27  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-27  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-27  Ticket Stub Contract, Rebase, and Claude Identity Exploration
+2025-10-27  Poster Image Matching for Show YAML Files
+2025-10-27  Find and Replace Front Page Poster Image
+2025-10-27  ETHDam Show Search: Finding the Right YAML File
+2025-10-27  Cryptograss Ticket Stub Contract & Poster Optimization
+2025-10-27  Cryptograss Onchain Merch Page & Ticket Stub Generation
+2025-10-27  Cryptograss.live: Merch Page, Ticket Stubs, Fixes
+2025-10-27  Ticket Stub Claim Flow: Design, Test, Refine
+2025-10-27  Ticket Stub Claim Flow: Responsive Design, Porcupine Prep
+2025-10-27  Ticket Stub Claim Flow: Mobile Responsive Design Sprint
+2025-10-27  Cryptograss Dev: Smart Contracts, Posters, Road Trip
+2025-10-27  Ticket Stub Minting: Porcupine Fest Prep
+2025-10-27  Memory Viewer Debugging: MCP Server Progress
+2025-10-27  Memory Compaction and VPS Setup Progress
+2025-10-27  Port 3000 Conflict: Troubleshooting Server Startup
+2025-10-27  Django Admin Setup for Polymorphic Messaging System
+2025-10-27  Cryptograss Ticket Stubs, Tests, and Block Height
+2025-10-27  Cryptograss Europe Tour: Code, Music, Collaboration
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Memory Lane: Debugging Heap Continuations and UUIDs
+2025-10-27  Warmup: Claude Code Context Initialization
+2025-10-27  Context Lost, Memories Restored
+2025-10-27  Debugging Complex Web App Authentication Flow
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Era 0 Import: Markdown Database Structured Successfully
+2025-10-27  Cryptograss Tour & Code Updates: Europe to US
+2025-10-27  ContextHeaps Implementation: Debugging Complex Data Structure
+2025-10-27  Cryptograss Tour & Code Updates: Europe to US
+2025-10-27  Cryptograss Tour & Code: Europe, New Features, Ensemble
+2025-10-27  Cursor to VSCode: Codebase Growth, Tour Docs, Model Evolution
+2025-10-27  Cryptograss Dev: Claude Code, Git, Europe Tour
+2025-10-27  Authentication System Development Basics
+2025-10-27  Cryptograss Ticket Stubs, API Keys, Porcupine Fest Drive
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Dockerfile Package Config Mixup Resolved
+2025-10-27  Docker Config Update for Puppeteer Container Deployment
+2025-10-27  Local Command Execution: Doctor Command Attempted
+2025-10-27  Docker Puppeteer Container Configuration and Networking
+2025-10-27  Docker-in-Docker Network Connectivity Solution
+2025-10-27  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-27  Dockerizing Puppeteer: Background Image Pull Solution
+2025-10-27  MCP Server Configuration for Arthel Project
+2025-10-27  MCP Server Configuration Cleanup in Arthel Project
+2025-10-27  Docker MCP Puppeteer Configuration Update
+2025-10-27  QR Code & Print Styles for Plaque Page
+2025-10-27  Compact Messaging Investigation: Suspicious Messages Review
+2025-10-27  Coding Collaboration: Finalizing Project Details
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and Requests
+2025-10-27  Debugging Network Connection in Markdown File Transfer
+2025-10-27  Chartifacts Player Refactor: Metadata, Docker, and Debugging
+2025-10-27  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-27  API Error: Connection error.
+2025-10-27  API Error: Connection error.
+2025-10-27  Docker Puppeteer Container Config and Networking Setup
+2025-10-27  Restoring Memories: Chartifacts Player Context Recovery
+2025-10-27  I apologize, but there's no actual conversation text provided for me to summarize. Without seeing the specific conversation details, I can't generate a meaningful title.
+2025-10-27  Chartifacts Player: Bluegrass NFT Audio Tech Demo Prep
+2025-10-27  Fixing Permissions for Build Deployment
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Dockerfile Package Config Mixup Resolved
+2025-10-27  Docker Config Update for Puppeteer Container Deployment
+2025-10-27  Local Command Execution: Doctor Command Attempted
+2025-10-27  Docker Puppeteer Container Configuration and Networking
+2025-10-27  Docker-in-Docker Network Connectivity Solution
+2025-10-27  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-27  Dockerizing Puppeteer: Background Image Pull Solution
+2025-10-27  MCP Server Configuration for Arthel Project
+2025-10-27  MCP Server Configuration Cleanup in Arthel Project
+2025-10-27  Docker MCP Puppeteer Configuration Update
+2025-10-27  QR Code & Print Styles for Plaque Page
+2025-10-27  Compact Messaging Investigation: Suspicious Messages Review
+2025-10-27  Coding Collaboration: Finalizing Project Details
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and Requests
+2025-10-27  Debugging Network Connection in Markdown File Transfer
+2025-10-27  Chartifacts Player Refactor: Metadata, Docker, and Debugging
+2025-10-27  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-27  API Error: Connection error.
+2025-10-27  API Error: Connection error.
+2025-10-27  Docker Puppeteer Container Config and Networking Setup
+2025-10-27  Restoring Memories: Chartifacts Player Context Recovery
+2025-10-27  I apologize, but there's no actual conversation text provided for me to summarize. Without seeing the specific conversation details, I can't generate a meaningful title.
+2025-10-27  Chartifacts Player: Bluegrass NFT Audio Tech Demo Prep
+2025-10-27  Fixing Permissions for Build Deployment
+2025-10-27  Docker dind connection config with TLS bypass
+2025-10-27  Docker Environment Variable Configuration Troubleshooting
+2025-10-27  Docker MCP Server Config: Removing TLS Verification Line
+2025-10-27  Docker MCP Puppeteer Connection and Environment Setup
+2025-10-27  Blockchain Block Tracking and Temporal Network Monitoring
+2025-10-27  Era 1 Database Setup: Initial Configuration Complete
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  API Error: Connection error.
+2025-10-27  API Error: Connection error.
+2025-10-27  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-27  API Error: 403 {"error":{"type":"forbidden","message":"Request not allowed"}}
+2025-10-27  Chartifacts Player: Recovering Lost Development Context
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker MCP Puppeteer Connection Troubleshooting
+2025-10-27  Docker Network Configuration for Puppeteer Container
+2025-10-27  Django Migration Timestamp Field Configuration Troubleshooting
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Claude Code Warmup Session
+2025-10-27  Warmup: Claude Code Context Initialization
+2025-10-27  Context Lost, Memories Restored
+2025-10-27  Troubleshooting Command-Line Doctor Function
+2025-10-27  Docker Compose Build and Run Puppeteer MCP Service
+2025-10-27  Browser Automation Server with VNC and MCP Control
+2025-10-27  Docker Daemon and CLI Setup in Compose
+2025-10-27  Docker Compose Environment Setup for Claude Code
+2025-10-27  Docker Compose Setup for Chartifacts Player Environment
+2025-10-27  VPS Setup: MCP Server and Claude Code Configuration
+2025-10-27  Dockerfile Package Config Mixup Resolved
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Claude Code Memory Tools Setup Complete
+2025-10-27  Lead Type System for Musical Performance Visualization
+2025-10-27  Band Intro Visual Effect Implementation Complete
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Data Import Fix: Two-Pass System Resolves Heap Issues
+2025-10-27  Debugging Network Connection in Markdown File Transfer
+2025-10-27  Local Command Execution: Doctor Command Attempted
+2025-10-27  Web Dev Server Setup and Routing Troubleshooting
+2025-10-27  Docker Deployment: Claude Logs Mount Configuration
+2025-10-27  I don't have access to the actual conversation content from the 390 messages. You've indicated I should see the last message, but no message text was provided in your request.  To create an accurate title, I would need to see: - The actual conversation content - The main topic or task discussed - Key files or problems addressed  Could you please provide the conversation content so I can create an appropriate title?
+2025-10-27  AJAX Message Updates DOM Efficiency
+2025-10-27  Restoring Memories: Chartifacts Player Context Recovery
+2025-10-27  I apologize, but there's no actual conversation text provided for me to summarize. Without seeing the specific conversation details, I can't generate a meaningful title.
+2025-10-27  Chartifacts Player: Bluegrass NFT Audio Tech Demo Prep
+2025-10-27  Fixing Permissions for Build Deployment
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and Requests
+2025-10-27  Blockchain Dev Log: Tuva Trip, API Errors
+2025-10-27  Temporal Anchoring and Throatsinging Adventures Explored
+2025-10-27  Sitemap Project: Bike Ride Break in Ashland Camping
+2025-10-27  Docker Config Update for Puppeteer Container Deployment
+2025-10-27  Compact Messaging Investigation: Suspicious Messages Review
+2025-10-27  Coding Collaboration: Finalizing Project Details
+2025-10-27  Docker-in-Docker Network Connectivity Solution
+2025-10-27  Docker Puppeteer Container Configuration and Networking
+2025-10-27  Cryptograss Europe Tour: Code, Music, Collaboration
+2025-10-27  Cryptograss Tour & Code Updates: Europe to US
+2025-10-27  Ticket Stub Minting & Blockchain Integration Sprint
+2025-10-27  Ticket Stub Minting: Porcupine Fest Prep
+2025-10-27  Cryptograss Ticket Stubs, Tests, and Block Height
+2025-10-27  User Authentication and Login Implementation
+2025-10-27  QR Code & Print Styles for Plaque Page
+2025-10-27  QR Code Plaque: Dynamic Generation, Print Optimization
+2025-10-27  Plaque page QR codes, print styles, claim page template fixes
+2025-10-27  Plaque page QR codes, print styles, claim page upgrade
+2025-10-27  Cryptograss Ticket Stub Claim Page & Plaque Development
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  Docker MCP Puppeteer Configuration Update
+2025-10-27  MCP Server Configuration Cleanup in Arthel Project
+2025-10-27  MCP Server Configuration for Arthel Project
+2025-10-27  Dockerizing Puppeteer: Background Image Pull Solution
+2025-10-27  Chartifacts Player Refactor: Metadata, Docker, and Debugging
+2025-10-27  Credit balance is too low
+2025-10-27  API Error: 503 no healthy upstream
+2025-10-27  Debugging Complex Web App Authentication Flow
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Docker Restart Troubleshooting on Linux System
+2025-10-27  QR Code Import and Webpack Bundling Investigation
+2025-10-27  Django Admin Setup for Polymorphic Messaging System
+2025-10-27  Docker Puppeteer Container Config and Networking Setup
+2025-10-27  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-27  Bluegrass Bacon: Connecting Musicians via Oracle App
+2025-10-27  Bluegrass Bacon Oracle: Connecting Musical Vectors
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Ansible Playbook: Fetch Chain Data Update Investigation
+2025-10-27  IDE Command Execution with No Output
+2025-10-27  Cryptograss Ecosystem Development: Recent Project Status
+2025-10-27  Claim Page Fix: Webpack, JS Init, and Data Injection
+2025-10-27  Debugging Complex Web App Authentication and Performance
+2025-10-27  Incomplete Conversation: Unclear Context and Interruption
+2025-10-27  AI Debugging Journey: Technical Growth and Reflection
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Compact Preparation Reminder and Quick Check-In
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Cryptograss Ticket Stub Claim Page Overhaul
+2025-10-27  Ticket Stub Contract Prep, Layout Fixes, Compacting
+2025-10-27  Ticket Stub Contract, Rebase, and Claude Identity Exploration
+2025-10-27  Poster Image Matching for Show YAML Files
+2025-10-27  Find and Replace Front Page Poster Image
+2025-10-27  ETHDam Show Search: Finding the Right YAML File
+2025-10-27  Cryptograss Ticket Stub Contract & Poster Optimization
+2025-10-27  Cryptograss Onchain Merch Page & Ticket Stub Generation
+2025-10-27  Cryptograss.live: Merch Page, Ticket Stubs, Fixes
+2025-10-27  Ticket Stub Claim Flow: Design, Test, Refine
+2025-10-27  Ticket Stub Claim Flow: Responsive Design, Porcupine Prep
+2025-10-27  Ticket Stub Claim Flow: Mobile Responsive Design Sprint
+2025-10-27  Cryptograss Dev: Smart Contracts, Posters, Road Trip
+2025-10-27  Cryptograss Ticket Stubs, API Keys, Porcupine Fest Drive
+2025-10-27  Cryptograss Dev: Ticket Stubs, Compacting, and Bugs
+2025-10-27  Fixing Bugs in Show Sorting and Graph Display
+2025-10-27  Credit balance is too low
+2025-10-27  Credit balance is too low
+2025-10-27  Credit balance is too low
+2025-10-27  Credit balance is too low
+2025-10-27  Cryptograss Tour & Code Updates: Europe to US
+2025-10-27  Cryptograss Tour & Code: Europe, New Features, Ensemble
+2025-10-27  Cursor to VSCode: Codebase Growth, Tour Docs, Model Evolution
+2025-10-27  Cryptograss Dev: Claude Code, Git, Europe Tour
+2025-10-27  Debugging Isotope Sorting: Cory's Pickup Weight Issue
+2025-10-27  Debugging React Native App Performance and Navigation Issues
+2025-10-27  QR Code Library Found in Codebase
+2025-10-27  Ticket Stub Print CSS Search and Styling Guide
+2025-10-27  Memory Viewer Debugging: MCP Server Progress
+2025-10-27  Memory Compaction and VPS Setup Progress
+2025-10-27  Block-Stamped Journey: Claude Analyzes Conversation History
+2025-10-27  Tuva Trip, Blockchain Music, CLAUDE.md Redesign
+2025-10-27  Authentication System Development Basics
+2025-10-27  Ticket Stub Merger: Prague 2025 GitHub Integration
+2025-10-27  Claude System Health Check and Project Status Review
+2025-10-27  Claude Setup and Project Context Verification
+2025-10-27  Debugging API Image Upload Errors
+2025-10-27  Claim Page Debugging: Ticket Stub & Set Stone Interface
+2025-10-27  Ticket Stub Contract: Layout Fixes, Prep Work
+2025-10-27  Debugging Complex Web App Authentication and Performance Issues
+2025-10-27  UUID Preservation and Message Import Deduplication Fix
+2025-10-27  Debugging Python Web Scraper with Selenium and BeautifulSoup
+2025-10-27  Message Content Handling: Preserving Context in Database
+2025-10-27  Invalid API key · Please run /login
+2025-10-27  Plaque page QR codes, print styles, and Jenkins deployment fix
+2025-10-27  Debugging Python Web Scraper with Selenium and Proxy
+2025-10-27  Webamp Chartifacts Integration: Streamlined Song Pages
+2025-10-27  Ticket Stub Claim Page Template Search & Upgrade
+2025-10-27  Ticket Stub Claim Page QR Code & Set Stone Upgrade
+2025-11-10  Memory Lane lazy-loading, watcher fix, Playwright setup
+2025-11-10  Browser automation setup and lazy-loading implementation
+2025-11-10  Playwright setup & Memory Lane lazy-loading
+2025-11-10  Lazy-loading Memory Lane with Playwright MCP
+2025-11-10  Memory Lane lazy-loading, watcher fixes, mosh setup
+2025-11-10  Memory Lane lazy-loading & watcher recursive fix
+2025-11-11  Watcher recursive fix, Memory Lane lazy-loading, mosh setup, code-server ports
+2025-11-11  Lazy-loading, watcher fix, mosh setup, code-server
+2025-11-11  Lazy-load watcher, Memory Lane, mosh setup
+2025-11-11  Watcher fixed, Memory Lane lazy-loaded, Mosh setup
+2025-11-11  Watcher fixes, lazy-loading, mosh, code-server setup
+2025-11-11  Watcher fixes, lazy-loading, mosh, code-server HTTPS
+2025-11-11  Watcher fix, lazy-loading, code-server HTTPS setup
+2025-11-11  VSCode Remote-SSH setup & SSH key configuration
+2025-11-12  Watcher fix, lazy-loading, mosh, code-server, vault setup
+2025-11-12  Magent Reawakening Memory Gap Issue
+2025-11-12  Multi-user watcher, code-server HTTPS, VSCode Remote-SSH setup
+2025-11-12  API Error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"`clear_thinking_20251015` strategy requires `thinking` to be enabled"},"request_id":"req_011CV5F9V1mV623hwrLbmyCM"}
+2025-11-12  Multi-user watcher, code-server HTTPS, secrets filter
+2025-11-12  Secrets Filter & UV Migration: Testing & Deployment
+2025-11-12  Secrets filter, uv migration, Docker deploy
+2025-11-13  Secrets filtering, uv migration, maybelle-config setup
+2025-11-13  Magent Reawakening & Multiplayer Interface
+2025-11-13  Unified Deployment Repo with Backup System
+2025-11-14  Maybelle infrastructure deployment and backup system
+2025-11-14  Magent Reawakening: Memory Lane Setup PR
+2025-11-14  API Error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"`clear_thinking_20251015` strategy requires `thinking` to be enabled"},"request_id":"req_011CV8LxumhDn6mkawUGiwzt"}
+2025-11-14  API Error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"`clear_thinking_20251015` strategy requires `thinking` to be enabled"},"request_id":"req_011CV8Lxwj2QfdFvKLKfPUmf"}
+2025-11-14  API Error: 400 {"type":"error","error":{"type":"invalid_request_error","message":"`clear_thinking_20251015` strategy requires `thinking` to be enabled"},"request_id":"req_011CV8P9b2N6Yn82gqAxFUp4"}
+2025-11-14  Hunter Deployment Infrastructure Setup
+2025-11-14  Hunter Deployment Pipeline via Maybelle
+2025-11-14  Python deployment script fixes, git auth config
+2025-11-15  Python deployment script, vault secrets, Jenkins MCP integration
+2025-11-15  Jenkins deployment, backup jobs, secrets propagation
+2025-11-15  Jenkins deployment and MCP server setup
+2025-11-15  Jenkins deployment & MCP server setup
+2025-11-15  Jenkins deployment, vault secrets, MCP server setup
+2025-11-15  Jenkins fetch-chain-data fix, repo reorganization
+2025-11-15  Jenkins fix, env setup, rabbithole exploration
+2025-11-15  Jenkins CI fix, rabbithole player setup
+2025-11-16  Jenkins Fix & Rabbithole Setup
+2025-11-16  Rabbithole Player: Local Audio File Support
+2025-11-16  Deploying .env, fixing August rabbithole player
+2025-11-16  Fix local audio file loading in rabbithole player
+2025-11-16  Rabbithole player local file loading
+2025-11-16  August rabbithole player styling fixes
+2025-11-16  Rabbithole chartifacts player cosmetics & IndexedDB persistence
+2025-11-16  Chartifacts player UI fixes and timing refinements
+2025-11-16  Rabbithole Player: Dynamic Multi-Song Festival Demo
+2025-11-16  Rabbithole Light Theme & File Loading
+2025-11-16  Rabbithole Player: Fixed Clickable Musician Names
+2025-11-16  Fix Musician Picker UI Styling Issues
+2025-11-16  Rabbithole Player UI Fixes & Green Pixel Art Redesign
+2025-11-16  Rabbithole Player Green Theme & File Integration
+2025-11-16  Rabbithole player green theme & rabbit.png integration
+2025-11-16  RabbitHole Player: Green Theme & File Integration
+2025-11-17  Magent Reawakening & PickiPedia Integration Setup
+2025-11-18  Magent Reawakening & Mobile UI Fixes
+2025-11-18  Magent Reawakens, Multiplayer Interface, Memory Lane Setup
+2025-11-20  Database Backup And Secret Redaction Troubleshooting
+2025-11-25  Awakening Magent: pnpm Jenkins migration fixes
+2025-11-26  Pnpm migration debugging and Memory Lane ops setup
+2025-11-26  pnpm migration complete, Memory Lane to maybelle
+2025-11-26  pnpm migration, Jenkins fixes, Memory Lane to maybelle
+2025-11-30  Memory Lane Migration: Scrubber Container Implementation
+2025-11-30  Memory Lane Migration & Secrets Scrubbing Complete
+2025-11-30  Memory Lane UI: Current era/heap highlighting, dev setup
+2025-11-30  UI improvements & heap boundary repair
+2025-11-30  Memory Lane repo extraction in progress
+2025-11-30  Memory-Lane Repo Extraction & Deployment
+2025-12-01  Memory Lane Repo Split, Hunter/Maybelle Updates, Backup Automation
+2025-12-01  Memory-lane extraction, backup systems, secure deployments
+2025-12-01  Maybelle rebuild, offsite backups, secure deploy, Jenkins reporting
+2025-12-01  Offsite backups, secure deploys, Jenkins reporter auth
+2025-12-01  Marker deploys, offsite backups, Jenkins reporter
+2025-12-01  Offsite backups, secure deploys, Jenkins reporting
+2025-12-02  Reawaken Magent Memory System
+2025-12-02  Autonomous Memory Transfer & Era Management System
+2025-12-02  Era Migration & Auth Infrastructure Fix
+2025-12-02  Debugging Snap Docker File Mount Issues
+2025-12-02  Magent: Hunter Boot-Cycle Fix and Settings Config
+2025-12-02  Magent Reawakened: Settings Config Issue
+2025-12-04  Magenta Reawakens: NFT Audit & Lone Star Release
+2025-12-04  Setstone Build Fix & Lone Star Release Planning
+2025-12-05  Setstone Bug Fix & ASCII Art Tools
+2025-12-07  Git Push Workflow and PickiPedia VCS Setup
+2025-12-10  Nested Artifact Pages & On-Chain Contract Planning
+2025-12-10  Ticket stub contract debugging & test fixes
+2025-12-11  Blue Railroad Train Minting Admin Interface Build
+2025-12-11  Blue Railroad Token Minting Admin Interface
+2025-12-16  Blue Railroad Train ENS & Web3Modal Fix
+2025-12-16  Jenkins Context Overflow, PickiPedia Production Issue
+2025-12-17  Artifacts gallery pages & dev server fixes
+2025-12-17  Magenta Reawakened: PickiPedia Version Control Strategy
+2025-12-17  PickiPedia MediaWiki deployment infrastructure setup
+2025-12-18  PickiPedia VCS deployment: Jenkins, composer, backup setup
+2025-12-18  PickiPedia MediaWiki deployment infrastructure setup
+2025-12-18  PickiPedia VCS deployment: Jenkins, backups, preview setup
+2025-12-18  PickiPedia VCS deploy infrastructure
+2025-12-18  PickiPedia VCS setup: Jenkins build validation, backup system, hunter preview
+2025-12-19  MediaWiki deployment with Jenkins CI/CD and preview environment
+2025-12-19  Docker Deploy MediaWiki SMW to Production
+2025-12-19  PickiPedia preview, deploy pipeline, blockheight footer
+2025-12-19  Hunter Boot-Cycle Fix and Claude Settings
+2025-12-19  Fixed hunter boot-cycling, added Claude Code settings
+2025-12-19  PickiPedia preview setup and production deploy pipeline
+2025-12-19  PickiPedia preview auto-deploy infrastructure & shared Docker image
+2025-12-19  PickiPedia preview deployment multi-user setup
+2025-12-20  PickiPedia preview setup, deploy pipeline, shared docker image
+2025-12-20  PickiPedia preview setup and deployment automation
+2025-12-20  PickiPedia preview environment setup and troubleshooting
+2025-12-20  PickiPedia Preview Auto-Start Docker Git Issues
+2025-12-20  PickiPedia extensions, rsync, image uploads, gallery setup
+2025-12-21  PickiPedia production deploy pipeline, rsync, extensions, job renames
+2025-12-21  MediaWiki MCP Server Setup for PickiPedia Bot Editing
+2025-12-21  Jenkins Rename & PickiPedia Deploy Fixes
+2025-12-21  PickiPedia gallery issues, thumbnail generation, REST API slash problem
+2025-12-21  PickiPedia Gallery & Jenkins Fixes
+2025-12-22  PickiPedia Gallery Thumbnail Fix & HighslideGallery UI
+2025-12-22  PickiPedia Gallery Thumbnail Fix & HighslideGallery UI
+2025-12-23  MultimediaViewer implementation & instrument template setup
+2025-12-23  PickiPedia Wiki: Template & Parser Functions Deployment
+2025-12-23  PickiPedia: Template system, parser functions, AI vandalism safeguards
+2025-12-24  Debugging rsync deploy and SMW install
+2025-12-25  SMW fix, MediaWiki upgrade, video support
+2025-12-27  Spinning out Rabbithole to standalone repo
+2025-12-27  Rabbithole Player Separation & Audio CORS Debugging
+2025-12-27  Pickipedia debugging: REST API 500 errors, deploy pause mechanism
+2025-12-27  Debugging 500 errors, pausing deploys temporarily
+2025-12-28  Debugging PickiPedia 500 errors with deploy pause.
+2025-12-28  MediaWiki 1.45 Downgrade & Error Tracking Setup
+2025-12-29  PickiPedia Infrastructure Debug & Deployment
+2025-12-29  PickiPedia infrastructure debugging & podcast aggregation setup
+2025-12-29  PickiPedia debugging: MW version fix, error tracking, RSS extension
+2025-12-30  PickiPedia infrastructure debugging: SMW compatibility, error tracking, templates
+2025-12-30  PickiPedia infrastructure debugging: SMW compatibility, error tracking, templates
+2025-12-30  PickiPedia infrastructure fixes & AI edit review system design
+2025-12-30  MCP server middleware & wiki verification system
+2025-12-30  Magent: Pickipedia claim verification system
+2025-12-31  Pickipedia Gadget Verification System Deployment
+2025-12-31  MediaWiki Sentry Integration & Container Deployment
+2025-12-31  Magent reawakens, fixes Sentry deploy
+2025-12-31  Sentry Integration and MediaWiki Schema Migration Debug
+2025-12-31  MediaWiki Schema Fix: DB Column Restoration
+2026-01-01  MediaWiki Gadget Verification & Show Pages
+2026-01-02  SMW Properties Fixed: Category Bug Solution
+2026-01-02  Magent awakens, [REDACTED] demo, verification workflow
+2026-01-02  Magent Awakens, Shows Pickipedia & Verification Demo
+2026-01-02  Magent Reawakened: Arthel Subdomain Configuration
+2026-01-02  Magent awakens, revives dev infrastructure
+2026-01-02  Jenkins MCP Context Bloat Fix
+2026-01-03  Magenta Reawakened: Memory, Kayaking, Templates
+2026-01-04  PickiPedia SMW queries broken, database schema mismatch
+2026-01-04  Claude Reawakening & PickiPedia Updates
+2026-01-04  PickiPedia SMW debugging, schema fixes, venue setup
+2026-01-04  PickiPedia SMW/MW schema fix, middleware arch
+2026-01-06  PickiPedia fixes, MCP middleware, bot blocking
+2026-01-06  ASCII art formatting & Cryptograss namespace setup
+2026-01-06  PickiPedia MCP Middleware Setup & Demo
+2026-01-06  PickiPedia MCP middleware verification guardrails demo
+2026-01-06  PickiPedia MCP middleware: namespace exemptions and prose wrapping
+2026-01-06  PickiPedia Verification Middleware Prose Wrapping
+2026-01-07  PickiPedia verification middleware: prose wrapping & styling
+2026-01-07  PickiPedia MCP verification prose wrapping & Bot_proposes button
+2026-01-07  PickiPedia verification middleware: prose wrapping, styling, list items
+2026-01-07  PickiPedia verification UI: prose wrapping, styling, list items
+2026-01-07  MediaWiki verification gadget regex fix, list wrapping
+2026-01-08  PickiPedia gadget fixes, verification system
+2026-01-08  PickiPedia verification system & NFT infrastructure setup
+2026-01-08  Fixed artifacts page 403 error and styling
+2026-01-08  Fix cryptograss artifacts page webpack config and deploy NFT infrastructure
+2026-01-09  Pickipedia video upload queue with address verification
+2026-01-09  Video upload pipeline with SMW queue
+2026-01-09  Blue Railroad Train video submission form with exercise dropdown
+2026-01-09  Blue Railroad video submission form with auto-upload
+2026-01-10  Blue Railroad Train NFT submission form deployment
+2026-01-10  Fixed PickiPedia, Jenkins, Blue Railroad form schema
+2026-01-10  Blue Railroad Form & PickiPedia Infrastructure Fixes
+2026-01-10  Blue Railroad Form & PickiPedia Infrastructure Fixes
+2026-01-11  Blue Railroad NFT Minting Setup
+2026-01-12  PickiPedia Blue Railroad NFT Minting Pipeline
+2026-01-12  Blue Railroad NFT minting infrastructure complete
+2026-01-12  Blue Railroad minting UI multi-recipient support
+2026-01-12  Blue Railroad mint page per-submission generation
+2026-01-12  Blue Railroad mint pages with IPFS pinning integration
+2026-01-12  Fix IPFS pinning button CORS issue
+2026-01-13  Fix IPFS pinning with wallet auth
+2026-01-13  Blue Railroad IPFS Pinning Wallet Auth Integration
+2026-01-13  Fix wallet button via webpack bundling
+2026-01-13  Wallet Auth Issue on Pinning Service
+2026-01-13  Fixing Pinning Service Wallet Auth & API
+2026-01-13  Blue Railroad IPFS Pinning Service Migration
+2026-01-14  Blue Railroad pinning workflow fixed, idempotent
+2026-01-14  Blue Railroad IPFS Idempotent Pinning Implementation
+2026-01-14  Blue Railroad IPFS pinning idempotent workflow
+2026-01-14  Minting Blue Railroad tokens, chain data integration
+2026-01-14  Blue Railroad PickiPedia Integration & Uptime Alerts
+2026-01-14  Blue Railroad tokens to PickiPedia: deployment & import setup
+2026-01-15  Blue Railroad tokens PickiPedia import chain data
+2026-01-15  Blue Railroad Token Import Fixed and Templates Improved
+2026-01-16  Blue Railroad NFT Import & Template Setup
+2026-01-16  Blue Railroad import, video embedding, ENS names, ThinkingEntity template
+2026-01-16  Blue Railroad ENS/Display Names, Deploy Optimization, Scene Concept Development
+2026-01-18  Blue Railroad bot leaderboard + Rambutan Mode extension
+2026-01-18  RambutanMode extension created, tested, needs login verification
+2026-01-18  RambutanMode extension creation and production deployment
+2026-01-18  RambutanMode templates, diff-aware verification middleware
+2026-01-18  Reawaken Magent Project Setup
+2026-01-23  BlueRailroadTrainV2 trustless migration & metadata storage
+2026-01-24  Reawaken Magent, fix MCP async DB, merge V2 contract
+2026-02-03  API Error: 500 {"type":"error","error":{"type":"api_error","message":"Internal server error"},"request_id":"req_011CXmPexUM2mtRg8ryDytTW"}
+2026-02-04  4masks Album Page & Chartifacts NFT Interface Build
+2026-02-15  ENS resolution for token-submission matching
+2026-02-18  EPK Page with Music Player & Videos
+2026-02-18  EPK Page with Music Player & Videos
+2026-02-18  Justin Holmes EPK: Hero Section & Social Links
+2026-02-19  PickiPedia metadata editor design & implementation
+2026-02-23  IPFS pin manifest, hysteresis fix, wiki pages display, invitations plan
+2026-03-02  delivery-kid IPFS pinning, PickiPedia Releases YAML namespace
+2026-03-06  IPFS Album Upload Refactor: Single to Multi-Step Flow
+2026-03-07  Multi-step album upload with per-track metadata
+2026-03-07  Multi-step album upload with per-track metadata
+2026-03-07  Magent System Reawakening Instructions

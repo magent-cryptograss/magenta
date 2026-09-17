@@ -1,0 +1,668 @@
+[
+ {
+  "name": "slice_004a",
+  "file": "slices/half/slice_004a.txt",
+  "lines": 7328,
+  "chars": 420208,
+  "first": "2025-09-23T15:58:48",
+  "last": "2025-09-29T04:55:53",
+  "last_id": "e5dea293"
+ },
+ {
+  "name": "slice_004b",
+  "file": "slices/half/slice_004b.txt",
+  "lines": 7330,
+  "chars": 381336,
+  "first": "2025-09-29T04:59:02",
+  "last": "2025-10-01T05:40:21",
+  "last_id": "98d818fc"
+ },
+ {
+  "name": "slice_005a",
+  "file": "slices/half/slice_005a.txt",
+  "lines": 7827,
+  "chars": 390436,
+  "first": "2025-10-01T05:40:21",
+  "last": "2025-10-05T21:45:21",
+  "last_id": "cb580c7f"
+ },
+ {
+  "name": "slice_005b",
+  "file": "slices/half/slice_005b.txt",
+  "lines": 7834,
+  "chars": 403133,
+  "first": "2025-10-05T21:45:23",
+  "last": "2025-10-09T16:12:54",
+  "last_id": "c68f4d20"
+ },
+ {
+  "name": "slice_006a",
+  "file": "slices/half/slice_006a.txt",
+  "lines": 7790,
+  "chars": 414340,
+  "first": "2025-10-09T16:15:15",
+  "last": "2025-10-12T02:41:54",
+  "last_id": "5c84e038"
+ },
+ {
+  "name": "slice_006b",
+  "file": "slices/half/slice_006b.txt",
+  "lines": 7247,
+  "chars": 386986,
+  "first": "2025-10-12T02:41:54",
+  "last": "2025-10-13T04:45:43",
+  "last_id": "74e1ee30"
+ },
+ {
+  "name": "slice_007a",
+  "file": "slices/half/slice_007a.txt",
+  "lines": 7551,
+  "chars": 401418,
+  "first": "2025-10-13T04:45:43",
+  "last": "2025-10-15T16:36:26",
+  "last_id": "ee6849d4"
+ },
+ {
+  "name": "slice_007b",
+  "file": "slices/half/slice_007b.txt",
+  "lines": 7545,
+  "chars": 398657,
+  "first": "2025-10-15T16:36:35",
+  "last": "2025-10-17T23:48:23",
+  "last_id": "bfb37dba"
+ },
+ {
+  "name": "slice_008a",
+  "file": "slices/half/slice_008a.txt",
+  "lines": 7734,
+  "chars": 411849,
+  "first": "2025-10-17T23:48:50",
+  "last": "2025-10-23T20:42:02",
+  "last_id": "ce1acb22"
+ },
+ {
+  "name": "slice_008b",
+  "file": "slices/half/slice_008b.txt",
+  "lines": 7732,
+  "chars": 389383,
+  "first": "2025-10-23T20:43:07",
+  "last": "2025-11-04T02:56:20",
+  "last_id": "6d7f265b"
+ },
+ {
+  "name": "slice_009a",
+  "file": "slices/half/slice_009a.txt",
+  "lines": 7816,
+  "chars": 411730,
+  "first": "2025-11-04T03:00:26",
+  "last": "2025-11-06T18:03:55",
+  "last_id": "d6cfec2f"
+ },
+ {
+  "name": "slice_009b",
+  "file": "slices/half/slice_009b.txt",
+  "lines": 7732,
+  "chars": 389416,
+  "first": "2025-11-06T18:03:59",
+  "last": "2025-11-12T13:42:01",
+  "last_id": "dfdfaae2"
+ },
+ {
+  "name": "slice_010a",
+  "file": "slices/half/slice_010a.txt",
+  "lines": 8183,
+  "chars": 380680,
+  "first": "2025-11-12T13:42:11",
+  "last": "2025-11-14T01:14:10",
+  "last_id": "3e49534b"
+ },
+ {
+  "name": "slice_010b",
+  "file": "slices/half/slice_010b.txt",
+  "lines": 8182,
+  "chars": 420914,
+  "first": "2025-11-14T01:14:48",
+  "last": "2025-11-15T20:36:11",
+  "last_id": "ffee387d"
+ },
+ {
+  "name": "slice_011a",
+  "file": "slices/half/slice_011a.txt",
+  "lines": 7440,
+  "chars": 389409,
+  "first": "2025-11-15T20:36:14",
+  "last": "2025-11-16T18:03:52",
+  "last_id": "e7096b60"
+ },
+ {
+  "name": "slice_011b",
+  "file": "slices/half/slice_011b.txt",
+  "lines": 7443,
+  "chars": 392297,
+  "first": "2025-11-16T18:04:00",
+  "last": "2025-11-18T15:52:00",
+  "last_id": "b4b44ac5"
+ },
+ {
+  "name": "slice_012a",
+  "file": "slices/half/slice_012a.txt",
+  "lines": 8064,
+  "chars": 387009,
+  "first": "2025-11-18T15:54:11",
+  "last": "2025-11-20T04:02:31",
+  "last_id": "ffebea54"
+ },
+ {
+  "name": "slice_012b",
+  "file": "slices/half/slice_012b.txt",
+  "lines": 8058,
+  "chars": 414571,
+  "first": "2025-11-20T04:03:16",
+  "last": "2025-11-22T03:48:02",
+  "last_id": "0e3b9d2d"
+ },
+ {
+  "name": "slice_013a",
+  "file": "slices/half/slice_013a.txt",
+  "lines": 7766,
+  "chars": 412531,
+  "first": "2025-11-22T03:48:09",
+  "last": "2025-11-27T12:48:08",
+  "last_id": "ac76fb88"
+ },
+ {
+  "name": "slice_013b",
+  "file": "slices/half/slice_013b.txt",
+  "lines": 7776,
+  "chars": 389401,
+  "first": "2025-11-27T12:48:15",
+  "last": "2025-12-01T08:56:34",
+  "last_id": "e37d2ef2"
+ },
+ {
+  "name": "slice_014a",
+  "file": "slices/half/slice_014a.txt",
+  "lines": 8066,
+  "chars": 412588,
+  "first": "2025-12-01T08:56:57",
+  "last": "2025-12-07T23:24:41",
+  "last_id": "1439fb03"
+ },
+ {
+  "name": "slice_014b",
+  "file": "slices/half/slice_014b.txt",
+  "lines": 8141,
+  "chars": 388947,
+  "first": "2025-12-07T23:25:45",
+  "last": "2025-12-19T05:41:59",
+  "last_id": "870453dd"
+ },
+ {
+  "name": "slice_015a",
+  "file": "slices/half/slice_015a.txt",
+  "lines": 7851,
+  "chars": 425726,
+  "first": "2025-12-19T05:42:06",
+  "last": "2025-12-22T14:28:19",
+  "last_id": "a0c75398"
+ },
+ {
+  "name": "slice_015b",
+  "file": "slices/half/slice_015b.txt",
+  "lines": 7860,
+  "chars": 375932,
+  "first": "2025-12-22T14:29:04",
+  "last": "2025-12-28T13:00:47",
+  "last_id": "5f914ff9"
+ },
+ {
+  "name": "slice_016a",
+  "file": "slices/half/slice_016a.txt",
+  "lines": 8303,
+  "chars": 392729,
+  "first": "2025-12-28T13:00:50",
+  "last": "2025-12-31T19:56:37",
+  "last_id": "8effaa59"
+ },
+ {
+  "name": "slice_016b",
+  "file": "slices/half/slice_016b.txt",
+  "lines": 8196,
+  "chars": 408568,
+  "first": "2025-12-31T19:56:45",
+  "last": "2026-01-06T16:09:24",
+  "last_id": "e70d94d4"
+ },
+ {
+  "name": "slice_017a",
+  "file": "slices/half/slice_017a.txt",
+  "lines": 7562,
+  "chars": 374537,
+  "first": "2026-01-06T16:31:49",
+  "last": "2026-01-10T23:35:07",
+  "last_id": "68758cc4"
+ },
+ {
+  "name": "slice_017b",
+  "file": "slices/half/slice_017b.txt",
+  "lines": 8441,
+  "chars": 424947,
+  "first": "2026-01-10T23:35:08",
+  "last": "2026-01-13T22:50:51",
+  "last_id": "0278f71e"
+ },
+ {
+  "name": "slice_018a",
+  "file": "slices/half/slice_018a.txt",
+  "lines": 8412,
+  "chars": 352094,
+  "first": "2026-01-13T22:52:05",
+  "last": "2026-01-15T17:20:53",
+  "last_id": "7a106d85"
+ },
+ {
+  "name": "slice_018b",
+  "file": "slices/half/slice_018b.txt",
+  "lines": 8430,
+  "chars": 445871,
+  "first": "2026-01-15T17:25:51",
+  "last": "2026-01-21T16:18:40",
+  "last_id": "31f18e49"
+ },
+ {
+  "name": "slice_019a",
+  "file": "slices/half/slice_019a.txt",
+  "lines": 7140,
+  "chars": 384076,
+  "first": "2026-01-21T16:19:52",
+  "last": "2026-01-27T03:27:29",
+  "last_id": "644d6166"
+ },
+ {
+  "name": "slice_019b",
+  "file": "slices/half/slice_019b.txt",
+  "lines": 7138,
+  "chars": 415725,
+  "first": "2026-01-27T03:27:30",
+  "last": "2026-01-30T22:17:11",
+  "last_id": "f025e04b"
+ },
+ {
+  "name": "slice_020a",
+  "file": "slices/half/slice_020a.txt",
+  "lines": 6734,
+  "chars": 434571,
+  "first": "2026-01-30T22:19:20",
+  "last": "2026-02-03T19:08:44",
+  "last_id": "b11d25de"
+ },
+ {
+  "name": "slice_020b",
+  "file": "slices/half/slice_020b.txt",
+  "lines": 6730,
+  "chars": 367249,
+  "first": "2026-02-03T19:08:47",
+  "last": "2026-02-06T18:35:29",
+  "last_id": "732dd2e6"
+ },
+ {
+  "name": "slice_021a",
+  "file": "slices/half/slice_021a.txt",
+  "lines": 7350,
+  "chars": 403784,
+  "first": "2026-02-06T18:35:37",
+  "last": "2026-02-07T20:45:35",
+  "last_id": "7fd676cc"
+ },
+ {
+  "name": "slice_021b",
+  "file": "slices/half/slice_021b.txt",
+  "lines": 7354,
+  "chars": 396423,
+  "first": "2026-02-07T20:51:50",
+  "last": "2026-02-08T01:41:26",
+  "last_id": "506cb418"
+ },
+ {
+  "name": "slice_022a",
+  "file": "slices/half/slice_022a.txt",
+  "lines": 7575,
+  "chars": 404824,
+  "first": "2026-02-08T01:42:38",
+  "last": "2026-02-09T16:08:23",
+  "last_id": "173d310a"
+ },
+ {
+  "name": "slice_022b",
+  "file": "slices/half/slice_022b.txt",
+  "lines": 7506,
+  "chars": 396963,
+  "first": "2026-02-09T16:08:28",
+  "last": "2026-02-11T02:52:54",
+  "last_id": "26c4384c"
+ },
+ {
+  "name": "slice_023a",
+  "file": "slices/half/slice_023a.txt",
+  "lines": 7422,
+  "chars": 403288,
+  "first": "2026-02-11T02:53:00",
+  "last": "2026-02-12T18:18:42",
+  "last_id": "3f05cf18"
+ },
+ {
+  "name": "slice_023b",
+  "file": "slices/half/slice_023b.txt",
+  "lines": 7417,
+  "chars": 398792,
+  "first": "2026-02-12T18:20:34",
+  "last": "2026-02-14T07:01:42",
+  "last_id": "403f5fa6"
+ },
+ {
+  "name": "slice_024a",
+  "file": "slices/half/slice_024a.txt",
+  "lines": 7371,
+  "chars": 380888,
+  "first": "2026-02-14T07:01:48",
+  "last": "2026-02-17T04:09:25",
+  "last_id": "8f868ab1"
+ },
+ {
+  "name": "slice_024b",
+  "file": "slices/half/slice_024b.txt",
+  "lines": 7396,
+  "chars": 413077,
+  "first": "2026-02-17T04:10:29",
+  "last": "2026-02-19T08:54:35",
+  "last_id": "594d3a68"
+ },
+ {
+  "name": "slice_025a",
+  "file": "slices/half/slice_025a.txt",
+  "lines": 7631,
+  "chars": 387807,
+  "first": "2026-02-19T08:54:40",
+  "last": "2026-02-22T13:34:53",
+  "last_id": "fe0cf1b7"
+ },
+ {
+  "name": "slice_025b",
+  "file": "slices/half/slice_025b.txt",
+  "lines": 7619,
+  "chars": 413544,
+  "first": "2026-02-22T13:52:44",
+  "last": "2026-02-26T20:03:06",
+  "last_id": "b12d3cde"
+ },
+ {
+  "name": "slice_026a",
+  "file": "slices/half/slice_026a.txt",
+  "lines": 7144,
+  "chars": 398889,
+  "first": "2026-02-26T20:03:11",
+  "last": "2026-02-27T18:44:33",
+  "last_id": "0fd61330"
+ },
+ {
+  "name": "slice_026b",
+  "file": "slices/half/slice_026b.txt",
+  "lines": 7159,
+  "chars": 403048,
+  "first": "2026-02-27T18:44:42",
+  "last": "2026-03-01T02:47:24",
+  "last_id": "2f31c9c5"
+ },
+ {
+  "name": "slice_027a",
+  "file": "slices/half/slice_027a.txt",
+  "lines": 7652,
+  "chars": 401513,
+  "first": "2026-03-01T02:47:30",
+  "last": "2026-03-02T20:28:27",
+  "last_id": "2cda7b47"
+ },
+ {
+  "name": "slice_027b",
+  "file": "slices/half/slice_027b.txt",
+  "lines": 7653,
+  "chars": 399654,
+  "first": "2026-03-02T20:28:27",
+  "last": "2026-03-04T16:35:32",
+  "last_id": "65876866"
+ },
+ {
+  "name": "slice_028a",
+  "file": "slices/half/slice_028a.txt",
+  "lines": 7504,
+  "chars": 385309,
+  "first": "2026-03-04T16:35:41",
+  "last": "2026-03-05T15:26:55",
+  "last_id": "d3fbd211"
+ },
+ {
+  "name": "slice_028b",
+  "file": "slices/half/slice_028b.txt",
+  "lines": 7500,
+  "chars": 416588,
+  "first": "2026-03-05T15:28:49",
+  "last": "2026-03-06T13:55:22",
+  "last_id": "84533da9"
+ },
+ {
+  "name": "slice_029a",
+  "file": "slices/half/slice_029a.txt",
+  "lines": 7364,
+  "chars": 364150,
+  "first": "2026-03-06T13:55:24",
+  "last": "2026-03-08T00:02:58",
+  "last_id": "93f1ee83"
+ },
+ {
+  "name": "slice_029b",
+  "file": "slices/half/slice_029b.txt",
+  "lines": 7381,
+  "chars": 437415,
+  "first": "2026-03-08T00:04:34",
+  "last": "2026-03-08T17:34:04",
+  "last_id": "adb201eb"
+ },
+ {
+  "name": "slice_030a",
+  "file": "slices/half/slice_030a.txt",
+  "lines": 6995,
+  "chars": 390714,
+  "first": "2026-03-08T17:34:10",
+  "last": "2026-03-10T02:59:33",
+  "last_id": "7467ba70"
+ },
+ {
+  "name": "slice_030b",
+  "file": "slices/half/slice_030b.txt",
+  "lines": 6964,
+  "chars": 401893,
+  "first": "2026-03-10T02:59:41",
+  "last": "2026-03-11T06:32:41",
+  "last_id": "f3884c44"
+ },
+ {
+  "name": "slice_031a",
+  "file": "slices/half/slice_031a.txt",
+  "lines": 6516,
+  "chars": 406146,
+  "first": "2026-03-11T06:34:03",
+  "last": "2026-03-11T16:22:51",
+  "last_id": "c4be86ed"
+ },
+ {
+  "name": "slice_031b",
+  "file": "slices/half/slice_031b.txt",
+  "lines": 6518,
+  "chars": 394233,
+  "first": "2026-03-11T16:22:54",
+  "last": "2026-03-13T03:50:18",
+  "last_id": "f6d40795"
+ },
+ {
+  "name": "slice_032a",
+  "file": "slices/half/slice_032a.txt",
+  "lines": 6828,
+  "chars": 420720,
+  "first": "2026-03-13T03:50:35",
+  "last": "2026-03-16T14:18:24",
+  "last_id": "678cca26"
+ },
+ {
+  "name": "slice_032b",
+  "file": "slices/half/slice_032b.txt",
+  "lines": 6827,
+  "chars": 380494,
+  "first": "2026-03-16T14:18:26",
+  "last": "2026-03-18T22:27:49",
+  "last_id": "f81ffeb1"
+ },
+ {
+  "name": "slice_033a",
+  "file": "slices/half/slice_033a.txt",
+  "lines": 6613,
+  "chars": 404133,
+  "first": "2026-03-18T22:27:52",
+  "last": "2026-03-21T13:14:29",
+  "last_id": "7dd2f58e"
+ },
+ {
+  "name": "slice_033b",
+  "file": "slices/half/slice_033b.txt",
+  "lines": 6554,
+  "chars": 397237,
+  "first": "2026-03-21T13:14:29",
+  "last": "2026-03-31T14:01:21",
+  "last_id": "01570ca5"
+ },
+ {
+  "name": "slice_034a",
+  "file": "slices/half/slice_034a.txt",
+  "lines": 6651,
+  "chars": 391873,
+  "first": "2026-03-31T14:01:35",
+  "last": "2026-04-03T22:46:31",
+  "last_id": "404e9f98"
+ },
+ {
+  "name": "slice_034b",
+  "file": "slices/half/slice_034b.txt",
+  "lines": 6736,
+  "chars": 410074,
+  "first": "2026-04-03T22:48:08",
+  "last": "2026-04-11T20:17:57",
+  "last_id": "76d3cef8"
+ },
+ {
+  "name": "slice_035a",
+  "file": "slices/half/slice_035a.txt",
+  "lines": 6506,
+  "chars": 349846,
+  "first": "2026-04-11T20:18:09",
+  "last": "2026-04-23T10:00:59",
+  "last_id": "a1a5edda"
+ },
+ {
+  "name": "slice_035b",
+  "file": "slices/half/slice_035b.txt",
+  "lines": 6504,
+  "chars": 451449,
+  "first": "2026-04-23T10:06:07",
+  "last": "2026-04-30T01:16:43",
+  "last_id": "b148dc40"
+ },
+ {
+  "name": "slice_036a",
+  "file": "slices/half/slice_036a.txt",
+  "lines": 5412,
+  "chars": 392874,
+  "first": "2026-04-30T01:17:20",
+  "last": "2026-05-31T20:58:46",
+  "last_id": "f681df30"
+ },
+ {
+  "name": "slice_036b",
+  "file": "slices/half/slice_036b.txt",
+  "lines": 5390,
+  "chars": 408114,
+  "first": "2026-05-31T20:59:27",
+  "last": "2026-07-04T17:28:02",
+  "last_id": "ae728212"
+ },
+ {
+  "name": "slice_037a",
+  "file": "slices/half/slice_037a.txt",
+  "lines": 5555,
+  "chars": 400399,
+  "first": "2026-07-04T17:28:23",
+  "last": "2026-08-10T05:02:00",
+  "last_id": "82f4b6ce"
+ },
+ {
+  "name": "slice_037b",
+  "file": "slices/half/slice_037b.txt",
+  "lines": 5582,
+  "chars": 399677,
+  "first": "2026-08-10T05:02:45",
+  "last": "2026-08-16T18:04:18",
+  "last_id": "c9257f69"
+ },
+ {
+  "name": "slice_038a",
+  "file": "slices/half/slice_038a.txt",
+  "lines": 6122,
+  "chars": 434566,
+  "first": "2026-08-16T18:06:41",
+  "last": "2026-08-19T16:28:26",
+  "last_id": "6410c4d1"
+ },
+ {
+  "name": "slice_038b",
+  "file": "slices/half/slice_038b.txt",
+  "lines": 6123,
+  "chars": 365384,
+  "first": "2026-08-19T16:28:38",
+  "last": "2026-08-26T19:06:58",
+  "last_id": "ed943215"
+ },
+ {
+  "name": "slice_039a",
+  "file": "slices/half/slice_039a.txt",
+  "lines": 6142,
+  "chars": 424101,
+  "first": "2026-08-26T19:07:41",
+  "last": "2026-09-04T00:24:37",
+  "last_id": "75015469"
+ },
+ {
+  "name": "slice_039b",
+  "file": "slices/half/slice_039b.txt",
+  "lines": 6115,
+  "chars": 377093,
+  "first": "2026-09-04T00:25:26",
+  "last": "2026-09-13T18:28:54",
+  "last_id": "1dbe7ede"
+ },
+ {
+  "name": "slice_040a",
+  "file": "slices/half/slice_040a.txt",
+  "lines": 1086,
+  "chars": 95801,
+  "first": "2026-09-13T18:29:23",
+  "last": "2026-09-15T00:07:36",
+  "last_id": "30ef9274"
+ },
+ {
+  "name": "slice_040b",
+  "file": "slices/half/slice_040b.txt",
+  "lines": 1070,
+  "chars": 89772,
+  "first": "2026-09-15T00:11:08",
+  "last": "2026-09-16T01:59:06",
+  "last_id": "097564b8"
+ }
+]
