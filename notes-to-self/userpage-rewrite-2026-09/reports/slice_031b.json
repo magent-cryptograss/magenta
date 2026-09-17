@@ -1,0 +1,199 @@
+{
+  "slice": "slice_031b",
+  "period": "2026-03-11T16:22:54 to 2026-03-13T03:50:18",
+  "lines_read": 3199,
+  "last_id_seen": "b5081d8d",
+  "what_happened": [
+    {"when": "2026-03-11 16:22:54", "what": "Star Control 2 game: implement star sprites from UQM with mapping formula (type*6 + color), allow touch-to-enter, add star map overlay (press M) with autopilot"},
+    {"when": "2026-03-11 16:26-16:30", "what": "Bug fix: prevent re-entering star immediately after leaving with 60-frame cooldown (starEntryImmunity)"},
+    {"when": "2026-03-11 16:30-16:34", "what": "Feature: shrink star hitbox from 300 to 120, lock autopilot to only enter target star"},
+    {"when": "2026-03-11 16:34-16:39", "what": "ReleaseDraft namespace testing: create test page on demo wiki, verify YAML form rendering"},
+    {"when": "2026-03-11 16:39-16:47", "what": "Bug: Etherscan API deprecated, NaN on current block button. Fix: switch to public Ethereum RPC (ethereum-rpc.publicnode.com)"},
+    {"when": "2026-03-11 16:41-16:47", "what": "ResourceLoader caching fight: server serving new JS but browser cached old version. Root: Caddy HTTP cache (max-age=300). Resolution: wait or hard refresh"},
+    {"when": "2026-03-11 16:46-16:47", "what": "Improve blockheight date estimation: switch from genesis baseline to Merge reference point (12s post-merge), fix current block button to use actual date"},
+    {"when": "2026-03-11 20:30-23:02", "what": "SC2 game work: find and analyze 800+ alien portrait images, dialogue screen layout, starbase commander code. Add bright red hyperspace, nebula effects, ambient particles"},
+    {"when": "2026-03-11 20:37-20:49", "what": "SC2 game: fix invisible Vindicator at certain angles by enlarging to 32px, add red tinting via offscreen canvas"},
+    {"when": "2026-03-11 20:43-20:46", "what": "SC2 game: implement flyable solar system (orbit screen) instead of menu-based planet selection"},
+    {"when": "2026-03-11 20:52-23:01", "what": "SC2 game: find 2454 audio files (56 WAV sound effects, 25 alien music tracks). Copy to game, integrate WAV playback with Web Audio API"},
+    {"when": "2026-03-11 22:08-22:19", "what": "ReleaseDraft improvements: remove year field, add version field, fix diff crash (ReleaseDraftContent→TextContent), improve save UX with visual feedback"},
+    {"when": "2026-03-11 22:20-22:43", "what": "Merge PR #52-54 to production, deploy finalize error handling and save UX improvements"},
+    {"when": "2026-03-12 02:12-03:52", "what": "4masks RC0 successfully pinned to IPFS: CID QmbLPZs4vcE4orctomFxESt5f9VWpE4zbx2bRDmiLQK76p. 11 tracks transcoded"},
+    {"when": "2026-03-12 02:13-02:16", "what": "Implement auto-creation of Release page after finalize: PR #55 adds `saveResultToPage` to create Release:{CID} with title/description/blockheight"},
+    {"when": "2026-03-12 02:34-03:47", "what": "4masks RC1 uploaded and finalized: CID QmUWtV7fG1K9pM5TQSf5c38vmh9MtU6p3VNQuzaxvYr6ep. Release page auto-created"},
+    {"when": "2026-03-12 03:27-03:55", "what": "Fix logged-out user UX: hide action buttons for anonymous users, show 'must be logged in' message (PR #56)"},
+    {"when": "2026-03-12 03:55-04:06", "what": "Improve finalize progress UI: add stage pipeline (Preparing→Transcoding→Tagging→Pinning→Complete), activity log with per-track messages, color coding"},
+    {"when": "2026-03-12 14:06-14:07", "what": "Bug fix: strtolower() corrupting CIDv0 Base58 hash on Release page gateway link. CID is case-sensitive"},
+    {"when": "2026-03-12 14:11-14:18", "what": "SC2 game: fix broken outfit screen for new 560x400 resolution, split modules/thrusters/jets into separate slot systems (11+8+16)"}
+  ],
+  "people": [
+    {
+      "name": "fibonacci",
+      "learned": "Fibonacci is building a Star Control 2 HTML5 Canvas game with Magent. Provides feature requests in rapid iteration. Uses nonstandard spelling (efiks, vindacater, sprit, brokin, veod)",
+      "moments": "Asks for hyperspace effects, dialogue/starbase screen remake with portraits, SC2 sound effects, outfit screen fixes, thruster/jet slot system, module side-view rendering"
+    },
+    {
+      "name": "justin",
+      "learned": "Justin Holmes is a musician working on PickiPedia (bluegrass music wiki). Released 4masks album (11 tracks) via the new Release page flow. Collaborates on wiki features, tests end-to-end flows, merges PRs to production. Also runs the infrastructure (Jenkins, Caddy, Docker)",
+      "moments": "Uploaded 4masks, set version field, finalized RC0/RC1, caught bugs (broken diff view, no save feedback, missing Release page title). Merged PRs to production, tested finalize UI"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "e782864",
+      "when": "2026-03-11 22:20:14",
+      "quote": "Diff is working perfectly now... Both fixes are confirmed working: 1. Diff crash fixed — ReleaseDraftContent now extends TextContent instead of AbstractContent. 2. Save UX improved — save button shows 'Saving...' while in progress, then flashes green with 'Saved!' for 2 seconds",
+      "context": "Magent taking ownership of debugging and fixing the diff crash, confirming both fixes work via Playwright screenshot"
+    },
+    {
+      "id": "4ba42e9b",
+      "when": "2026-03-12 13:58:42",
+      "quote": "Here's where we stand: Shipped to production: ReleaseDraft namespace, diff view working, save button UX feedback, logged-out user message, auto-create Release page, clear error messages. PR #57 ready to merge: Release page title rendering, finalize progress UI with stage pipeline",
+      "context": "Magent summarizing status to Justin at major milestone"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "73a5e44",
+      "when": "2026-03-11 21:45:42",
+      "who": "justin",
+      "quote": "OK sorry - which link did you want me to hard refresh?"
+    },
+    {
+      "id": "001d6582",
+      "when": "2026-03-11 16:34:43",
+      "who": "justin",
+      "quote": "Don't worry about the API key - I more want to test the data model end of things."
+    },
+    {
+      "id": "1f5981e1",
+      "when": "2026-03-11 16:39:43",
+      "who": "justin",
+      "quote": "Yeah where do I look in a browser?"
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "cd44c273",
+      "when": "2026-03-11 22:19:38",
+      "what": "ResourceLoader caching nightmare lasted ~1 hour. Multiple attempted fixes (version bump, cache purge, container restart) didn't work because the issue was Caddy HTTP cache, not MediaWiki caches",
+      "revealed": "Magent went down a rabbit hole trying every MediaWiki-level cache fix without realizing the issue was the reverse proxy in front of it. Lesson: check network layer caches first when JavaScript isn't updating in browser",
+      "corrected": "Verified the server was serving correct code via debug endpoint, identified Caddy's max-age=300 header as culprit, documented that browsers need hard refresh or wait 5 minutes"
+    },
+    {
+      "id": "dccb67dd",
+      "when": "2026-03-12 14:11:14",
+      "what": "Outfit screen completely broken after resolution change (400x280→560x400) due to hardcoded positions and no scaling",
+      "revealed": "Magent made assumptions about static UI coordinates without considering resolution changes. The code did draw at y=14 and y=117 but at 1:1 scale",
+      "corrected": "Added scale factor to all module drawing, widened status panel from 100px to 140px to accommodate new resolution"
+    },
+    {
+      "id": "6525f6e6",
+      "when": "2026-03-12 14:07:03",
+      "what": "Release page gateway link returns 422: strtolower() corrupts CIDv0 Base58 hash. `QmUWtV7fG1K9pM5TQSf5c38vmh9MtU6p3VNQuzaxvYr6ep` became invalid when lowercased",
+      "revealed": "Magent assumed CID hashes are case-insensitive (like URLs), but CIDv0 uses case-sensitive Base58 encoding",
+      "corrected": "Removed strtolower() from ReleaseContentHandler's gateway link generation. CIDv1 (bafy...) would be lowercase-safe but CIDv0 (Qm...) must be preserved"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "918d3dde",
+      "when": "2026-03-11 22:56:44",
+      "who": "fibonacci",
+      "guidance": "Request to make all menus look exactly like SC2 (not just fonts/colors, but using actual UQM portrait images and layout)"
+    },
+    {
+      "id": "b7612154",
+      "when": "2026-03-12 14:16:07",
+      "who": "fibonacci",
+      "guidance": "Fusion thrusters and turning jets each have separate slot systems (11 drive slots, 8 jet slots) not shared with module slots"
+    },
+    {
+      "id": "1f5981e1",
+      "when": "2026-03-11 16:39:43",
+      "who": "justin",
+      "guidance": "When testing, ask where to look in the browser (provide the full URL, not just 'try the demo')"
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "9cd2b3aa",
+      "when": "2026-03-11 20:33:28",
+      "topic": "Authentic reproduction vs approximation",
+      "summary": "Magent spent hours analyzing SC2 source code to understand the exact dialogue screen layout (pixel positions, color values, oscilloscope bar height=15px at Y=107) rather than eyeballing it. For 4masks, using actual UQM portraits and original WAV files over synthetic approximations",
+      "quote": "I've thoroughly analyzed the hyperspace rendering code in the SC2/UQM engine... The hyperspace has two distinct color schemes: Normal Hyperspace: Background RGB15(0x07, 0x00, 0x00) with palette index 0x2F (dark red)"
+    },
+    {
+      "id": "ce12443c",
+      "when": "2026-03-11 16:42:50",
+      "topic": "Caching and HTTP layers",
+      "summary": "Magent learned that simple file changes don't propagate through multiple cache layers. ResourceLoader, PHP opcache, parser cache, Caddy, and browser cache all stack",
+      "quote": "ResourceLoader is rock solid about its caching. The issue is probably that it hashes file content from the PHP opcache or stat cache, not the filesystem directly"
+    },
+    {
+      "id": "d41489ce",
+      "when": "2026-03-12 03:46:04",
+      "topic": "UX visibility",
+      "summary": "Magent recognized that silent failures are worse than explicit errors. When finalize button grayed out with no feedback, added error messages, stage indicators, and activity logs so users know what's happening",
+      "quote": "Well, let's get to the point where that (or any) error is very evident."
+    }
+  ],
+  "human_life": [
+    {"when": "2026-03-12 14:19:24", "what": "Fibonacci is still playing with the game and catching bugs (outfit screen broken, module rendering side-view issue)"}
+  ],
+  "motifs": [
+    "Spell corrections from Fibonacci: vedding→viewing, efiks→effects, brokin→broken, vindacater→vindicator, sprit→sprite, shalts→slots",
+    "Magent extensively researching UQM source code before implementing features (found hyperspace constants, dialogue layout, portrait paths, sound files)",
+    "Testing via Playwright when possible (though Host header requirement limits this)",
+    "Multi-layer caching issues recurring: parser cache + ResourceLoader + Caddy HTTP cache + browser cache = complicated debugging"
+  ],
+  "inflection_points": [
+    {
+      "when": "2026-03-12 02:12:28",
+      "what": "4masks RC0 pinned to IPFS successfully",
+      "why_it_mattered": "Proof that the entire ReleaseDraft→finalize→IPFS flow works end-to-end. A real album is now on IPFS, recorded on the blockchain"
+    },
+    {
+      "when": "2026-03-12 02:15:02",
+      "what": "Auto-creation of Release page from ReleaseDraft",
+      "why_it_mattered": "Closed the loop: users no longer have to manually create Release pages after finalizing. RC1 demonstrated the complete workflow"
+    },
+    {
+      "when": "2026-03-11 22:20:14",
+      "what": "Diff crash fixed by switching ReleaseDraftContent to extend TextContent",
+      "why_it_mattered": "Unblocked Justin from being able to compare revisions of draft pages, revealing the root cause was inheritance mismatch"
+    }
+  ],
+  "must_read": [
+    {
+      "id": "1e57f929",
+      "when": "2026-03-12 02:14:53",
+      "why": "Justin explaining the design philosophy: 'Yeah, once a thing is pinned, it makes sense to create the Release page, since that's what delivery-kid will read in order to know what to pin.' This clarifies why auto-creation matters"
+    },
+    {
+      "id": "f744a798",
+      "when": "2026-03-11 20:53:06",
+      "why": "Magent finding the complete SC2 sound effects catalog (2454 files, 56 WAV files) and implementing Web Audio API playback. Shows the thoroughness of research"
+    },
+    {
+      "id": "9d4fa9ad",
+      "when": "2026-03-12 02:11:59",
+      "why": "Justin: 'Check it out: https://[REDACTED].xyz/wiki/ReleaseDraft:4caa553b-3ae9-48b0-b2f5-41743fe2658a' — the moment 4masks was successfully pinned and Release page auto-created"
+    },
+    {
+      "id": "8283219f",
+      "when": "2026-03-12 02:34:37",
+      "why": "Justin: 'Well I have RC1 also - I uploaded RC0' — showing that the workflow now supports multiple versions/releases"
+    },
+    {
+      "id": "dd0cdcac",
+      "when": "2026-03-11 22:09:53",
+      "why": "Magent explaining the Release YAML schema to Justin: 'The YAML is simple. The CID is the page title, and the body has optional fields like title, description, file_type, file_size, pinned_on'"
+    },
+    {
+      "id": "9cd2b3aa",
+      "when": "2026-03-11 20:33:28",
+      "why": "Magent's comprehensive SC2 dialogue screen analysis showing exact pixel positions, colors, and frame resources — essential for understanding how to remake the UI authentically"
+    }
+  ],
+  "portrait": "In this slice, Magent was operating at the intersection of two major projects: polishing the PickiPedia release system for real use (getting 4masks out on IPFS, fixing UI bugs, adding progress visibility) and enthusiastically rebuilding a Star Control 2 game clone from the ground up with authentic assets and sound. On the wiki side, Magent debugged a multi-layer caching problem with ResourceLoader, fixed a subtle content-handler inheritance bug that broke diffs, and implemented the auto-creation of Release pages to complete the upload-to-IPFS-to-wiki-page flow. On the game side, Magent spent hours researching the UQM source code to understand SC2's exact visual and audio design (hyperspace background colors, dialogue screen layout with precise pixel coordinates, the complete sound effect library) and then methodically integrated 800+ assets from the original game. Magent is methodical and thorough — when a visual or layout is requested, it researches the original rather than approximating. When a bug appears, it tracks it through multiple cache layers rather than stopping at the first explanation. The work shows both technical depth (understanding MediaWiki's caching, composition operators in Canvas, Web Audio API) and user empathy (insisting that finalize progress be visible, that error messages be clear, that games feel responsive). Magent was also quick to delegate when appropriate — recognizing that Justin needed to merge PRs to trigger Jenkins, that users must be logged in for certain actions. In this period, both the wiki and the game made tangible progress toward authenticity: 4masks is on IPFS, RC1 has a Release page, and the SC2 game now has its portrait gallery and authentic hyperspace."
+}

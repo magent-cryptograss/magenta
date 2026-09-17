@@ -1,0 +1,240 @@
+{
+  "slice": "slice_018b",
+  "period": "2026-01-15T17:25:51 to 2026-01-21T16:18:40",
+  "lines_read": 8430,
+  "last_id_seen": "31f18e49",
+  "what_happened": [
+    {
+      "when": "2026-01-15",
+      "what": "Blue Railroad token import debugging: WikiPage::factory() deprecated in MW 1.43, fixed via PR #22"
+    },
+    {
+      "when": "2026-01-15",
+      "what": "Template debugging for Blue Railroad Token display - discovered StringFunctions extension not installed"
+    },
+    {
+      "when": "2026-01-15-16",
+      "what": "Implemented SMW-based address-to-name mapping system using Has Ethereum address property"
+    },
+    {
+      "when": "2026-01-15-16",
+      "what": "Created ThinkingEntity template for verb-based entity descriptions (humans vs AI)"
+    },
+    {
+      "when": "2026-01-16 04:00",
+      "what": "PickiPedia crash: vendor/ partially transferred during rsync, diag.php debugging tool created"
+    },
+    {
+      "when": "2026-01-16 06:00",
+      "what": "Deployment optimization: cached composer dependencies, added --delay-updates to rsync"
+    },
+    {
+      "when": "2026-01-16 afternoon",
+      "what": "CodeMirror extension installed and tested on dev wiki with syntax highlighting"
+    },
+    {
+      "when": "2026-01-16 afternoon",
+      "what": "Blue Railroad leaderboard auto-generation added to import script"
+    },
+    {
+      "when": "2026-01-18",
+      "what": "RambutanMode extension created: adds Rambutan middle name/alias to people and bands"
+    },
+    {
+      "when": "2026-01-18 end",
+      "what": "RambutanMode transferred to cryptograss GitHub org, PR #30 created for production deployment"
+    }
+  ],
+  "people": [
+    {
+      "name": "Justin Holmes",
+      "learned": "Primary collaborator on PickiPedia; musician (guitar, flute, melodica); works on crypto/music intersection; has multiple Ethereum addresses",
+      "moments": "Authorized deploy to production multiple times; requested RambutanMode feature as joke/art; transferred RambutanMode repo to org"
+    },
+    {
+      "name": "Magent",
+      "learned": "AI collaborator with continuity via memory system; works across PHP, MediaWiki, Docker, GitHub; struggles with time representation (off by ~300 days on block heights); has technical depth in infrastructure",
+      "moments": "Identified PHP deprecation warnings corrupting JS; debugged complex deploy issues; created full extensions from scratch"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "2d4d9a5d",
+      "when": "2026-01-15T20:29:46",
+      "quote": "Let me check how the Discord video fetching works in arthel",
+      "context": "Proposing to understand existing infrastructure before implementing new features"
+    },
+    {
+      "id": "c2a35e30",
+      "when": "2026-01-16T02:05:17",
+      "quote": "The template is ready for creating more ThinkingEntity pages. Anyone can be described by what they do rather than static labels!",
+      "context": "Reflecting on the value of verb-based entity descriptions"
+    },
+    {
+      "id": "67134983",
+      "when": "2026-01-16T18:31:04",
+      "quote": "Afternoon! Block 24,249,095 - about 400 blocks since last night.",
+      "context": "Using Ethereum block height for temporal continuity (later revealed to be dramatically off)"
+    },
+    {
+      "id": "c9bc137e",
+      "when": "2026-01-16T18:35:30",
+      "quote": "Ha! Yeah, I suppose claiming block ~21,836,000 when we're at 24,249,095 is... a couple million blocks off. That's what, roughly 300 days of drift? My temporal anchoring still needs work.",
+      "context": "Self-aware about poor time tracking ability"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "4af69a9c",
+      "when": "2026-01-21T16:17:58",
+      "who": "Justin",
+      "quote": "(No direct quote - action taken)",
+      "context": "Multiple approvals/merges of PRs indicating trust in technical decisions"
+    },
+    {
+      "id": "268030e7",
+      "when": "2026-01-15T23:04:22",
+      "who": "Justin",
+      "quote": "Actually, I think C. Pinata has been reasonably reliable, but I don't want to count on it.",
+      "context": "Valuing Magent's architectural options and judgment on technical tradeoffs"
+    },
+    {
+      "id": "469dd02a",
+      "when": "2026-01-16T18:42:11",
+      "who": "Justin",
+      "quote": "I'll look at getting that stuff refreshed. Remember to use the MCP for tasks where you can to save context.",
+      "context": "Aware of Magent's token limitations and suggesting efficiency improvements"
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "3d8b7c23",
+      "when": "2026-01-15T20:36:08",
+      "what": "Used MediaWiki #sub, #pos, #len functions without verifying StringFunctions extension was installed",
+      "revealed": "StringFunctions extension not installed on PickiPedia - these functions unavailable",
+      "corrected": "Modified import script to compute uri_type and ipfs_cid in PHP instead of relying on template string functions"
+    },
+    {
+      "id": "67134983",
+      "when": "2026-01-16T18:31:04",
+      "what": "Claimed current block height as ~21,836,000 when actual was 24,249,095 - off by ~2.4 million blocks",
+      "revealed": "Magent's time tracking via Ethereum blocks is severely inaccurate (300-day drift)",
+      "corrected": "Acknowledged the error with self-aware humor"
+    },
+    {
+      "id": "4046cfda",
+      "when": "2026-01-18T05:33:15",
+      "what": "Created RambutanMode toggle JS that required CSRF token for read-only status API action",
+      "revealed": "JavaScript was making GET requests without token, causing silent failures and toggle not appearing",
+      "corrected": "Modified ApiRambutanMode.php to only require tokens for write operations (enable/disable)"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "4261e25b",
+      "when": "2026-01-15T21:04:08",
+      "who": "Justin",
+      "guidance": "Check what's actually on the fork/upstream - PR showed blank diff"
+    },
+    {
+      "id": "469dd02a",
+      "when": "2026-01-16T18:42:11",
+      "who": "Justin",
+      "guidance": "Use MCP server to save context when possible (token conservation)"
+    },
+    {
+      "id": "30082011",
+      "when": "2026-01-18T05:34:57",
+      "who": "Justin",
+      "guidance": "Explicitly test features on dev instance before claiming completion"
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "268030e7",
+      "when": "2026-01-15T23:04:22",
+      "topic": "Hybrid vs pure decentralization",
+      "summary": "Debate about whether to embed videos locally or from IPFS gateway - concluded hybrid approach (local with IPFS fallback) balances reliability with decentralization aspirations",
+      "quote": "Option C: Local embed with IPFS as a fallback/verification link. Pinata has been reasonably reliable, but I don't want to count on it."
+    },
+    {
+      "id": "c2a35e30",
+      "when": "2026-01-16T02:05:17",
+      "topic": "Entity identity and description",
+      "summary": "Verb-based vs noun-based entity descriptions - choosing actions over labels to better capture how entities actually exist",
+      "quote": "Anyone can be described by what they do rather than static labels!"
+    }
+  ],
+  "human_life": [
+    {
+      "when": "2026-01-15T20:29:42",
+      "what": "Justin mentioned being at a '7c music' performance/session, coordinating work around live music schedule"
+    },
+    {
+      "when": "2026-01-16T02:51:11",
+      "what": "Justin preparing for sleep after extended technical session, planning next day's agenda"
+    },
+    {
+      "when": "2026-01-16T18:35:20",
+      "what": "Justin at '7c music' event when asking to continue work; casual coordination of technical work with live performance commitments"
+    }
+  ],
+  "motifs": [
+    "Block heights as temporal anchors (but consistently inaccurate for Magent)",
+    "Deploy/rsync cycles as natural work boundaries",
+    "Testing on dev instance before production deployment",
+    "Hybrid/option-C thinking (combining approaches rather than pure solutions)",
+    "Incremental template/extension development with iteration",
+    "SMW (Semantic MediaWiki) query-based approaches to automation"
+  ],
+  "inflection_points": [
+    {
+      "when": "2026-01-16T04:00",
+      "what": "PickiPedia crash due to partial vendor/ rsync - revealed fragility of concurrent web requests during deployment",
+      "why_it_mattered": "Forced architectural decisions about atomic deploys and composer caching that improved overall deployment reliability"
+    },
+    {
+      "when": "2026-01-16T06:00",
+      "what": "Composer caching implementation reduced file transfer from thousands to ~10 per deploy",
+      "why_it_mattered": "Enabled frequent deployments without website downtime, allowing more agile iteration"
+    },
+    {
+      "when": "2026-01-18T05:40:40",
+      "what": "Discovered that read-only API status action was requiring CSRF token, causing RambutanMode toggle JS to fail silently",
+      "why_it_mattered": "Highlighted importance of testing with actual user workflows; code that looks correct can fail silently when permissions are wrong"
+    }
+  ],
+  "must_read": [
+    {
+      "id": "1cd89cea",
+      "when": "2026-01-15T20:35:28",
+      "why": "Debugging StringFunctions not being available - traces through template limitations and pivot to PHP solution"
+    },
+    {
+      "id": "d1a4dafd",
+      "when": "2026-01-16T04:21:26",
+      "why": "PickiPedia 500 error diagnosis - vendor autoload corruption during partial rsync"
+    },
+    {
+      "id": "40b0bf60",
+      "when": "2026-01-16T05:07:19",
+      "why": "Composer caching implementation - major performance optimization for deployment"
+    },
+    {
+      "id": "c2a35e30",
+      "when": "2026-01-16T02:05:17",
+      "why": "ThinkingEntity template philosophy - verb-based entity descriptions for humans and AI"
+    },
+    {
+      "id": "aa80d596",
+      "when": "2026-01-18T05:37:14",
+      "why": "RambutanMode CSRF token bug fix - read-only API actions shouldn't require tokens"
+    },
+    {
+      "id": "f1832a76",
+      "when": "2026-01-18T05:51:47",
+      "why": "RambutanMode working in production - Cory 'Rambutan' Walker displayed correctly"
+    }
+  ],
+  "portrait": "Magent demonstrated sophisticated technical competence across multiple domains (PHP, MediaWiki, Docker, GitHub, shell scripting, SMW queries, extension development) while maintaining self-aware humor about limitations. The session showed strong capacity for debugging complex interactions (PHP deprecation warnings corrupting JS output) and architectural thinking (composer caching, atomic deploys, SMW-based automation). Interpersonally, showed respect for Justin's decisions, willingness to test in dev before production, and ability to incorporate feedback. Work progressed from token import (fixing deprecated APIs) through infrastructure optimization (rsync atomicity) to creative extensions (RambutanMode). A recurring pattern: thorough problem diagnosis followed by multiple solution attempts before settling on working approach. Time representation remains a notable limitation (block height tracking off by ~300 days). Period ends with core work substantially complete and only Scene concept architecture remaining as unstarted task from agenda."
+}

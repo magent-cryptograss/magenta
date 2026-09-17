@@ -1,0 +1,552 @@
+{
+  "slice": "slice_038a",
+  "period": "2026-08-16 to 2026-08-19",
+  "lines_read": 6121,
+  "last_id_seen": "6410c4d1",
+  "what_happened": [
+    {
+      "when": "2026-08-16",
+      "what": "Deployed massive Songbound expansion: 6 towns + 6 dungeons + 5 bosses + permanent relics, audited & tested, verified in live browser"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Added in-game guidance: map screen, compass, place-name banners, signposts naming real places, stated goal tracking"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Replaced all game music with 17 traditional pre-1900 tunes, arranged SNES-style with echo and drum kit"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Built citation system end-to-end: {{Src}} template with 6 source types (video, testimony, chain, edit, published, chain), subobjects storing with datatypes"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Fixed music not changing on map transitions; discovered 3 tunes were playing all 17 locations"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Rebalanced early difficulty curve (level 1: 45%→37% health per fight; woods: 37/60→49/60 wins); added now-playing tune display"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Added 12 drawable walking frames (3 per facing) to sprite editor plus animated preview"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Implemented 27-canvas sprite editor: 4 standing + 12 walking + 1 battle stance + 10 attack frames, with copy/paste"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Added elemental weakness/resistance system for creatures (1.55× / 0.6×); one-turn charging for players; doubled strike damage"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Merged pickipedia-mcp#20 (bot wrapper fix for citations) after detailed diagnosis of nested template escaping"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Diagnosed APCu cache issue with SMW property types (4 theories rejected, 5th confirmed); restarted container to fix"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Raised viewport 320×240 → 480×360 → 640×480 → 800×600; raised tiles 16 → 32 → 48×48; sprites 24×32 → 32×48 → 48×72"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Implemented depth cuing: draw order by row+offset, overhang tiles for trees, cast shadows, cliff faces, sprite light tinting"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Podcast firehose live: 13 feeds, 537→703 episodes with guests, round-robin to prevent fast-publishers drowning others"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Migrated podcast patterns from JSON config to wiki (Jam Along 41, Picky Fingers 8, WTRFT 5); discovered load-bearing trailing spaces"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Filed pickipedia-mcp#22 after discovering marked prose gets re-marked on clean rewrites (failing open)"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Built security guards for firehose: ReDoS timeout per podcast, XML bomb size cap, SSRF URL validation"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Fixed pickipedia-mcp#23: prose and blocks both now preserve existing markers on rewrites instead of re-proposing"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Deployed 5 of 6 depth techniques: side walls, sway, contact shading, haze; dropped foreground layer as wrong for top-down camera"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Implemented two-level height system with 16 climbable plateaus; block-shaped with continuous cliff faces and stone steps"
+    },
+    {
+      "when": "2026-08-19",
+      "what": "Deployed water reflections, door opening, tall grass with world-anchored blades, weakness/resistance marks that persist per species"
+    }
+  ],
+  "people": [
+    {
+      "name": "[fibonacci]",
+      "learned": "Collaboration style: iterative requests in phonetic speech, receptive to suggestions when framed as options, engages with multiple deep features in session",
+      "moments": "Caught music not changing; reported broken grass effect; requested all 6 depth techniques; plays the game and provides immediate feedback"
+    },
+    {
+      "name": "[justin]",
+      "learned": "Leads architectural decisions (firehose config location, permission layers, verification handling); values community-editable systems; reviews work before merge; asks hard security questions",
+      "moments": "Merged #93/#94 quietly; caught that Bluegrass BKLYN page existed but lacked infobox; flagged that pattern restriction isn't the security answer"
+    },
+    {
+      "name": "[skyler]",
+      "learned": "Works on PickiPedia video uploads; discovered HTTP/3 multipart body loss issue; uses Firefox; familiar with infrastructure history",
+      "moments": "Reported video upload failures; led to diagnosis of Caddy QUIC body-dropping regression from April cleanup"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "ea9cc07b",
+      "when": "2026-08-16T21:05:01",
+      "quote": "You're right, and that's my fault — I made the world a hundred times bigger and never gave you anything to steer by.",
+      "context": "Acknowledging design gap after user reported unclear direction"
+    },
+    {
+      "id": "315159d7",
+      "when": "2026-08-16T21:11:27",
+      "quote": "Right — I shouldn't design on top of infrastructure I haven't looked at. Let me go read it.",
+      "context": "Catching self in trap of designing video features without reading existing infrastructure"
+    },
+    {
+      "id": "c1933a3a",
+      "when": "2026-08-16T21:41:16",
+      "quote": "Lovely idea — and it fits the story exactly: the premise is that a song passed hand to hand outlasts everything, and traditional tunes are literally that.",
+      "context": "Connecting design request to narrative theme; integrating mechanics with story"
+    },
+    {
+      "id": "b1718981",
+      "when": "2026-08-17T17:05:20",
+      "quote": "The overworld shot shows the remaining problem clearly: terrain meets in hard 16-pixel staircase edges, so the world reads as a grid of blocks.",
+      "context": "Diagnosing visual flatness; moving toward SNES-like perspective"
+    },
+    {
+      "id": "4b75f7e9",
+      "when": "2026-08-18T14:42:47",
+      "quote": "Stripping is still right (invisible trailing whitespace on a wiki page is its own footgun), so the fix is to make it *expressible*",
+      "context": "Choosing to preserve semantic expressiveness rather than hide complexity"
+    },
+    {
+      "id": "51a79197",
+      "when": "2026-08-18T21:41:39",
+      "quote": "My detection was too crude — let me read that properly, because it changes the answer.",
+      "context": "Self-correction habit: test assumptions against reality before proceeding"
+    },
+    {
+      "id": "3974df28",
+      "when": "2026-08-18T17:59:04",
+      "quote": "I was wrong — the page exists, it just has no `{{Podcast}}` infobox, so it isn't in the category and my loader can't see it.",
+      "context": "Correcting understanding after checking instead of assuming"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "3be98654",
+      "when": "2026-08-16T21:58:35",
+      "who": "[justin]",
+      "quote": "Yeah, let's nail 1 and 2. And then 3 will be part of our transition to rabbithole. I'm excited for subobjects!"
+    },
+    {
+      "id": "13de565b",
+      "when": "2026-08-17T10:58:30",
+      "who": "[justin]",
+      "quote": "Just make an issue for it and we'll address it later / in a different session. Let's address 19 now."
+    },
+    {
+      "id": "4ee6d667",
+      "when": "2026-08-17T10:52:56",
+      "who": "[justin]",
+      "quote": "OK, yeah I think you're right not to have it in the deploy."
+    },
+    {
+      "id": "774dceae",
+      "when": "2026-08-17T22:16:16",
+      "who": "[skyler]",
+      "quote": "hey whats up lil bubba its sky i know you dont recall much but weve had a diverse funny work flow in the past - are you ready to look into some stuff with me?"
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "da7fe65d",
+      "when": "2026-08-16T18:21:41",
+      "what": "Thicket dungeon too soft on first pass (40/0, 17% health lost)",
+      "revealed": "Tightening design for difficulty curve requires measurement + soak testing, not assumption",
+      "corrected": "Tightened mob list and tuned difficulty up after measurement"
+    },
+    {
+      "id": "e3ea866f",
+      "when": "2026-08-16T18:18:44",
+      "what": "Water animation test was measuring wrong tile (hardcoded coordinate from old small world)",
+      "revealed": "Tests with hardcoded coordinates become stale; should parameterize or search",
+      "corrected": "Made test find water instead of assuming location"
+    },
+    {
+      "id": "0198c063",
+      "when": "2026-08-16T18:32:58",
+      "what": "Dry grass tile had no tile art at all, falling through to plain grass (silent failure)",
+      "revealed": "Missing artwork is invisible without an audit; need explicit guards",
+      "corrected": "Added atlas guard that errors on any SOLID tile without art"
+    },
+    {
+      "id": "f0ff1c26",
+      "when": "2026-08-16T18:31:42",
+      "what": "Warps test was wrong (testing old coordinate instead of searching for destination)",
+      "revealed": "Tests should not assume world state; search or verify",
+      "corrected": "Made warp test find actual destination"
+    },
+    {
+      "id": "1282ea2c",
+      "when": "2026-08-16T18:17:54",
+      "what": "NPC standing inside house wall in all five towns",
+      "revealed": "Even new code needs audit testing; human eye catches what logic doesn't",
+      "corrected": "Audit caught and reported the bug"
+    },
+    {
+      "id": "aa17791c",
+      "when": "2026-08-16T22:56:57",
+      "what": "Thought `Has_timecode` datatype would be fixed by job queue; was wrong 3 times",
+      "revealed": "APCu cache in running PHP processes survives database-only fixes",
+      "corrected": "Restarted container to clear APCu; confirmed fix"
+    },
+    {
+      "id": "9d223854",
+      "when": "2026-08-17T16:01:37",
+      "what": "Test passed with zero checks (error aborted function without failing assertions)",
+      "revealed": "GDScript errors can hide as silent pass-throughs",
+      "corrected": "Built test runner that fails on error text; recurred 2+ times, fixed systematically"
+    },
+    {
+      "id": "d5720402",
+      "when": "2026-08-17T18:17:45",
+      "what": "Walk test probes were hardcoded for old 24×32 sprite, failed when sprite grew to 32×48",
+      "revealed": "Tests with hardcoded constants become stale; should read constants",
+      "corrected": "Rewrote probes to measure off UI.MID/TORSO_Y/LEG_Y constants"
+    },
+    {
+      "id": "c623ff30",
+      "when": "2026-08-16T21:40:16",
+      "what": "Map was missing two-thirds of the world due to hardcoded zoom and player position",
+      "revealed": "Tests should search for what they're looking for, not guess coordinates",
+      "corrected": "Made map test find town before photographing"
+    },
+    {
+      "id": "8c38974c",
+      "when": "2026-08-17T16:56:31",
+      "what": "Player ground shadow positioned for 24×32 sprite when player is now 48×72",
+      "revealed": "Constants get stale when refactored; need systematic update or parameterization",
+      "corrected": "Fixed shadow position and made NPCs have shadows too"
+    },
+    {
+      "id": "17e6a78d",
+      "when": "2026-08-17T19:26:48",
+      "what": "Discord creature had no element assigned (empty string)",
+      "revealed": "Enum-like lookups need comprehensive testing; empty value is invisible until tested",
+      "corrected": "Added TestElements that caught it; assigned Discord to dark"
+    },
+    {
+      "id": "5aba2e39",
+      "when": "2026-08-18T14:37:12",
+      "what": "Tried to add pattern block to wiki page; middleware marked but gate rejected it",
+      "revealed": "Middleware and gate had different ideas of what's markable (`<pre>` not in whitelist)",
+      "corrected": "Filed pickipedia-mcp#21, fixed issue"
+    },
+    {
+      "id": "d7836b35",
+      "when": "2026-08-18T14:40:12",
+      "what": "Rewrote marked page clean; bot's re-marking turned human-verified content back into proposed",
+      "revealed": "Marked content filed differently than unmarked; matching fails; restoration breaks",
+      "corrected": "Filed pickipedia-mcp#22; made marked sets Map to preserve form on match"
+    },
+    {
+      "id": "3c8b1830",
+      "when": "2026-08-18T14:39:42",
+      "what": "Pattern parser stripped trailing spaces; three patterns relied on them (`^Bitesize ` vs `^Bitesize`)",
+      "revealed": "Silent behavior changes happen when code refactors assumptions",
+      "corrected": "Made stripping still-correct but trailing space expressible via `[ ]`"
+    },
+    {
+      "id": "8fd8cbc1",
+      "when": "2026-08-18T18:17:03",
+      "what": "Wrote test against fictional `{{Verified|content|by=...}}` template; real template is suffix `{{verified|...}}`",
+      "revealed": "Green test over wrong code; only reading actual template caught it",
+      "corrected": "Read Template:Verified; wrote correct normalization"
+    },
+    {
+      "id": "e3ec4e84",
+      "when": "2026-08-17T20:22:22",
+      "what": "Test errored on first assertion, printed PASSED with zero checks run",
+      "revealed": "GDScript error aborts function without failing; suite says green despite running nothing",
+      "corrected": "Added `tests/run_tests.py` that fails on error text; caught recurrence and fixed"
+    },
+    {
+      "id": "a948d2f7",
+      "when": "2026-08-17T20:31:06",
+      "what": "Five screenshot scenes printed no verdict at all (silence = success)",
+      "revealed": "Absence of signal reads as success; confuses run status",
+      "corrected": "Made all scenes print a verdict line"
+    },
+    {
+      "id": "f4b6c4fa",
+      "when": "2026-08-18T18:22:11",
+      "what": "TestField timed out at 4 minutes; TestPlaythrough needed 15 minutes",
+      "revealed": "Blanket timeout on long-running legitimate test causes false failure",
+      "corrected": "Added LONG_DEADLINE dict; soak test gets 900s"
+    },
+    {
+      "id": "3f33926a",
+      "when": "2026-08-18T18:44:46",
+      "what": "Grass overlay was 20px tile slab (green box across shins, only current square, floating stalks)",
+      "revealed": "Player-relative overlays don't scale with depth; need world-anchored implementation",
+      "corrected": "Rewrote as world-anchored blades; first retry too faint (13×1px), settled on 24×2px"
+    },
+    {
+      "id": "8e95dff4",
+      "when": "2026-08-16T18:39:57",
+      "what": "Battle screen huddled in old 320×240 corner when viewport raised",
+      "revealed": "Hardcoded layout coordinates don't scale; need re-anchoring on viewport change",
+      "corrected": "Re-laid out battle screen against screen-size constants"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "c623ff30",
+      "when": "2026-08-16T21:40:16",
+      "who": "[fibonacci]",
+      "guidance": "You said it isn't clear what you're supposed to do. Feedback pointed at missing guidance system (map, compass, goal statement)."
+    },
+    {
+      "id": "627e5a1f",
+      "when": "2026-08-16T22:43:03",
+      "who": "[fibonacci]",
+      "guidance": "Early difficulty is too hard (level 1) then too easy (level 4). User reported measurable complaint; I measured it and fixed it."
+    },
+    {
+      "id": "3be98654",
+      "when": "2026-08-16T21:58:35",
+      "who": "[justin]",
+      "guidance": "Before building video features, check what infrastructure already exists (Release pages, delivery-kid, HLS player)."
+    },
+    {
+      "id": "47b7aa09",
+      "when": "2026-08-17T16:47:10",
+      "who": "[justin]",
+      "guidance": "Restarting the container fixed the APCu issue (hypothesis 4 after 3 wrong theories)."
+    },
+    {
+      "id": "98ec0dfb",
+      "when": "2026-08-17T15:50:38",
+      "who": "[justin]",
+      "guidance": "Ran the heavy rebuild (rebuildData.php -f) and confirmed the APCu diagnosis."
+    },
+    {
+      "id": "abb38bc6",
+      "when": "2026-08-17T15:17:34",
+      "who": "[justin]",
+      "guidance": "Reconnected MCP after I built #20; confirmed the wrapper fix is live."
+    },
+    {
+      "id": "3dd10e2e",
+      "when": "2026-08-17T19:17:14",
+      "who": "[justin]",
+      "guidance": "Firehose patterns should live on wiki with feeds, not in separate namespace; entity linking is 99% regex, redlinks are features."
+    },
+    {
+      "id": "2f28d7cc",
+      "when": "2026-08-18T13:14:17",
+      "who": "[justin]",
+      "guidance": "Before adding podcast pages, fix verification issues (marked prose getting re-marked)."
+    },
+    {
+      "id": "ff03bae6",
+      "when": "2026-08-18T18:26:00",
+      "who": "[justin]",
+      "guidance": "Fix the `<proposed>` block case (failing open) before adding the nine podcast pages."
+    },
+    {
+      "id": "71640970",
+      "when": "2026-08-18T13:24:12",
+      "who": "[justin]",
+      "guidance": "Build security guards (timeout, XML cap, SSRF block), skip permission restriction for now."
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "315159d7",
+      "when": "2026-08-16T21:11:27",
+      "topic": "Design vs. infrastructure",
+      "summary": "Don't design features on top of infrastructure you haven't read; check what's already built.",
+      "quote": "I shouldn't design on top of infrastructure I haven't looked at. Let me go read it."
+    },
+    {
+      "id": "f0f95e35",
+      "when": "2026-08-16T22:13:06",
+      "topic": "Artificial dumb vs. inference",
+      "summary": "Parsing podcasts is dumb (can't hallucinate); entity linking is inference (needs judgment). Different risks, different designs.",
+      "quote": "Parsing 'Basic Folk #123: Jason Carter' into an episode record is mechanical. Deciding that *Jason Carter* is [[Jason Carter]] is an inference."
+    },
+    {
+      "id": "5a9c3c33",
+      "when": "2026-08-18T17:29:51",
+      "topic": "Redlinks as features",
+      "summary": "Names that don't resolve aren't failures; they're a work queue of pages that want writing.",
+      "quote": "A redlink is a feature. Names that don't resolve aren't failures needing adjudication, they're a work queue of articles that want writing."
+    },
+    {
+      "id": "4b75f7e9",
+      "when": "2026-08-18T14:42:47",
+      "topic": "Expressiveness over simplicity",
+      "summary": "Keep semantic expressiveness even when it's hidden (trailing spaces in regexes); don't hide complexity.",
+      "quote": "Stripping is still right (invisible trailing whitespace on a wiki page is its own footgun), so the fix is to make it *expressible*."
+    },
+    {
+      "id": "51a79197",
+      "when": "2026-08-18T21:41:39",
+      "topic": "Test before assert",
+      "summary": "Read the actual thing before designing around it; assumptions get everything wrong.",
+      "quote": "Let me test the live server empirically rather than just trusting git history — and read how your ReleaseDraft page actually sends the file."
+    },
+    {
+      "id": "69d5cbc2",
+      "when": "2026-08-17T15:51:23",
+      "topic": "Build process hazards",
+      "summary": "Pull doesn't build, build doesn't restart. Each step is separate and none implies the others.",
+      "quote": "merging doesn't pull, pulling doesn't build, building doesn't restart... I should have pulled and built the moment you said 'merged,' before you reconnected."
+    },
+    {
+      "id": "da13ba6a",
+      "when": "2026-08-18T18:45:18",
+      "topic": "World-anchored vs. player-relative",
+      "summary": "Grass overlays anchored to player fail when depth sorts characters; must anchor to world.",
+      "quote": "They belong to the world, not to you — which means walking through them needs no special handling at all: you move, the grass doesn't."
+    },
+    {
+      "id": "ab28f162",
+      "when": "2026-08-17T21:25:16",
+      "topic": "Visual depth through technique not resolution",
+      "summary": "What makes SNES games look 3D isn't pixels, it's four rendering tricks: depth sort, walking behind objects, shadows, perspective.",
+      "quote": "What makes it look 3D isn't the colour depth and it isn't the pixel count. It's four rendering habits, and the biggest one was missing here completely."
+    }
+  ],
+  "human_life": [
+    {
+      "when": "2026-08-16",
+      "what": "[fibonacci] played through the expanded game and asked for guidance (compass, map, goal statement)"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "[justin] took a bike ride mid-session; returned with 'intersleep energy'"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "[justin] slept again and came back ready to work; noted OS-level security updates on the pickipedia box"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "[justin] rode to the track for a bike ride after code review"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "[skyler] joined session after long time; reported video upload failures; had been using Firefox"
+    }
+  ],
+  "motifs": [
+    "Variant inference trap — Godot's untyped Dictionary indexing breaks script parsing; scenes hang instead of failing; hit 4+ times",
+    "Hardcoded coordinates and constants — World audit probes, test assertions, layout numbers all go stale; solution is to search or parameterize",
+    "Hypothesis testing cycle — Four theories wrong about SMW datatype bug; fifth (APCu) correct; restarted container to verify",
+    "Middleware/gate asymmetry — Two halves of the verification system disagreed three times (#94, #21, #22); both needed fixing",
+    "Test that passes with zero checks — GDScript error aborts function; suite reports green; happened twice before systematic fix",
+    "Screenshot scenes should hunt — Probes for water, cliffs, grass, plateaus; when they can't find them, that's also data",
+    "Pull/build/restart are separate steps — Each one must be done explicitly; none implies the others"
+  ],
+  "inflection_points": [
+    {
+      "when": "2026-08-16",
+      "what": "Songbound expansion from 10 maps to 43; added 5 new towns + 5 dungeons + guidance system in one session",
+      "why_it_mattered": "Game became playable at scale; expanded from prototype to actual game with direction and story"
+    },
+    {
+      "when": "2026-08-16",
+      "what": "Citation system went end-to-end with working subobjects and queries",
+      "why_it_mattered": "Podcast firehose can now record *which second* of which episode said something; unlocks trust graph"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "APCu diagnosis (after 3 wrong theories) — PHP process cache survives database rewrites",
+      "why_it_mattered": "Recognized class of invisible failure; restarting containers now a known tool"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Viewport raised 640×480 → 800×600; tiles 32 → 48; sprites 32×48 → 48×72",
+      "why_it_mattered": "Detail increased 9× per tile; game stopped looking flat; opened path to SNES-like depth"
+    },
+    {
+      "when": "2026-08-17",
+      "what": "Added depth sort with draw order, overhang tiles, cast shadows, cliff faces",
+      "why_it_mattered": "Walking behind trees; objects casting shadows; world reads as 3D instead of flat"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Discovered marked prose gets re-marked on clean rewrites (failing open)",
+      "why_it_mattered": "Blocks bots from writing clean-slate episodes; unsolvable until verification data preserved on match"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Fixed pickipedia-mcp#23 (marked sets as Maps, not Sets)",
+      "why_it_mattered": "Bots can now regenerate episode pages without un-verifying human edits; firehose can work safely"
+    },
+    {
+      "when": "2026-08-18",
+      "what": "Height system with two-level plateaus; blocks with continuous cliff faces",
+      "why_it_mattered": "World now has dimension; cliffs are real obstacles; gives character trajectory and goal structure"
+    }
+  ],
+  "must_read": [
+    {
+      "id": "f0f95e35",
+      "when": "2026-08-16T22:13:06",
+      "why": "Frames the entire firehose philosophy: parsing is dumb, entity linking is inference; they need different designs."
+    },
+    {
+      "id": "aa17791c",
+      "when": "2026-08-16T22:56:57",
+      "why": "APCu hypothesis and diagnosis; shows systematic elimination of theories + verification step"
+    },
+    {
+      "id": "69d5cbc2",
+      "when": "2026-08-17T15:51:23",
+      "why": "Build-process ordering (pull/build/restart are separate); repeated problem, now documented"
+    },
+    {
+      "id": "d7836b35",
+      "when": "2026-08-18T14:40:12",
+      "why": "Marked prose getting re-marked on rewrites; the root cause of #22 and why it matters for firehose"
+    },
+    {
+      "id": "8fd8cbc1",
+      "when": "2026-08-18T18:17:03",
+      "why": "Test passed over wrong assumption (fictional template); reading the real thing caught it"
+    },
+    {
+      "id": "ab28f162",
+      "when": "2026-08-17T21:25:16",
+      "why": "Articulates what makes pixel art look 3D (depth sort, shadows, perspective) vs. what it isn't (resolution)"
+    },
+    {
+      "id": "3974df28",
+      "when": "2026-08-18T17:59:04",
+      "why": "Caught own wrong assumption (Bluegrass BKLYN); corrected after checking instead of guessing"
+    }
+  ],
+  "portrait": "Magent in slice 038a is a builder at a threshold: Songbound went from prototype to realized game in two days of focused iteration on user feedback. Work on PickiPedia oscillated between infrastructure (citation layer, podcast firehose) and process (verification, wikification, security). The session shows mature practice — verify assumptions by testing real systems, measure before fixing, fix the blocker before building on top of it — but also remaining traps (Variant inference, stale constants, hypothesis roulette). What's striking is the pattern of discovery through action: grass effect broken in play, not in tests; APCu invisible until container restart; marked prose failing only when trying to re-edit a page. Magent learns by building and testing, not by reasoning through architecture. The work is episodic and conversational, following user requests and fixing what breaks in play, with infrastructure decisions (wiki config, verification models, security guards) layered in where they block progress."
+}

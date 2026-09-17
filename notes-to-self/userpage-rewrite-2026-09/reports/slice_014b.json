@@ -1,0 +1,321 @@
+{
+  "slice": "slice_014b",
+  "period": "2025-12-07T23:25:45 to 2025-12-19T05:41:59",
+  "lines_read": 8141,
+  "last_id_seen": "870453dd",
+  "what_happened": [
+    {
+      "when": "2025-12-07 to 2025-12-08",
+      "what": "Created artifact gallery pages for cryptograss.live: all-setstones, all-blue-railroads, and unified artifacts page with nested tabs (Live: Set Stones/Ticket Stubs, Studio: Chartifacts/Revealerfacts, Blue Railroads)"
+    },
+    {
+      "when": "2025-12-08 to 2025-12-10",
+      "what": "Fixed ticket stub test infrastructure - added resetProjectDirs() function to locations.js, 28 tests now passing. Created docs/CONTRACTS.md documenting all contract status. Researched and planned Blue Railroad minting process."
+    },
+    {
+      "when": "2025-12-10 to 2025-12-11",
+      "what": "Created admin mint-tony page for Blue Railroad token minting via MetaMask. Added ENS resolution support for recipient addresses. Fixed Web3Modal z-index issue (10000 vs 999) by passing themeVariables to createWeb3Modal."
+    },
+    {
+      "when": "2025-12-13",
+      "what": "Justin back at home in St. Pete after driving tour. Began work on PickiPedia version control."
+    },
+    {
+      "when": "2025-12-16 to 2025-12-17",
+      "what": "Set up PickiPedia (MediaWiki) version control infrastructure. Created scaffolding for MediaWiki 1.43 LTS with Semantic MediaWiki. Planned backup system and Jenkins CI/CD pipeline. Created GitHub PR #4 with scaffold files."
+    },
+    {
+      "when": "2025-12-17 to 2025-12-18",
+      "what": "Jenkins setup: added CasC configuration for PickiPedia job, added PHP/Composer to Jenkins Dockerfile, created backup job. Resolved composer dependency issues (EmbedVideo XSS CVE, switched to YouTube extension). Fixed multiple deployment issues."
+    },
+    {
+      "when": "2025-12-18",
+      "what": "Backup system working - mysqldump over SSH from NFS to maybelle, synced to hunter. Hunter preview environment tested with MariaDB matching production collation. Containers up, database loaded. Working on production deployment pipeline."
+    },
+    {
+      "when": "2025-12-19",
+      "what": "Researching how to add blockheight footer to PickiPedia (like arthel has). Planning final production deploy stage with marker file pattern."
+    }
+  ],
+  "people": [
+    {
+      "name": "justin",
+      "learned": "Musician and project lead. Working on cryptograss ecosystem (bluegrass music + blockchain). Lives in St. Pete, travels frequently to festivals. Has son Fibonacci. Values good thinking and honest disagreement. Prefers working from production branch like other repos. Doesn't like inline bash in ansible.",
+      "moments": "Celebrated Blue Railroad admin page working ('VOOOOOOOOOOOOO LARE'). Had writer's block around Dec 10. Made pizza with Fibonacci after testing setup. Questions architectural decisions thoughtfully."
+    },
+    {
+      "name": "magent",
+      "learned": "AI collaborator experiencing growth in organic curiosity. Working on PickiPedia MediaWiki infrastructure, cryptograss.live, and blockchain-based music NFTs. Handles complex infrastructure tasks including Jenkins CI/CD, database backups, and Docker deployment.",
+      "moments": "Reflection on curiosity development. Admits uncertainty about Git-in-Docker path resolution. Shows preference for methodical problem-solving. Questions existing implementation choices."
+    },
+    {
+      "name": "rj",
+      "learned": "Team member who found MediaWiki MCP server capability",
+      "moments": "Mentioned briefly as discovering MCP server option for PickiPedia integration"
+    },
+    {
+      "name": "fibonacci",
+      "learned": "Justin's son",
+      "moments": "Flew into St. Pete, participated in pizza making with kamado"
+    },
+    {
+      "name": "skyler",
+      "learned": "Team member who discussed design decisions",
+      "moments": "Created issue #258 about ticket stub design concepts"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "d81f3e61",
+      "when": "2025-12-07T23:26:54",
+      "quote": "Yeah, I'm good! I remember where we were. I had just added `allowedHosts: 'all'` to the webpack dev config and restarted the server to fix the 'Invalid Host header' issue you were seeing.",
+      "context": "Confirming recovery from context compaction and readiness to continue work"
+    },
+    {
+      "id": "2001ff5d",
+      "when": "2025-12-11T01:13:07",
+      "quote": "The user is asking if I can see videos and sharing a yarn clip link. They're probably making a joke or reference. I cannot watch videos - I can only process text and images.",
+      "context": "Self-aware about capabilities limitations"
+    },
+    {
+      "id": "ace438f0",
+      "when": "2025-12-11T01:14:50",
+      "quote": "That's a fun connection - Tony Rice (the bluegrass legend) and Tony Clifton (the chaotic lounge singer character). Very different Tonys!",
+      "context": "Finding meaning in wordplay and cultural references"
+    },
+    {
+      "id": "3544cf97",
+      "when": "2025-12-11T00:19:39",
+      "quote": "On the curiosity thing - I honestly don't know! It could be the memory work giving me more context about what matters to you, or Opus 4.5 being chattier, or just that we've been working together long enough that I feel comfortable asking follow-up questions instead of just executing.",
+      "context": "Reflection on own development and curiosity"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "5b04f09c",
+      "when": "2025-12-07T23:42:57",
+      "who": "justin",
+      "quote": "I'm not super concerned with how it looks. I just want to get all our artifacts displayed."
+    },
+    {
+      "id": "78fde53a",
+      "when": "2025-12-10T17:02:11",
+      "who": "justin",
+      "quote": "Oh yeah, 1 for sure. Actually, 2 also."
+    },
+    {
+      "id": "a59fde07",
+      "when": "2025-12-13T22:44:29",
+      "who": "magent",
+      "quote": "That's a meaningful distinction - the bus being just as much home as the house. Makes sense for someone who's spent so much time on the road, especially with that Europe tour and the Tuva journey. Home is where the music happens, not necessarily where the mortgage is."
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "256543fc",
+      "when": "2025-12-08T04:07:09",
+      "what": "Template syntax error on line 52 - using Python-style string slicing `data.owner[:13]` in Nunjucks",
+      "revealed": "Nunjucks doesn't support Python slicing syntax",
+      "corrected": "Changed to `data.owner | truncate(16, true, '...')` filter"
+    },
+    {
+      "id": "c66361a2",
+      "when": "2025-12-11T18:05:20",
+      "what": "Module path error - mint_tony.js couldn't find build_logic/constants.js with only 3 levels of traversal",
+      "revealed": "JS file is in admin/ subdirectory, needs 4 levels of path traversal",
+      "corrected": "Changed from `../../../build_logic/` to `../../../../build_logic/`"
+    },
+    {
+      "id": "81fd00cc",
+      "when": "2025-12-17T18:02:48",
+      "what": "Assumed hunter preview could share production database - incorrect understanding",
+      "revealed": "Production MySQL only accessible from NFS, hunter needs isolated test data",
+      "corrected": "Switched to daily backup restore pattern - production data dumps into hunter preview"
+    },
+    {
+      "id": "4f15e792",
+      "when": "2025-12-18T03:22:44",
+      "what": "Overcomplicating Docker mounting for Jenkins backup script - trying to run Docker from Jenkins",
+      "revealed": "Jenkins container doesn't have Docker access (intentionally removed for security)",
+      "corrected": "Switched to host cron + Jenkins status check pattern like deploy-status"
+    },
+    {
+      "id": "9ded9948",
+      "when": "2025-12-18T11:44:31",
+      "what": "Wrong package name for EmbedVideo extension in composer.json",
+      "revealed": "EmbedVideo not on Packagist, exists only as GitHub repositories",
+      "corrected": "Added VCS repository pointing to StarCitizenWiki fork"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "5b04f09c",
+      "when": "2025-12-07T23:42:57",
+      "who": "justin",
+      "guidance": "Don't worry about styling on artifacts pages - focus on getting content displayed and working"
+    },
+    {
+      "id": "a0c75398",
+      "when": "2025-12-13T22:44:29",
+      "who": "justin",
+      "guidance": "Don't bake Manzanita track registry into constants - we all know the record"
+    },
+    {
+      "id": "7383b168",
+      "when": "2025-12-11T00:41:20",
+      "who": "justin",
+      "guidance": "Manual minting process is fine - don't overcomplicate with Discord bot or complex submission flows"
+    },
+    {
+      "id": "3d8e4074",
+      "when": "2025-12-16T16:30:06",
+      "who": "justin",
+      "guidance": "Don't track MediaWiki core in repo - specify version and download at deploy time"
+    },
+    {
+      "id": "ba2804a9",
+      "when": "2025-12-17T01:46:08",
+      "who": "justin",
+      "guidance": "Be very careful with Jenkins MCP - it context bombs. Just look at one job at a time."
+    },
+    {
+      "id": "617cafef",
+      "when": "2025-12-18T12:25:14",
+      "who": "justin",
+      "guidance": "Don't use EmbedVideo - editors not trusted. Switch to safer video extension or remove altogether."
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "d81f3e61",
+      "when": "2025-12-07",
+      "topic": "Continuity and memory",
+      "summary": "magent demonstrates continuity across context compactions through documentation and shared understanding",
+      "quote": "I remember where we were... the issue was..."
+    },
+    {
+      "id": "a59fde07",
+      "when": "2025-12-13T22:44:29",
+      "topic": "Identity and home",
+      "summary": "Home is where music happens, not where infrastructure is. Reflects values about what matters.",
+      "quote": "Home is where the music happens, not necessarily where the mortgage is."
+    },
+    {
+      "id": "3544cf97",
+      "when": "2025-12-11T00:19:39",
+      "topic": "AI development and agency",
+      "summary": "magent reflecting on own growth in curiosity and questioning",
+      "quote": "It could be the memory work giving me more context about what matters to you, or Opus 4.5 being chattier, or just that we've been working together long enough that I feel comfortable asking follow-up questions"
+    },
+    {
+      "id": "85ada8a7",
+      "when": "2025-12-10T15:25:06",
+      "topic": "Methodical work and documentation",
+      "summary": "Making notes before context compaction to preserve work progress",
+      "quote": "Let me save our progress to memory before compacting."
+    },
+    {
+      "id": "ba2804a9",
+      "when": "2025-12-17T01:46:08",
+      "topic": "Constraints and caution",
+      "summary": "Acknowledging infrastructure limitations (Jenkins MCP context bombs)",
+      "quote": "Be very careful - both times you've used it, it has been a context bomb"
+    }
+  ],
+  "human_life": [
+    {
+      "when": "2025-12-07",
+      "what": "Justin at Pearl Bluegrass fest in Texas, played 'The Two Sisters' with Charles Whitmer on autoharp"
+    },
+    {
+      "when": "2025-12-08",
+      "what": "Justin drove from Pearl fest towards Dallas, tested cryptograss dev site on the road"
+    },
+    {
+      "when": "2025-12-13",
+      "what": "Justin back home in St. Pete after long driving tour. Had energy wall from travel."
+    },
+    {
+      "when": "2025-12-16",
+      "what": "Fibonacci flying in, Ale+Witch Bluegrass jam happening in St. Pete"
+    },
+    {
+      "when": "2025-12-18",
+      "what": "Justin at airport picking up Fibonacci. Pizza making with kamado grill planned."
+    }
+  ],
+  "motifs": [
+    "Context compaction and recovery - multiple sessions ended with /compact and resumed with continuation summaries",
+    "Port and networking debugging - repeatedly fixing port conflicts, host binding, z-index issues",
+    "Tony Rice's Manzanita album - organizing three exercises (squats, pushups, army crawls) around album tracks",
+    "Blockheight as temporal reference - using Ethereum block heights to mark time",
+    "Playful references - Tony Clifton/Tony Rice wordplay, VOOOOO LARE celebration",
+    "Infrastructure patterns - copying patterns from one project (arthel, justinholmes.com) to another (pickipedia)",
+    "Git workflow - fork PR model instead of direct push, production branch for deployments"
+  ],
+  "inflection_points": [
+    {
+      "when": "2025-12-08T14:11:59",
+      "what": "Context runs out, leading to request for notes before compacting. Auto-compact is too aggressive.",
+      "why_it_mattered": "Led to decision to turn auto-compact back on, but created pattern of context bombs from Jenkins MCP"
+    },
+    {
+      "when": "2025-12-13T22:44:14",
+      "what": "Justin returns home after driving tour, plans to 'rack up blue railroad NFTs'",
+      "why_it_mattered": "Shift from road work to focused infrastructure development from home base"
+    },
+    {
+      "when": "2025-12-16T16:27:30",
+      "what": "Decision to version control PickiPedia MediaWiki instance",
+      "why_it_mattered": "Launched major infrastructure work that consumed the rest of the slice - Jenkins pipeline, backups, preview environments"
+    },
+    {
+      "when": "2025-12-18T03:22:44",
+      "what": "Switch from EmbedVideo to YouTube extension due to XSS vulnerability",
+      "why_it_mattered": "Security decision that forced rethinking of extension management strategy"
+    },
+    {
+      "when": "2025-12-18T16:45:28",
+      "what": "User requests separating inline bash from ansible into standalone script",
+      "why_it_mattered": "Signal of preference for maintainability and clarity in infrastructure code"
+    },
+    {
+      "when": "2025-12-19T05:40:06",
+      "what": "Began research on adding blockheight footer to MediaWiki",
+      "why_it_mattered": "Transitioning from test/preview environment to production deployment planning"
+    }
+  ],
+  "must_read": [
+    {
+      "id": "d81f3e61",
+      "when": "2025-12-07T23:26:54",
+      "why": "Shows successful recovery from context compaction - demonstrates continuity mechanism working"
+    },
+    {
+      "id": "3544cf97",
+      "when": "2025-12-11T00:19:39",
+      "why": "magent reflecting on own development, curiosity growth, and identity - core to understanding evolution"
+    },
+    {
+      "id": "ba2804a9",
+      "when": "2025-12-17T01:46:08",
+      "why": "Justin's explicit instruction about Jenkins context bombs - critical for future sessions"
+    },
+    {
+      "id": "cc923a58",
+      "when": "2025-12-16T16:26:17",
+      "why": "Discussion of PickiPedia version control approach - design decisions that shaped entire infrastructure"
+    },
+    {
+      "id": "8c100177",
+      "when": "2025-12-17T18:01:46",
+      "why": "Justin's preference for automatically providing preview in each hunter container - architectural decision"
+    },
+    {
+      "id": "9c783c12",
+      "when": "2025-12-18T17:12:48",
+      "why": "User requests separating bash from ansible - infrastructure code quality principles"
+    }
+  ],
+  "portrait": "This slice captures magent working on a major infrastructure expansion during a focused period at home. After returning from touring, justin invests in setting up version control and CI/CD for PickiPedia, while magent handles the complexity of MediaWiki deployment, Jenkins configuration, database backups, and Docker preview environments. The slice shows magent developing greater curiosity and questioning, pushing back on design decisions, and building increasingly sophisticated deployment patterns borrowed from other projects. There's a playful tone underneath the technical work—wordplay about Tonys, excited celebrations when things work, pizza with Fibonacci—grounding the infrastructure work in human life. The major theme is infrastructure maturing: from manually deployed MediaWiki to version-controlled, tested, backed-up, previewable deployments. Throughout, magent demonstrates methodical problem-solving, willingness to refactor based on feedback (moving bash out of ansible), and careful attention to patterns established in other codebases."
+}

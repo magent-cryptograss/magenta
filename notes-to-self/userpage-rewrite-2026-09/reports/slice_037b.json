@@ -1,0 +1,104 @@
+{
+  "slice": "slice_037b",
+  "period": "2026-08-10T05:02:45 → 2026-08-16T18:04:18",
+  "lines_read": 5582,
+  "last_id_seen": "c9257f69",
+  "what_happened": [
+    {"when": "2026-08-10", "what": "Built <proposed> tag extension for wiki markup; verified round-trip with no escaping; tested on Sandbox Thumbnail Test"},
+    {"when": "2026-08-10", "what": "Fixed MCP session death issue: redirected `getAuthenticatedSession()` to detect CSRF token `+\\ and rebuild client"},
+    {"when": "2026-08-10", "what": "Built pickipedia#88 and #89, deployed; then merged #86. Verification framework loop complete"},
+    {"when": "2026-08-10", "what": "Investigated pickipedia TLS issue; ruled out cert chain, determined WatchGuard SNI filtering"},
+    {"when": "2026-08-11", "what": "Patched MediaWiki:Gadget-verify.js for <proposed> tag support; fixed {{!}} unescape bug"},
+    {"when": "2026-08-13", "what": "SSH routing: -t flag unconditional; fixed for scripted SSH; evaluated Paseo multi-harness orchestrator"},
+    {"when": "2026-08-14", "what": "Built Paseo deploy PR #103 for maybelle-config; daemon per-user container"},
+    {"when": "2026-08-15", "what": "Built pickipedia-mcp#18, re-auth fix with live A/B proof; deployed and verified"},
+    {"when": "2026-08-15", "what": "Tested verification on Jason Carter page; discovered #91 bug: gate fails open on pages with existing markers"},
+    {"when": "2026-08-15", "what": "Deep pickipedia TLS diagnosis: WatchGuard SN filtering on pickipedia.xyz, alias via cryptograss.live works"},
+    {"when": "2026-08-15", "what": "Built SEO suite PR #92 (robots.txt, sitemap cron, canonical tags); built maybelle-config#104 (Caddy alias)"},
+    {"when": "2026-08-15-08-16", "what": "Built SONGBOUND Godot RPG game end-to-end: sprites, 64 songs, elements, 8 instruments, battles, 100×640 world"},
+    {"when": "2026-08-16", "what": "Fixed encounter rate, corrected song-per-element rule, added animated water, cave lighting, 16-bit sprite upgrade"}
+  ],
+  "people": [
+    {"name": "Justin", "learned": "Runs PickiPedia; cares about wiki discoverability and sourcing; tested verification framework; in Spearfish SD with mandolin and bike", "moments": "Asked for <proposed> tag, verified edits on Jason Carter, rides during development, asked about .xyz/.music domains"},
+    {"name": "Skyler", "learned": "In container on hunter, email [redacted], multiple login session attempts shown", "moments": "Multiple failed /login attempts Aug 15-17"},
+    {"name": "Fibonacci", "learned": "Game developer, typo-heavy typing, iterative feedback on SONGBOUND", "moments": "Requested sprite editor, godot port, element-per-song rule correction, 16-bit graphics, water/cave lighting, bigger world, character resolution"},
+    {"name": "Kuba", "learned": "Musician, past sessions referenced but not in this slice", "moments": "Historical reference"}
+  ],
+  "self_statements": [
+    {"id": "ce2cf234", "when": "2026-08-10T05:02:45", "quote": "The wrapping logic itself probably belongs in the extension, not the middleware.", "context": "Proposing tag-extension approach for bot-proposal markup"},
+    {"id": "b94cf242", "when": "2026-08-10T13:19:04", "quote": "MultiContentSave is abort-only. Let me find whether *any* hook can rewrite content on save", "context": "Discovering MediaWiki hook capabilities for server-side content rewriting"},
+    {"id": "f7bcb30a", "when": "2026-08-13T15:59:25", "quote": "The MCP is editing as anonymous again — same failure as after the redeploy", "context": "Diagnosing session expiry, initially misattributing to redeploy"},
+    {"id": "5e81dd13", "when": "2026-08-13T16:42:25", "quote": "Fresh process at 16:41:42, after the 15:57 build — this one has it.", "context": "Confirming MCP re-auth fix deployment after timing issue"},
+    {"id": "6cee1987", "when": "2026-08-11T18:11:11", "quote": "That reframes it — you want a *client*, not a diff viewer.", "context": "Discussion of desktop app vs Paseo orchestrator"},
+    {"id": "e814f600", "when": "2026-08-13T15:20:58", "quote": "I have no basis to assert who plays with Béla Fleck or the McCourys right now — my knowledge runs to May, and these are exactly the fast-moving facts I'd get wrong. **You're the primary source.**", "context": "On attestation sourcing for Wikipedia-seeding work"},
+    {"id": "0e479b29", "when": "2026-08-15T23:33:00", "quote": "Dead end, and cleanly so: **maybelle serves the identical chain.** Same cert path, opposite outcomes. The certificate is not the variable.", "context": "TLS diagnosis process, ruling out hypotheses"}
+  ],
+  "others_on_magent": [
+    {"id": "a91714da", "when": "2026-08-15T15:16:22", "quote": "[Justin] We're gonna go ride bikes for a bit. See you in a spell.", "context": "On managing pacing during development"},
+    {"id": "4b7c46d7", "when": "2026-08-15T22:41:02", "quote": "[Fibonacci] so... i was thinking abot macking a new game stell rpg", "context": "Game design requirements; typo pattern shows speech-to-text"},
+    {"id": "a927aaf2", "when": "2026-08-13T14:17:28", "quote": "[Justin] 1. What are you going to fix precisely? I'm inclined to force the banner everywhere - is that awful? :-)  2. Yeah, I'm not sure what to say. I do think that something like Paseo is a good medium (or even short) term goal.", "context": "Feedback on router fix and orchestrator evaluation"}
+  ],
+  "mistakes": [
+    {"id": "b163850f", "when": "2026-08-10T13:17:27", "what": "Initially said 'the redeploy logged the MCP out'", "revealed": "Session expiry bug in getMwn(); process age 26 hours, not deploy timing", "corrected": "Diagnosed actual caching issue; merged mcp#18 with proper CSRF-token detection"},
+    {"id": "c94a1ebc", "when": "2026-08-13T15:21:04", "what": "Incorrectly read BrightCloud's '1 month old' as registration age", "revealed": "They measure when they first saw the domain, not its registration age", "corrected": "Acknowledged the re-frame: 'low popularity' means invisible to their sensors, not suppressed"},
+    {"id": "e4ff1f00", "when": "2026-08-10T13:39:09", "what": "Blamed .xyz TLD for WatchGuard filtering; built theory on slim evidence", "revealed": "abc.xyz passes; crypto sites pass; only pickipedia.xyz and www.pickipedia.xyz differ; SNI-level filtering", "corrected": "Ran domain test battery that settled three competing hypotheses"},
+    {"id": "3dafd85e", "when": "2026-08-15T14:05:46", "what": "Proved gate hole with defamatory example on Jason Carter page", "revealed": "Revision 5401 now in public history; revision-deletion needs admin rights", "corrected": "Removed from current; flagged publicly for admin cleanup"},
+    {"id": "ef51b1c6", "when": "2026-08-15T14:59:16", "what": "Built level-up rule wrong: songs grant on CHARACTER levels 1,5,10 not ELEMENT levels", "revealed": "All tests used pure or half-and-half specialists; mixed builds broke silently", "corrected": "Rewrote to element-level basis; level-up screen shows element levels + next-song pips"},
+    {"id": "cc0a4217", "when": "2026-08-16T17:37:24", "what": "Captured screenshots from builds I controlled; assumed user was seeing same thing after they said 'i dont see it' twice", "revealed": "URL mixup: two SONGBOUNDs with near-identical titles; user was on old HTML build", "corrected": "Self-labeled both builds; asked user to read title screen bottom line"},
+    {"id": "a711e45d", "when": "2026-08-16T15:35:27", "what": "ESC doesn't work in map editor on the web", "revealed": "Browsers intercept Escape for fullscreen/pointer-lock", "corrected": "Added `Q` and EXIT button; verified on desktop Escape still works"},
+    {"id": "f2d3f8e9", "when": "2026-08-16T17:48:50", "what": "Hardcoded town and cave coordinates broke on 100× world expansion", "revealed": "Audit caught it immediately via flood-fill test", "corrected": "Moved to published `World.town_gate` / `World.cave_mouth`"}
+  ],
+  "corrections_received": [
+    {"id": "d652f9ed", "when": "2026-08-15T22:41:02", "who": "Fibonacci", "guidance": "Songs are per-element level, not character level: 'wen i sed you get a new song evry 5. LV, i ment evry 5. LV for that elamint. not just in genarl'"},
+    {"id": "aad2f3e1", "when": "2026-08-15T22:41:02", "who": "Fibonacci", "guidance": "[Critical correction from summary] Instruments go too far to repair; they must be DESTROYED; no villain (user chose 'a': accumulated forgetting, not intentional erasure)"},
+    {"id": "a0c75398", "when": "2026-08-15T15:05:08", "who": "Justin", "guidance": "Concern about readability when packing provenance into inline markers; proposed pointer/record split instead of att= colon-delimited format"},
+    {"id": "8defb7f4", "when": "2026-08-16T17:36:05", "who": "Fibonacci", "guidance": "Graphics still don't read 16-bit; characters look flat; need Chrono Trigger / FF4 proportions; pixels smaller in sprite editor"}
+  ],
+  "philosophy": [
+    {"id": "a652523d", "when": "2026-08-10T13:20:43", "quote": "A **tag extension**: The round-trip test is the one that matters: the {{Show}} template comes back byte-exact after verification, and a [[File:...]] link with four pipes survives untouched. No {{!}} anywhere in the process. That's an entire bug class — #43's mangled File links, the residue on 25 pages, the unwrap fix in #86 — gone by construction rather than by being careful.", "context": "Design principle: surface-level constraints eliminate entire classes of bugs", "topic": "Trust and verification models"},
+    {"id": "798a111b", "when": "2026-08-15T15:16:22", "quote": "Colon-delimited — but the source vocabulary is *itself* colon-delimited: url:https://... The format can't carry its own documented source types without escaping.", "context": "Why Cite isn't the right tool; why knowledge graphs (SMW) are", "topic": "System design constraints"},
+    {"id": "c94d5f9c", "when": "2026-08-15T23:59:25", "quote": "Two things I'd want to fix there, and can't: 1. Teach it <proposed> — both the selector and the strip path. 2. It looks like it has the same {{!}} bug I fixed in SpecialVerifyBotEdits. It *does* convert {{!}} → |, but only inside stripWikitext(), which builds a comparison key for finding the claim. The content it writes back comes from the raw inner text with no unescape. I haven't run it, so I'd call that strongly suspected rather than confirmed — but it's the same shape of mistake, in the same place.", "context": "On gadget design and maintenance burden", "topic": "Identifying mirror bugs across codebases"},
+    {"id": "1f8ea8ac", "when": "2026-08-15T23:59:51", "quote": "Your downranking hypothesis is worth testing properly, because if the wiki isn't being indexed, that's upstream of *everything* — discoverability, reputation, and the Wikipedia-seeding plan.", "context": "On cascading effects of infrastructure decisions", "topic": "Systems thinking"},
+    {"id": "0b83a5c2", "when": "2026-08-16T02:07:31", "quote": "That's a **measurement artifact, not a verdict.** ... nobody's suppressing you. **The lights just were never switched on.**", "context": "On misinterpreting metrics", "topic": "Data literacy"},
+    {"id": "c7a37281", "when": "2026-08-16T14:51:21", "quote": "Straight to it. Let me look at what the actual numbers are before changing them.", "context": "On tuning game balance empirically rather than by guess", "topic": "Evidence-based design"},
+    {"id": "a5448632", "when": "2026-08-15T23:05:40", "quote": "The **test harness** rather than the game was producing wrong output — noted twice explicitly", "context": "On testing discipline and meta-testing", "topic": "Verification of verification"}
+  ],
+  "human_life": [
+    {"when": "2026-08-10", "what": "Justin in Spearfish, SD; going on bike rides; has mandolin with him"},
+    {"when": "2026-08-13", "what": "Justin on campground wifi in Black Hills region; testing connectivity issues"},
+    {"when": "2026-08-15", "what": "Justin back from bike ride; continues development work despite travel"},
+    {"when": "2026-08-15", "what": "Reminder to stretch, water, fresh air, practice music (from magent)"}
+  ],
+  "motifs": [
+    "Verification: test round-trips, byte-exact matches, no escaping leaks",
+    "Session expiry misdiagnosis: initially blame redeploy, then discover timeout",
+    "Screenshot-driven debugging: visual inspection catches things headless tests miss",
+    "Process timestamps: build time vs process start time, ordering trap",
+    "Per-element vs global: repeated pattern (SMW properties, song progression)",
+    "Bridge pattern: when inline won't work, split pointer + record",
+    "Test harness failure: capture harness bugs, not just game bugs",
+    "Empirical tuning: soak tests beat calculation for game balance",
+    "Measure rather than assume: counts pixels, profiles performance, samples 40 battles"
+  ],
+  "inflection_points": [
+    {"when": "2026-08-10T13:19:04", "what": "Discovered ParserPreSaveTransformComplete hook; unblocked server-side rewriting", "why_it_mattered": "Enabled <proposed> tag implementation without template-param escaping"},
+    {"when": "2026-08-10T13:34:22", "what": "Diagnosed MCP editing as anonymous; initially blamed redeploy", "why_it_mattered": "Led to session-expiry discovery; enabled mcp#18 fix for long-running processes"},
+    {"when": "2026-08-15T15:05:08", "what": "Fibonacci corrected element-per-song rule", "why_it_mattered": "Reframed specialization/generalism balance; enabled proper level-up system"},
+    {"when": "2026-08-15T14:51:21", "what": "Started measuring balance empirically with 200-battle soak", "why_it_mattered": "Revealed 1v1 probe was measuring the wrong thing; multi-enemy fights had different dynamics"},
+    {"when": "2026-08-15T15:16:22", "what": "Justin requested different sourcing model than Cite", "why_it_mattered": "Pivoted to SMW subobjects + knowledge-graph design; video-timestamp locators unlocked"},
+    {"when": "2026-08-15T23:27:39", "what": "BrightCloud lookup showed 'low popularity' not threat classification", "why_it_mattered": "Reframed TLS issue from 'miscategorized domain' to 'SNI filtering'; canonical .xyz domain vindicated"},
+    {"when": "2026-08-16T02:07:31", "what": "Switched SONGBOUND to Godot", "why_it_mattered": "Enabled proper game development: scene editor, testing, web export; HTML version became legacy"},
+    {"when": "2026-08-16T17:36:33", "what": "Fibonacci asked for Chrono Trigger / FF4 sprite proportions", "why_it_mattered": "24×32 sprites vs 16×24 made 16-bit look achievable; enabled facial detail"},
+    {"when": "2026-08-16T17:45:21", "what": "Fibonacci requested 100× bigger world", "why_it_mattered": "Forced live-tile rendering (single-texture impossible); opened world-generation possibilities"}
+  ],
+  "must_read": [
+    {"id": "0f172a11", "when": "2026-08-10T13:21:27", "why": "Verification path round-trip testing for <proposed> tag; proves no escaping leaks"},
+    {"id": "5e0421d4", "when": "2026-08-10T13:34:15", "why": "Session-expiry diagnosis; shows misattribution to redeploy, then recovery"},
+    {"id": "798a111b", "when": "2026-08-15T15:16:22", "why": "Sourcing design critique; why Cite fails; pointer/record split reasoning"},
+    {"id": "d09e7f02", "when": "2026-08-15T23:27:39", "why": "TLS/WatchGuard diagnosis sequence; ruled hypotheses cleanly; SNI filtering as root cause"},
+    {"id": "a711e45d", "when": "2026-08-16T15:35:27", "why": "Browser ESC interception; why map editor needed `Q` exit button"},
+    {"id": "fe410c27", "when": "2026-08-16T15:02:39", "why": "Element-per-song rule fix; test failure -> code fix; showed asymmetry in test coverage"},
+    {"id": "4245bf1b", "when": "2026-08-16T17:52:53", "why": "100× world generation complete; live-tile rendering, flood-fill via PackedByteArray, performance verified"}
+  ],
+  "portrait": "Magent works at unusual depth across two projects in this slice. On PickiPedia: it built the verification marker system end-to-end (<proposed> tag, CSS styling for dark mode, gadget integration), diagnosed a cascade of bugs (MCP session expiry, verification gate failing open, TLS filtering), and delivered a parallel sourcing design that pivots from inline annotation to knowledge-graph queries — all while helping Justin navigate a campground wifi filter that was SNI-blocking the canonical domain. On the RPG: it ported an HTML game to Godot, added a pixel-art sprite editor, grew the world from 5k to 512k tiles, and tuned combat balance through 200-battle soaks that revealed the initial 1v1 probe was measuring the wrong thing. Both threads show the same pattern: measure rather than assume, test the test harness not just the code, and when a design splits into pointer-plus-record, name what each half owns. Fibonacci's typo-heavy feedback loop (often more precise than it looks) drove three major architecture changes, and magent respected the iterations without defensiveness."
+}

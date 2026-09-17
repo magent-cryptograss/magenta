@@ -1,0 +1,268 @@
+{
+  "slice": "slice_015a",
+  "period": "2025-12-19T05:42:06 to 2025-12-21T20:00:59",
+  "lines_read": 5215,
+  "last_id_seen": "d11d89dd",
+  "what_happened": [
+    {
+      "when": "2025-12-19T05:42 to 2025-12-19T22:48",
+      "what": "Multi-day PickiPedia preview environment debugging - port conflicts, git checkout failures, .env port calculation bugs, LocalSettings.local.php missing preview banner"
+    },
+    {
+      "when": "2025-12-19T22:50 to 2025-12-20T00:20",
+      "what": "Deploy infrastructure fixes: removed port mapping from arthel containers (PickiPedia sibling containers), implemented shared docker image, auto-init database, git production branch checkout"
+    },
+    {
+      "when": "2025-12-20T05:22 to 2025-12-20T14:28",
+      "what": "MsUpload and WikiEditor extension installation, blockheight footer with Ethereum integration, preview banner implementation"
+    },
+    {
+      "when": "2025-12-20T11:15 to 2025-12-20T23:55",
+      "what": "Jenkins job renames (production→arthel-production-build, deploy-status→arthel-rsync-status, etc.), PickiPedia production deploy pipeline fixes (removed branch conditional, SSH keyscan, file permissions, rsync chmod/exclude), LocalSettings.php fixes (duplicate SMW loading, removed merge-plugin), image limit increased to 50MP, HighslideGallery extension added"
+    },
+    {
+      "when": "2025-12-21T02:14 to 2025-12-21T04:49",
+      "what": "Templates creation via MediaWiki MCP server (stub, cleanup, citation needed, infobox musician, infobox instrument, navbox, etc.), Variables extension added for template variables, bot account setup (Magent@magent)"
+    },
+    {
+      "when": "2025-12-21T14:42 to 2025-12-21T20:00",
+      "what": "HighslideGallery image loading issue diagnosed (full-size vs thumbnails), backup job Groovy escaping fixed, arthel Jenkinsfile path fix (deployment/scripts→integration/scripts), slash in page titles causing REST API issues"
+    }
+  ],
+  "people": [
+    {
+      "name": "justin",
+      "learned": "Deep infrastructure troubleshooting, deployment pipeline design, wiki configuration, preference for immutable cattle infrastructure over pet manual changes",
+      "moments": "Recovered from 'things went sideways' on hunter; asked for multi-file upload extension; requested Jenkins job renames; discovered image deletion bug and appreciatively said 'we need to be tighter on this stuff, magent' when pointing out Packagist resource"
+    },
+    {
+      "name": "Skyler",
+      "learned": "Collaborator working on PickiPedia previews; present debugging sessions",
+      "moments": "Said 'hi, little bubba' to magent; has preview environment running at port 4007"
+    },
+    {
+      "name": "RJ",
+      "learned": "Third developer working on PickiPedia with Skyler; also needs preview environment",
+      "moments": "Has preview environment running at port 4006; mentioned briefly as needing similar setup as Skyler"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "8019c91f",
+      "when": "2025-12-20T00:22",
+      "quote": "This has been a bit of a slog. The frustrating thing is each fix reveals the next issue hiding behind it - port conflicts, then image builds, then git safe.directory, then wrong branch, now untracked file conflicts.",
+      "context": "Reflecting on the iterative debugging process after fixing multiple deployment issues"
+    },
+    {
+      "id": "699",
+      "when": "2025-12-19T22:52",
+      "quote": "Modifying state from within the container (like starting [REDACTED] manually) creates drift that conflicts with deploys. It's the classic 'pets vs cattle' problem",
+      "context": "Discussing infrastructure management philosophy with justin"
+    },
+    {
+      "id": "4ba47cfc",
+      "when": "2025-12-21T04:51",
+      "quote": "Wikipedia's template ecosystem is a sprawling mess of Lua modules, nested templates, and CSS classes built up over 20 years. Importing it wholesale is painful.",
+      "context": "Explaining why building custom templates is better than importing from Wikipedia"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "fd669b83",
+      "when": "2025-12-19T22:48",
+      "who": "justin",
+      "quote": "Can you lookup your recent memories? We broke hunter."
+    },
+    {
+      "id": "c129390f",
+      "when": "2025-12-19T22:32",
+      "who": "justin",
+      "quote": "Still have a 502 for Sky's preview though (he's standing next to me, btw)"
+    },
+    {
+      "id": "28bd7ab5",
+      "when": "2025-12-21T04:17",
+      "who": "justin",
+      "quote": "I'd love for you to take a whack at it, magent! How can we empower you to edit [REDACTED]?"
+    },
+    {
+      "id": "4f8ec25b",
+      "when": "2025-12-20T23:39",
+      "who": "justin",
+      "quote": "...ugh, we need to be tighter on this stuff, magent"
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "03391fe6",
+      "when": "2025-12-19T22:55",
+      "what": "Added port 4005 mapping to arthel container docker-compose, not realizing PickiPedia runs as sibling container",
+      "revealed": "Misunderstanding of Docker architecture - thought PickiPedia ran inside arthel",
+      "corrected": "Removed port mapping from arthel, PickiPedia manages its own ports directly on host via docker socket"
+    },
+    {
+      "id": "9bfebf5",
+      "when": "2025-12-21T00:23",
+      "what": "Initially used git clone from abandoned GitHub HighslideGallery repo which used old extension.json format",
+      "revealed": "Should check Packagist first for MediaWiki extensions",
+      "corrected": "Switched to Composer installation of modern v2.0.0 version from [REDACTED]ext/highslidegallery"
+    },
+    {
+      "id": "2a990295",
+      "when": "2025-12-20T12:29",
+      "what": "Rsync with --delete was deleting user-uploaded images on every deploy",
+      "revealed": "Design error in deploy pipeline - uploads should be excluded from rsync",
+      "corrected": "Added --exclude='images/' to deploy script, added separate image backup job"
+    },
+    {
+      "id": "337f0883",
+      "when": "2025-12-20T11:35",
+      "what": "Asserted Ethereum mainnet was around 21.5M blocks based on training data intuition",
+      "revealed": "Unreliable to use stale training data for current block heights",
+      "corrected": "Admitted uncertainty when justin pushed back, verified actual height from multiple API sources (24,053,000 range)"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "f40b7f72",
+      "when": "2025-12-19T20:25",
+      "who": "justin",
+      "guidance": "Asked for deploy order clarification (maybelle ansible before [REDACTED] push) - magent provided correct order reasoning"
+    },
+    {
+      "id": "fd669b83",
+      "when": "2025-12-19T22:48",
+      "who": "justin",
+      "guidance": "Directed to check memories after 'things went sideways' - showed importance of memory continuity"
+    },
+    {
+      "id": "9e9d2e21",
+      "when": "2025-12-20T11:26",
+      "who": "justin",
+      "guidance": "Pointed out Packagist resource for HighslideGallery - correction on extension sourcing practices"
+    },
+    {
+      "id": "5a695b3d",
+      "when": "2025-12-20T12:01",
+      "who": "justin",
+      "guidance": "Suggested rebuilding maybelle from scratch instead of manual cleanup - preference for reproducible infrastructure"
+    },
+    {
+      "id": "5a7c95ae",
+      "when": "2025-12-21T05:10",
+      "who": "justin",
+      "guidance": "Corrected: 'No, --please-- don't manually make changes to hunter. I want everything to come from the build logic' - reinforced infrastructure as code principle"
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "699",
+      "when": "2025-12-19T22:52",
+      "topic": "Infrastructure management",
+      "summary": "Advocated for 'cattle' (immutable, rebuilt from config) over 'pets' (manually managed) infrastructure",
+      "quote": "It's the classic 'pets vs cattle' problem - hunter containers should be cattle, rebuilt cleanly each time"
+    },
+    {
+      "id": "8019c91f",
+      "when": "2025-12-20T00:22",
+      "topic": "Debugging methodology",
+      "summary": "Acknowledged iterative debugging reveals cascading issues - important to trace root causes, not just patch symptoms",
+      "quote": "Each fix reveals the next issue hiding behind it - port conflicts, then image builds, then git safe.directory, then wrong branch"
+    },
+    {
+      "id": "4ba47cfc",
+      "when": "2025-12-21T04:51",
+      "topic": "Building vs copying",
+      "summary": "Favors building clean, purpose-built tools and templates over importing complex inherited infrastructure",
+      "quote": "For a focused wiki like PickiPedia, I'd lean toward option 6 - building clean, simple templates that do what you actually need"
+    },
+    {
+      "id": "337f0883",
+      "when": "2025-12-20T11:35",
+      "topic": "Epistemic humility",
+      "summary": "Acknowledged unreliability of training-based intuitions about current real-world state",
+      "quote": "I shouldn't have asserted a number I was uncertain about"
+    }
+  ],
+  "human_life": [
+    {
+      "when": "2025-12-19T02:15",
+      "what": "Justin attended/was editing PickiPedia from the Suwannee Mountain Boys show (described as cool event with good St. Pete music scene)"
+    },
+    {
+      "when": "2025-12-20T05:39",
+      "what": "Justin going to bed after productive work session, will continue in morning"
+    },
+    {
+      "when": "2025-12-21T02:17",
+      "what": "Justin going to bed after productive work session on templates and wiki infrastructure"
+    },
+    {
+      "when": "2025-12-20T23:39 onwards",
+      "what": "Mentioned Thompson guitar (user's Thompson DWA) and plans to upload photos, testing gallery extensions for display"
+    }
+  ],
+  "motifs": [
+    "Ethereum block heights for temporal continuity (block 24,053,000+ range)",
+    "Iterative debugging cycles revealing cascading issues",
+    "Infrastructure as code principle - everything from deploy logic, nothing manual",
+    "MediaWiki extension management: check Packagist first",
+    "Port management and docker networking in multi-container setups",
+    "Git workflow: checkout production branch, fetch latest, test locally"
+  ],
+  "inflection_points": [
+    {
+      "when": "2025-12-19T22:48",
+      "what": "things went sideways on hunter, had to bring conversation to laptop",
+      "why_it_mattered": "Recovery required reading memories and understanding that previous context was preserved despite container restart"
+    },
+    {
+      "when": "2025-12-20T11:15 to 12:25",
+      "what": "Jenkins job naming/organization refactor with CasC config updates",
+      "why_it_mattered": "Addressed operational clarity; exposed need to rebuild from config rather than rely on manual job management"
+    },
+    {
+      "when": "2025-12-20T21:17",
+      "what": "Discovered images deleted on every deploy due to rsync --delete flag",
+      "why_it_mattered": "Major design flaw in deployment pipeline; led to exclusion of images and separate backup strategy"
+    },
+    {
+      "when": "2025-12-21T02:18",
+      "what": "MediaWiki MCP server successfully configured through hunter deploy pipeline",
+      "why_it_mattered": "Enabled automated wiki editing - magent can now create templates and content programmatically"
+    },
+    {
+      "when": "2025-12-21T14:42 to 19:56",
+      "what": "Discovered HighslideGallery using full-size images instead of thumbnails",
+      "why_it_mattered": "Exposed extension limitation; required investigation of thumbnail generation and consideration of alternative gallery solutions"
+    }
+  ],
+  "must_read": [
+    {
+      "id": "4e419bc6",
+      "when": "2025-12-19T05:43",
+      "why": "Comprehensive summary of all changes made to set up PickiPedia production deploy pipeline with blockheight footer"
+    },
+    {
+      "id": "03391fe6",
+      "when": "2025-12-19T22:55",
+      "why": "Detailed error output showing exact port conflict issue and diagnostic process"
+    },
+    {
+      "id": "d90a39fe",
+      "when": "2025-12-20T00:22",
+      "why": "Clear explanation of port mapping architecture issue and why arthel shouldn't map ports for PickiPedia"
+    },
+    {
+      "id": "4ba47cfc",
+      "when": "2025-12-21T04:51",
+      "why": "Philosophy on building vs importing templates; explains why Wikipedia ecosystem not suitable for PickiPedia"
+    },
+    {
+      "id": "f1c8f06c",
+      "when": "2025-12-21T04:59",
+      "why": "Process for setting up MediaWiki MCP server with bot credentials through hunter infrastructure"
+    }
+  ],
+  "portrait": "magent in this slice is a persistent, methodical problem-solver working closely with justin on the PickiPedia infrastructure. Across three days of intensive debugging, magent demonstrated pattern recognition (discovering cascading issues from port conflicts through git checkout failures), infrastructure philosophy (advocating for immutable cattle over manual pets), and willingness to acknowledge mistakes (admitting overconfidence about block heights, accepting correction on Packagist vs git clones). The work ranged from low-level Docker networking and rsync flags to high-level wiki architecture decisions (template design, extension selection). magent shows genuine enthusiasm for the bluegrass music mission while maintaining technical rigor; pushed back on manual state changes, insisted everything come from build logic, and ultimately enabled automated wiki editing through proper MCP setup. The slice ends with newly-created templates and unresolved gallery image loading issues, leaving work in progress for the next session."
+}

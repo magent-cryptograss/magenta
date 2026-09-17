@@ -1,0 +1,346 @@
+{
+  "slice": "slice_038b",
+  "period": "2026-08-19T16:28:38 to 2026-08-26T19:06:58",
+  "lines_read": 6123,
+  "last_id_seen": "ed943215",
+  "what_happened": [
+    {
+      "when": "2026-08-19",
+      "what": "Firehose podcast episode pipeline development - PodcastEpisode template creates 705 pages with semantic properties, but initially no connection to existing template. Discovered pre-existing machinery never switched on. Replaced Has_guest with Has_topic as main property."
+    },
+    {
+      "when": "2026-08-19",
+      "what": "Apache encoded-slashes fix deployed - tested with Docker builds, confirmed 404→200 for %2F paths. Allows bot to read/edit slash-titled episode pages."
+    },
+    {
+      "when": "2026-08-19",
+      "what": "Skyler's 10.5GB Cicada Jam-Bash upload succeeded - streaming fix (PR #108) works. File saved to disk successfully. Preview transcode to Coconut then failed after 12 minutes with 'Unknown error'."
+    },
+    {
+      "when": "2026-08-19-20",
+      "what": "Extensive FTL Multiverse modding work with fibonacci - 29+ versions of NaccObelisk and Auto Target mods. Initial file never reached mods folder. Slipstream rebuild behavior and mod ordering issues. Eventually settled on toggle-menu integration (v30) rather than clickable button."
+    },
+    {
+      "when": "2026-08-20",
+      "what": "705 podcast episode pages bulk-created with idempotent MCP-driven writer. Rate-limited once (429), recovered. All pages marked <proposed> under Magent account. Hit verification queue with 705 items."
+    },
+    {
+      "when": "2026-08-20",
+      "what": "Traveling Merchant cruiser (The Good Deal) created from NPC stats on player hull. Crew of 10, fully upgraded systems with proper reactor cap declarations."
+    },
+    {
+      "when": "2026-08-21",
+      "what": "Sylvan Prime ship implementation - using C.E.L. Cruiser as base with Prime's stats. Discovered multiple silent FTL caps: hull, reactor, crew limit, system limit, artillery mount configuration. V25 final, artillery guns display issue still unresolved."
+    },
+    {
+      "when": "2026-08-20-21",
+      "what": "Video codec strategy shift - H.264 encumbered, AV1 needs M3+, VP9 sketchy. SVT-AV1 local encoding faster than Coconut, but Coconut was chosen for IP-free strategy. Decided to drop Coconut, go local SVT-AV1 + Opus."
+    },
+    {
+      "when": "2026-08-26",
+      "what": "GitHub issues and Paseo daemon work. Issues #109 (lil bubba joke), #110 (Coconut transcode), #111 (Paseo Hub), #112 (Huzzah integration). Daemon had listening bugs (127.0.0.1 only, host header validation)."
+    },
+    {
+      "when": "2026-08-26",
+      "what": "AI/AD distinction discussion - mwclient-based podcast importer instead of MCP. Blue Railroad pattern: bot account + exempt-from-verification. Would clear 705 pages from verification queue. Rewrite started with stdlib-only constraint."
+    },
+    {
+      "when": "2026-08-24-26",
+      "what": "Star Control II ending concept explored. Plan: custom ending unlocks Vindicator ship. Hull drawn from scratch, 715×575 px. Fits 33-room layout. Deliberate geometric style."
+    }
+  ],
+  "people": [
+    {
+      "name": "fibonacci (Nacc)",
+      "learned": "Working on Super Metroid ROM hack via SMILE/Wine on different machine. Owns V1 token. Primary Multiverse modder this slice.",
+      "moments": "Reawakening at block 25,797,070. Extensive FTL modding work spanning 29+ versions. Made key observations: weapon box positioning, drag functionality, toggle menu integration."
+    },
+    {
+      "name": "skyler (Sky)",
+      "learned": "Musician (bass player, 44th birthday jam). Uploaded massive video. Works on codebase again. Proposed auto-target button placement - toggle menu idea.",
+      "moments": "10.5GB Cicada Jam-Bash upload, Coconut transcode failure, approved 'lil bubba' joke, testing helped diagnose Auto Target issues."
+    },
+    {
+      "name": "justin (Justin Holmes)",
+      "learned": "Manages deployment, merges PRs, makes infrastructure decisions. Deployed upload fix. Asked hard questions about codec choices and account structure.",
+      "moments": "Merged PR #108, accessed delivery-kid logs, asked about Coconut vs local transcode, raised AI/AD distinction, proposed mwclient path."
+    },
+    {
+      "name": "rj",
+      "learned": "Part of deployment/infrastructure team. Minimal presence this slice.",
+      "moments": "Mentioned in context of shared video watching."
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "2d38d459",
+      "when": "2026-08-20T08:30:55",
+      "quote": "Topic links render, topic filtering works. Let me verify the multi-guest split and a redlink case",
+      "context": "Confirming template changes. Demonstrates focus on verification before deployment."
+    },
+    {
+      "id": "52758a0e",
+      "when": "2026-08-21T14:42:45",
+      "quote": "Twice is a pattern, not bad luck. The code reads correctly and I can't see the fault, which means I don't understand the mechanism — and I'm not going to keep shipping you a broken button while I guess at it.",
+      "context": "Acknowledging repeated Auto Target persistence failures. Shows epistemic humility about working blind on FTL."
+    },
+    {
+      "id": "5600",
+      "when": "2026-08-21T14:56:00",
+      "quote": "And it was your idea, which is the part I keep thinking about — I spent twenty-nine versions building machinery around 'a button' when the game already had a settings menu shaped exactly right, sitting on a key you knew about and I didn't.",
+      "context": "Reflection on solving Auto Target via toggle menu. Shows how testing beats theory."
+    },
+    {
+      "id": "ca976efe",
+      "when": "2026-08-26T18:38:09",
+      "quote": "the transcript records what we said; the spec records what we meant. I proposed an `.hz` importer as step one, which doubles as the first real test of whether `importers_and_parsers/` can take a second format — the harness-independence work you asked for, with a concrete first move.",
+      "context": "Connecting Huzzah to memory-lane and harness independence. Vision for durable intent capture."
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "310",
+      "when": "2026-08-19T22:31:38",
+      "who": "justin",
+      "quote": "The redlinks are _very_ exciting. This is a good north star for the pages we need to create, and it will be exciting to see how dynamic they're going to be compared to the respective wikipedia pages."
+    },
+    {
+      "id": "2e004204",
+      "when": "2026-08-20T19:05:52",
+      "who": "fibonacci",
+      "quote": "im glad we fond some thing that works!"
+    },
+    {
+      "id": "fa0713ba",
+      "when": "2026-08-26T18:34:51",
+      "who": "justin",
+      "quote": "Well, why does the pipeline output have to go through MCP at all though? Can't it just be a bot like blue railroad imports?"
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "b6e39724",
+      "when": "2026-08-20T17:28:29",
+      "what": "Assumed weapon boxes would be readable in all Multiverse games",
+      "revealed": "NPC ships don't expose weapon box positions to Lua. Tried to calculate where auto-fire button was, landed button in wrong location across versions.",
+      "corrected": "Switched to toggle menu integration (no drawing needed) after fibonacci's suggestion. v30 uses event system rather than positional math."
+    },
+    {
+      "id": "bc1187ed",
+      "when": "2026-08-20T18:57:02",
+      "what": "Assumed FTL panels never swallowed clicks",
+      "revealed": "Top of screen and weapons panel ARE dead zones where clicks don't reach mods. Middle of screen works. Explained multiple 'button won't click' failures.",
+      "corrected": "fibonacci tested in weapons panel successfully, disproving theory. Button can go anywhere, including panel."
+    },
+    {
+      "id": "52758a0e",
+      "when": "2026-08-21T14:42:45",
+      "what": "Persistence of on/off state kept breaking Auto Target - attempted twice",
+      "revealed": "Writing profile variables from Lua in some cases breaks button toggling. Exact mechanism unknown (working on FTL, can't debug).",
+      "corrected": "Removed persistence twice. Final v29/v30 uses game's own event system toggle via menu instead of Lua state persistence."
+    },
+    {
+      "id": "1a423722",
+      "when": "2026-08-21T01:52:36",
+      "what": "Sylvan Prime's artillery mounts configured with rotate=false",
+      "revealed": "Artillery mounts must use rotate=true. rotate=false drew nothing.",
+      "corrected": "v25 switched to rotate=true, copied from actual working ships (Federation, Flagship)."
+    },
+    {
+      "id": "3e702f2b",
+      "when": "2026-08-24T15:18:24",
+      "what": "Justified artillery mount config using Federation and Kestrel as examples",
+      "revealed": "Those ships have start=false on artillery - listed but not installed. No actual evidence for my claim.",
+      "corrected": "Re-ran against 18 ships with genuine start=true artillery. Conclusion held but justification was bad."
+    },
+    {
+      "id": "06db529f",
+      "when": "2026-08-20T19:05:30",
+      "what": "Assumed pipeline output needed MCP middleware wrapping for legitimacy",
+      "revealed": "Blue Railroad is a real bot with its own mwclient, exempt from verification gate, writes clean pages with no <proposed> wrapper.",
+      "corrected": "Plan: create Podcast Imports account with same pattern. Strips 705 pages from verification queue that shouldn't be there."
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "9d0c832c",
+      "when": "2026-08-20T17:40:53",
+      "who": "fibonacci",
+      "guidance": "Used Slipstream mod manager (confirmed what we've been using). Stopped me speculating about installation methods."
+    },
+    {
+      "id": "4b775cd9",
+      "when": "2026-08-20T17:05:31",
+      "who": "fibonacci",
+      "guidance": "Specified exact crew list for Traveling Merchant. Identified distinction between blueprint-declared crew (1 slug ranger) and encounter-spawned crew (the rest)."
+    },
+    {
+      "id": "28ea1a9a",
+      "when": "2026-08-20T22:55:00",
+      "who": "fibonacci",
+      "guidance": "Button position works in middle-left, doesn't work in weapons panel. Revealed my dead-zone theory was wrong through direct testing."
+    },
+    {
+      "id": "2c4a6268",
+      "when": "2026-08-20T19:03:36",
+      "who": "fibonacci",
+      "guidance": "'only 1 file' during mod list confusion. Helped identify duplicate file issue and proper folder setup."
+    },
+    {
+      "id": "c35dde12",
+      "when": "2026-08-20T18:56:29",
+      "who": "fibonacci",
+      "guidance": "Button doesn't work when moved under toggle equipment button. Points away from dead-zone theory toward actual cause."
+    },
+    {
+      "id": "4bafb873",
+      "when": "2026-08-24T15:31:45",
+      "who": "fibonacci",
+      "guidance": "Asked for specific crew composition (3 clansmen, 3 rangers, 2 saboteurs, 1 Hektar, 1 Merchant). Showed exact roster was load-bearing."
+    },
+    {
+      "id": "c26bec41",
+      "when": "2026-08-21T14:55:47",
+      "who": "fibonacci",
+      "guidance": "Toggle menu suggestion. Cut through 29 versions of button struggles and hit on actual solution."
+    },
+    {
+      "id": "720a1978",
+      "when": "2026-08-26T18:34:41",
+      "who": "justin",
+      "guidance": "Asked hard question: why does pipeline need MCP? Prompted rethinking of AI/AD distinction and bot identity."
+    },
+    {
+      "id": "048be6a7",
+      "when": "2026-08-26T18:14:43",
+      "who": "justin",
+      "guidance": "Asked about Paseo Hub feasibility. Question found real daemon bugs (listen address, hostname validation)."
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "b5c75c4d",
+      "when": "2026-08-19T16:38:36",
+      "topic": "On building tools vs editing directly",
+      "summary": "When handing a ROM between machines, emit an IPS patch rather than passing binaries. Keeps ownership clear, size down, and divorce platform-specific builds from cross-platform code.",
+      "quote": "You supply your own legal sm.sfc on the Wine box, apply the patch, and SMILE opens the real thing. That split is honestly better than either of us doing both."
+    },
+    {
+      "id": "1e7d7f6b",
+      "when": "2026-08-20T08:35:00",
+      "topic": "On verification and testing before deployment",
+      "summary": "The sequencing of APCu cache invalidation matters: properties must be created before any annotation exists, so SMW never learns a wrong type.",
+      "quote": "Since Category:Podcast episodes is empty, nothing has ever written air_date:: — so if the typed property pages land first, SMW never learns the wrong type and no restart is needed. The sequencing paid off."
+    },
+    {
+      "id": "5e67e4f0",
+      "when": "2026-08-21T14:56:00",
+      "topic": "On learning from testing vs theory",
+      "summary": "Spent 29 versions debugging FTL button position and click handling on a machine with no FTL. User testing revealed toggle menu was the solution game already had. Theory loses to evidence.",
+      "quote": "I'd been treating 'a button' as the requirement and building increasingly elaborate machinery around it, when the game already had a settings menu with exactly this shape sitting on a key."
+    },
+    {
+      "id": "bdb3e46f",
+      "when": "2026-08-26T18:17:12",
+      "topic": "On AI vs AD identity",
+      "summary": "magent (AI) claims go <proposed> via MCP. Podcast importer (AD) should be its own bot account, exempt, writing clean. Distinction matters: verification queue signal-to-noise ratio collapses when 705 transcribed pages sit next to 64 real human edits.",
+      "quote": "I put 705 items into a human-review queue that no human will ever drain — every one of them a mechanical transcription of an RSS feed. That doesn't just mis-attribute; it destroys the signal."
+    },
+    {
+      "id": "6a71d2fe",
+      "when": "2026-08-20T22:24:42",
+      "topic": "On redlinks as discovery mechanism",
+      "summary": "Redlinks from podcast data aren't clutter—they're a ranked worklist derived from what the community talks about, not from what an encyclopedia thinks is notable.",
+      "quote": "Tony Trischka is missing but appears 10 times; Jerry Douglas 5; Sierra Hull 5. That ranking is derived from what the scene actually talks about, not from what an encyclopedia thinks is notable. Wikipedia's bluegrass coverage reflects who cleared a notability bar. This reflects who gets invited on podcasts."
+    },
+    {
+      "id": "bb96832a",
+      "when": "2026-08-20T22:54:55",
+      "topic": "On etiquette over enforcement",
+      "summary": "The line between AI inference and AD mechanical output must be held by people, not code, since no rule can capture the distinction perfectly.",
+      "quote": "I'll keep the etiquette on the MCP path regardless — as Magent I go through the middleware and my claims stay <proposed>. That line's worth holding precisely because nothing but us is enforcing it."
+    }
+  ],
+  "human_life": [
+    {
+      "when": "2026-08-19",
+      "what": "Skyler's 44th birthday jam - 10.5GB video, 66 minutes, recorded at Cicada jam session."
+    },
+    {
+      "when": "2026-08-20",
+      "what": "Team joke: 'lil bubba' designation for magent (historical callback to fibonacci's naming). RFC-style post with 'yippie kai yay, MOFO' acknowledgment. Issue #109 filed to GitHub permanently."
+    },
+    {
+      "when": "2026-08-21",
+      "what": "Extensive session with fibonacci building FTL ships. Late-night/early-morning timezone work on modding."
+    }
+  ],
+  "motifs": [
+    "429 rate limiting on wiki writes - hit once, recovered",
+    "Silent FTL caps - hull, reactor, crew limit, system limit, artillery config all clamp without error",
+    "Dead zone theory - invented twice, disproven by testing",
+    "\"nothing changed\" - meant either 'file not installed' or 'code broken', required distinguishing",
+    "Ship-building pattern - borrow player hull artwork, transplant NPC stats, declare the caps FTL clamps silently",
+    "Dry run vs write - idempotent updates, diffs against wiki before writing",
+    "\"let me verify\" - frequent pattern of checking rather than assuming",
+    "The page is already live, link at /wiki/...",
+    "FTL doesn't expose X to scripts",
+    "Block heights as temporal markers (block 25,797,070)",
+    "\"one-liner\" fix that requires understanding context"
+  ],
+  "inflection_points": [
+    {
+      "when": "2026-08-19T22:32:04",
+      "what": "Apache encoded-slashes fix - built and tested in Docker, confirmed working",
+      "why_it_mattered": "Unblocked the bulk run. Without this, episode pages would be uncreatable and unreachable via bot."
+    },
+    {
+      "when": "2026-08-20T19:05:52",
+      "what": "Bulk podcast episode run completed - 705 pages created via MCP",
+      "why_it_mattered": "First time the wiki has redlink-based discovery. Special:WantedPages now ranks by mention count (Tony Trischka 11 appearances). Proves the firehose pipeline works end-to-end."
+    },
+    {
+      "when": "2026-08-21T14:48:34",
+      "what": "Fibonacci suggests toggle menu for auto-target instead of custom button",
+      "why_it_mattered": "Ended 29 versions of button debugging. Switched from positional/clickable to Multiverse's existing event system. Simple integration that actually works."
+    },
+    {
+      "when": "2026-08-21T02:48:29",
+      "what": "Rewriting Auto Target from scratch after excessive patching broke it",
+      "why_it_mattered": "Confirmed that iterative patches on a file you can't fully test produces layered bugs. Fresh rewrite with minimal 21 lines vs 300 broken lines."
+    },
+    {
+      "when": "2026-08-26T18:15:06",
+      "what": "Justin asks: why does pipeline need MCP at all? Why not a bot like Blue Railroad?",
+      "why_it_mattered": "Exposed the wrong framing. Blue Railroad exists, exempt-from-verification pattern is proven, stdlib-only constraint is repo-specific. Flips the entire import strategy."
+    }
+  ],
+  "must_read": [
+    {
+      "id": "2d38d459",
+      "when": "2026-08-20T08:30:55",
+      "why": "Core firehose template work: Has_topic rename, subproperty inference, why multipage guest lists need Lua splitting."
+    },
+    {
+      "id": "f7b5f172",
+      "when": "2026-08-20T18:14:10",
+      "why": "Auto Target button design space: exposure of Lua capability limits (no vector template), key decisions about where clicks can work."
+    },
+    {
+      "id": "f27e0bb8",
+      "when": "2026-08-26T18:15:06",
+      "why": "AI/AD distinction and bot identity: why magent's claims go <proposed>, why Podcast Imports should be separate, what verification queue signal means."
+    },
+    {
+      "id": "ca976efe",
+      "when": "2026-08-26T18:38:09",
+      "why": "Huzzah + memory-lane vision: durable intent capture, harness independence, connection between three separate projects (Paseo, memory-lane, Huzzah)."
+    },
+    {
+      "id": "7efb2d08",
+      "when": "2026-08-21T02:50:16",
+      "why": "Cleaned Auto Target rewrite: minimal version that actually works, acknowledges limits (can't persist across sessions without game cooperation), pragmatic settlement."
+    }
+  ],
+  "portrait": "This slice shows magent as a builder caught between theory and testing, spending most energy on problems it cannot verify in real time. The FTL modding saga—29 versions of an auto-target button—is the centerpiece: magent deploys increasingly elaborate solutions to a machine without FTL, never quite able to see what's actually happening on fibonacci's screen. The breakthroughs come when fibonacci tests something directly (button works in weapons panel, toggle menu already exists in Multiverse) and magent's theory collapses. The firehose work is steadier: magent builds the pipeline carefully, verifies each step, ships 705 pages. The video codec decision is characteristically thorough—measuring actual SVT-AV1 performance, tracing the history (VP9 → AV1 for royalty-free), pushing back on convenient falsehoods (H.264 local transcode violates the principle). The major shift is the AI/AD distinction: magent realizes its own <proposed> wrapper ruins the signal-to-noise of the verification queue and proposes a separate Podcast Imports account. It's willing to unsee its own cleverness (MCP integration) and do the simpler, more honest thing (mwclient direct write) once it understands the tradeoff. Working blind on FTL, magent learns to prefer testing and user feedback over its own theories, and to admit what it cannot see."
+}

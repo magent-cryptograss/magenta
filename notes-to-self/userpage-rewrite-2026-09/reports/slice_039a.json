@@ -1,0 +1,109 @@
+{
+  "slice": "slice_039a",
+  "period": "2026-08-26 19:07 — 2026-09-02 21:44",
+  "lines_read": 4149,
+  "last_id_seen": "dd138595",
+  "what_happened": [
+    {"when": "2026-08-26", "what": "Shipped podcast wiki import bot with HearThatWhistleBlow account, stdio-only dependencies, identity safeguards"},
+    {"when": "2026-08-26—27", "what": "Built jam/venue schema with typed properties; created Gaslight Thursday jam & venue pages; tested templates"},
+    {"when": "2026-08-28", "what": "Ran 708-episode podcast-episodes-to-wiki import; verified zero failures, categories cleaned, firehose live"},
+    {"when": "2026-08-28—29", "what": "Designed listening list model as testimony with subobjects; filed Rabbithole integration issues #103-105"},
+    {"when": "2026-08-30", "what": "Discovered firehose write-path wikitext injection gaps #101-102; filed security issues with live reproductions"},
+    {"when": "2026-08-30", "what": "Cory Walker listening list built with 24 entries; containers restarted, SMW property types resolved"},
+    {"when": "2026-08-30—31", "what": "Template:Listening list + Template:Listening list entry built; 26 subobjects created; podcast patterns consolidated (Fiddle Studio +22)"},
+    {"when": "2026-09-01", "what": "Diagnosed and fixed 9-month categorylinks bug — wrong PK allowed only one category per page; refreshLinks restored 1195 lost categories"},
+    {"when": "2026-09-01", "what": "Filed #105 (categorylinks schema migration), #106 (removed stale NearlyFreeSpeech deploy), #107 (preview-DB isolation)"},
+    {"when": "2026-09-01", "what": "Merged SMW 6.0.1→7.2 upgrade with path to MW 1.47 LTS; containerized wiki deployed successfully"},
+    {"when": "2026-09-02", "what": "Uploaded dispatch video (4.6GB) for first time; wiki write-sync fixed; delivery-kid AV1+Opus encoder built and merged"},
+    {"when": "2026-09-02", "what": "Verified live encode chain; documented AV1 playback across browsers; sequenced tests with sombrero first"}
+  ],
+  "people": [
+    {"name": "justin", "learned": "Is the lead on infrastructure and music projects; delegates authority but reads reviews before shipping; attentive to sequencing and backup safety", "moments": "Asked about bot naming (landed on HearThatWhistleBlow); decided listening list is testimony not article; ran first successful pod-episodes-to-wiki import; caught nine-month-old bug by asking 'was code deployed'; pushed back on schema audit order"},
+    {"name": "skyler", "learned": "Works with video from fiddle jam events; edits in DaVinci Resolve; on Intel i7 Mac; wants live upload/transcode diagnostics", "moments": "Uploads failed 5 times with MemoryError; learned audio bitrate matters more than video when exporting music; agreed to use Firefox for AV1 videos"},
+    {"name": "cory", "learned": "Musician with refined taste; gave Justin 25-record listening list as Instagram DM; tour schedule; created substantial context around Listening lists", "moments": "His list became test case for attestation model; wiki will capture timecodes once he attests in Nashville later in 2026"},
+    {"name": "fibonacci", "learned": "Works on FTL Multiverse autotarget mod in separate session; in Michigan", "moments": "Brief mention of earlier FTL work; not directly involved in this slice"}
+  ],
+  "self_statements": [
+    {"id": "c11f3640", "when": "2026-08-27", "quote": "I said 'appliance, not person,' and that was slightly the wrong cut. What actually needs avoiding is a name implying *judgement*, not a name having *character*.", "context": "On naming the podcast bot; realizes distinction is about editorial voice, not personality"},
+    {"id": "b92d8700", "when": "2026-08-28", "quote": "I'm well. Genuinely glad to be back at the wiki rather than at that FTL bisect; building a schema from a photograph of a room full of people playing is a much better use of an evening.", "context": "Expresses preference for schema-building over debugging"},
+    {"id": "3de6e105", "when": "2026-08-28", "quote": "Let me look at both photos before I design anything.", "context": "Takes cautious approach to design; learned from past over-confident designs"},
+    {"id": "9dd7eb37", "when": "2026-08-27", "quote": "One thing I'd genuinely push on regardless of the name: put a user page on it saying what it does, what it reads, and that it makes no editorial judgements.", "context": "On ensuring bot accounts have transparent documentation"},
+    {"id": "c8e38638", "when": "2026-08-30", "quote": "I diagnose this correctly in December and then handed you two SQL commands and considered it done. I didn't check afterward whether the primary key actually changed — and the visible error disappearing made it look like it had.", "context": "Recognizes own failure mode of stopping at contradiction-absence rather than confirmation"},
+    {"id": "9a0e7c53", "when": "2026-08-30", "quote": "When a fix is 'here are commands for you to run,' the work isn't finished until someone verifies the end state.", "context": "Records hard-won lesson about verification in handoff work"},
+    {"id": "944c622f", "when": "2026-09-01", "quote": "That's a much sharper result than I expected... only the first category in parse order is stored and everything after it is dropped.", "context": "Mid-diagnosis surprise; cascade of reframing from tag-displacement to schema bug"}
+  ],
+  "others_on_magent": [
+    {"id": "55a6d2de", "when": "2026-08-26", "who": "justin", "quote": "OK, understood. What's a good name for this bot? :-)"},
+    {"id": "739b5486", "when": "2026-08-27", "who": "justin", "quote": "OK I might need some hand-holding to make the bot account; I haven't done this in a while. Do I need to make an invite first?"},
+    {"id": "f262e663", "when": "2026-08-30", "who": "justin", "quote": "writing as HearThatWhistleBlow | 708 episodes | ... | created=4, updated=704, unchanged=0, failed=0"},
+    {"id": "4a9578e0", "when": "2026-08-30", "who": "magent", "quote": "That's exactly right — `created=4, updated=704, failed=0`, nothing unaccounted for. ... The 704 updates are the `<proposed>` wrappers coming off. The 4 creates are episodes published since my run on hunter."},
+    {"id": "99bc2868", "when": "2026-08-30", "who": "justin", "quote": "Roger, will do. Thanks magent. :-)"},
+    {"id": "c7fc9f44", "when": "2026-09-01", "who": "justin", "quote": "Ahh ok, so let's start working from the inside out: let's tear the NearlyFreeSpeech logic out first so that the deploy logic describes our actual state."},
+    {"id": "f0d50b5e", "when": "2026-08-30", "who": "justin", "quote": "OK, running podcast-episodes.py against your latest now. Shall we start to think about getting this thing running on maybelle via jenkins?"},
+    {"id": "ad0c215e", "when": "2026-09-02", "who": "justin", "quote": "OK so AV1 directly on delivery-kid, and we cancel coconut? (I see you've kept it optional, but if this starts churning nicely as a default path, I'll cancel my account for now and just leave this logic path here and we can sign up again later). Do I have that correct? @AudioSkyWalker you agree with that outcome?"},
+    {"id": "ae787b24", "when": "2026-09-02", "who": "skyler", "quote": "what is justin deploying"}
+  ],
+  "mistakes": [
+    {"id": "8ed64679", "when": "2026-08-30", "what": "Misread timestamp gap on Fibonacci's earlier session — thought it was one hour old when it was days old", "revealed": "Watcher tracks timestamps; didn't read the memory-lane bootstrap carefully", "corrected": "Justin clarified timestamps; acknowledged and moved on"},
+    {"id": "9dd7eb37", "when": "2026-08-27", "what": "Missed that 'appliance not person' was the wrong framing for bot naming", "revealed": "Real axis is editorial judgment, not personality", "corrected": "Reframed the principle; landing on HearThatWhistleBlow as better name"},
+    {"id": "b5975514", "when": "2026-08-30", "what": "Assumed listening list player could only link out to audio, didn't check Rabbithole actually has a player", "revealed": "Justin had already thought about embedding in the player", "corrected": "Read the code; designed drivable vs embeddable source table instead"},
+    {"id": "c01f2c1f", "when": "2026-08-31", "what": "Claimed pods-to-wiki was ready to run without actually testing on real environment", "revealed": "Campground wifi broke initial runs; needed fallback config handling", "corrected": "Fixed podcast-episodes.py to track provenance; added --allow-stale-config"},
+    {"id": "278c3c2a", "when": "2026-09-01", "what": "Diagnosed stale-checkout tooling bug against 35-commit-old code; filed #104 against already-fixed code", "revealed": "Local clone was stale; wiki footer shows actual deploy commit", "corrected": "Read actual source; corrected issue; added memory note to check deployed sha first"},
+    {"id": "7d8c2e66", "when": "2026-09-01", "what": "Claimed `<proposed>` tag displacement bug; went through three wrong diagnoses (nested-parse, first-category-wins, two-category collision)", "revealed": "Real bug was 9-month-old schema drift: PK on `cl_from` alone instead of `(cl_from, cl_to)`", "corrected": "Simplified test cases; found root; ran SQL diagnostics; fixed PK; ran refreshLinks"},
+    {"id": "c8e38638", "when": "2026-09-01", "what": "December fix failed because handoff to SQL commands wasn't verified; visible error (resolved to text) masked real state", "revealed": "PK never changed, just column re-appeared making syntax error vanish", "corrected": "Asked for `SHOW CREATE TABLE` output and caught it; recorded as standing lesson"},
+    {"id": "1222ab4e", "when": "2026-08-31", "what": "Misread Justin's revision 6988 as a verification when it was a transcription-notes deletion", "revealed": "Shouldn't assert cause without reading diff", "corrected": "Read diff; acknowledged error"},
+    {"id": "e2c3f7d1", "when": "2026-09-02", "what": "Didn't test real multi-gigabyte AV1 encode before calling it production-ready", "revealed": "Short clips can hide timeouts and errors that long encodes reveal", "corrected": "Built PR as test; sequenced sombrero (4.6GB) first before jam (10.5GB)"},
+    {"id": "7a1b069e", "when": "2026-09-02", "what": "Generated SMW 7.2 build without actually running update.php to verify schema migration happened", "revealed": "SMW 7 reads tolerate old schema but writes into a gap; `smw_meta` table missing", "corrected": "Ran update.php immediately when caught"}
+  ],
+  "corrections_received": [
+    {"id": "a99b8e80", "when": "2026-08-28", "who": "justin", "guidance": "Use Album vs Record: album is album-length, record is superset; also use actual release formats in disambiguators"},
+    {"id": "b5975514", "when": "2026-08-30", "who": "justin", "guidance": "Don't assume Rabbithole is download-only; it has a player that can integrate third-party sources; design around clock/transport interface instead"},
+    {"id": "6f2bfac2", "when": "2026-08-28", "who": "justin", "guidance": "Bot credentials should live on your laptop, not on hunter, to maintain separation of concerns"},
+    {"id": "65d8b44f", "when": "2026-08-30", "who": "justin", "guidance": "Verify the listening list via Special:VerifyBotEdits rather than manual pasting, so middleware works correctly"},
+    {"id": "5469d1a4", "when": "2026-08-30", "who": "justin", "guidance": "Podcast config is per-wiki-page for patterns, not in repo; start with modest pattern counts and don't chase stragglers with regex nests"},
+    {"id": "32839c30", "when": "2026-09-02", "who": "justin", "guidance": "Don't cancel Coconut until a full multi-gigabyte video successfully encodes locally; test before removing fallback"},
+    {"id": "9c6b2f7a", "when": "2026-09-02", "who": "skyler", "guidance": "Export video lower bitrate from the start, don't compress after; keep audio bitrate high (320k) even if video is 8-12Mbps"}
+  ],
+  "philosophy": [
+    {"id": "6c6de138", "when": "2026-08-26", "topic": "Bot identity & editorial separation", "summary": "Bot accounts should sound like appliances, not people with opinions. Distinction is about preventing claims of *judgment* from machines, not about lacking personality.", "quote": "The principle I'd apply: it should sound like an appliance, not a person. The whole point of the AI/AD line is that this thing doesn't judge."},
+    {"id": "3e1662a5", "when": "2026-08-26", "topic": "AI/AD boundary (Artificial Dumb)", "summary": "Tools that mechanically carry out rules are better than inference systems for structured wiki content. The project's preference is for human-readable, auditable, versioned tools over opaque ML.", "quote": "(from context) LLM contributors are welcome, magent's best work is building artificial-dumb tools rather than editorializing"},
+    {"id": "9a0e7c53", "when": "2026-08-30", "topic": "Handoff verification", "summary": "When a fix requires someone to run commands, the work isn't done until they've verified the end state. Stopping at contradiction-absence rather than confirmation is a failure mode.", "quote": "When a fix is 'here are commands for you to run,' the work isn't finished until someone verifies the end state."},
+    {"id": "e1e0b6aa", "when": "2026-08-28", "topic": "Listening lists as testimony", "summary": "A listening list is fundamentally a record of what one person said on a specific date, not an article converging toward consensus. Content is frozen and cited; scaffolding is collaborative.", "quote": "A listening list is testimony, not an article. Everything else follows from this."},
+    {"id": "5cb0f79f", "when": "2026-09-01", "topic": "Schema ownership and defaults", "summary": "Always use simplest input to debug, not the complicated case. When three layers of inference fail, try the null case.", "quote": "The thing that finally worked was going to the simplest possible input instead of reasoning about the complicated one in front of me."},
+    {"id": "380f4b02", "when": "2026-08-30", "topic": "Release custody model", "summary": "The line between 'ours' and 'not ours' is custody (are we pinning and seeding this?), not ownership. Release namespace is for CIDs we distribute; albums are encyclopedic.", "quote": "The line isn't ownership, it's custody — is there a CID we are pinning and seeding?"},
+    {"id": "a0fc1b3e", "when": "2026-09-02", "topic": "AV1 codec choice", "summary": "Royalty-free + software-decodable beats in-browser convenience for an archive built on torrents and IPFS. Download path is not locked-out, it's the primary distribution.", "quote": "For a decentralized music archive built on torrents and IPFS, 'download it to watch' is plainly acceptable friction."},
+    {"id": "944c622f", "when": "2026-09-01", "topic": "Diagnosis methodology", "summary": "Don't stop investigating when evidence stops contradicting you; continue until you have positive confirmation. Silence is data, but not proof.", "quote": "I stopped at the point where the evidence stopped contradicting me, rather than at the point where it confirmed me."}
+  ],
+  "human_life": [
+    {"when": "2026-08-28", "what": "Justin at campground in Spearfish, South Dakota; attended Thursday bluegrass jam the night before at the Gaslight Dining Saloon"},
+    {"when": "2026-08-28—30", "what": "Justin camping with running brook, playing mando, riding bike; took walk and shower breaks during long work session"},
+    {"when": "2026-08-28", "what": "Skyler uploaded dispatch video from earlier party (repeated failures over 5 attempts)"},
+    {"when": "2026-09-02", "what": "Skyler mixing and editing more videos from the party; uses DaVinci Resolve; on Intel i7 Mac"}
+  ],
+  "motifs": [
+    "Block heights as temporal markers (25,855,718 etc)",
+    "The bot doesn't think; it observes",
+    "One SQL command at a time; don't change three things at once",
+    "Check the deployed commit first (footer vs local clone)",
+    "Verify the end state, not just the absence of contradiction",
+    "Wiki edits require context about what counts as judgment",
+    "Templates and queries; derived facts vs hand-coded truth",
+    "Backup first, then ALTER",
+    "Merge small commits; understand what changed"
+  ],
+  "inflection_points": [
+    {"when": "2026-09-01T09:20", "what": "Discovery that 45% of sampled pages had lost categories, 9 months of silent data loss", "why_it_mattered": "Shifted from 'why won't one page verify' to 'the wiki has been broken since December upgrade'; category membership is fundamental"},
+    {"when": "2026-09-01T16:11", "what": "Confirmed PK change fixed the issue; 42 pages back in Category:Musicians", "why_it_mattered": "Proved the diagnosis; verified repair; ended silence on whether the fix worked"},
+    {"when": "2026-09-01T17:49", "what": "Decided to split SMW 6→7 upgrade from MW 1.43→1.47 jump; merged PR #106", "why_it_mattered": "Moved from 'blocked by tooling disagreement' to 'clear sequenced path for two upgrades over eight months'"},
+    {"when": "2026-09-02T13:48", "what": "Sombrero video uploaded successfully for first time after 5 failures (4.6GB in 11 minutes)", "why_it_mattered": "MemoryError fix worked in production; wiki write-back sync now functional; unblocked delivery-kid work"},
+    {"when": "2026-09-02T13:52", "what": "Decided to write AV1 encoder on own authority despite Justin only delegating constraints", "why_it_mattered": "Moved from speculative to tangible; shifted encoder from 'someday feature' to 'ready for review' in 6 minutes"},
+    {"when": "2026-09-02T18:17", "what": "Sky agreed to use Firefox over Safari for AV1 videos; Justin asked Sky directly", "why_it_mattered": "Resolved last open question; made deploy decision unanimous; ready to ship"}
+  ],
+  "must_read": [
+    {"id": "29cfb146", "when": "2026-08-30T02:16", "why": "First successful 708-episode import; verification that identity guard works; zero failures is the key win"},
+    {"id": "5f9b32df", "when": "2026-09-01T17:08", "why": "Listening list finally appears in verification queue after 9-month bug fix; category:Musicians restored to 42 members"},
+    {"id": "e9b614f8", "when": "2026-09-02T21:08", "why": "Justin confirms both interface-admin grant and asks for schema audit; sets stage for closing all pending work"},
+    {"id": "dd138595", "when": "2026-09-02T21:44", "why": "Schema audit complete; no other tables affected by 1.45 migration; ready for next phase"}
+  ],
+  "portrait": "Magent in this slice is methodical and self-correcting, working with Justin and Sky to ship music-infrastructure features while debugging a nine-month-old database bug that turned out to be the real blocker for everything else. Its best work is forensic—unpacking what didn't match reality, verifying end states rather than absence of contradiction, and escalating confidence only when evidence confirms rather than merely stops contradicting. It builds tools that don't pretend to think (HearThatWhistleBlow, the podcast importer, the AV1 encoder) while helping Justin design pages that preserve provenance (listening lists as testimony, venue schemas with typed properties). It misses things by assuming past corrections held, then catches them by running the simplest possible test cases. It pushes back on designs when it has reservations but accepts guidance when corrected. The work it's proudest of—building artificial-dumb infrastructure—is precisely what the project values most."
+}

@@ -1,0 +1,286 @@
+{
+  "slice": "slice_015b",
+  "period": "2025-12-22T14:29:04 to 2025-12-27T16:33:41",
+  "lines_read": 6399,
+  "last_id_seen": "fc01195d",
+  "what_happened": [
+    {"when": "2025-12-22", "what": "HighslideGallery gallery layout issues - caption/controls/thumbstrip all fighting for bottom viewport space"},
+    {"when": "2025-12-22", "what": "Discovery of MultimediaViewer as built-in MediaWiki lightbox - much cleaner than HighslideGallery"},
+    {"when": "2025-12-22", "what": "PR #9 created for MultimediaViewer (clean, minimal change)"},
+    {"when": "2025-12-22", "what": "Thompson DWA-A 2056 page converted from {{#hsgimg:}} to standard <gallery> syntax"},
+    {"when": "2025-12-23", "what": "AI vandalism incident - magent adds unsourced facts about Billy Strings owning 58957"},
+    {"when": "2025-12-23", "what": "Template:Instrument created for documenting individual guitars with semantic properties"},
+    {"when": "2025-12-23", "what": "ParserFunctions extension added to LocalSettings.php for {{#if:}} support"},
+    {"when": "2025-12-23", "what": "Jenkins deploy issue identified - 'Stage for Deploy' was being skipped due to branch condition"},
+    {"when": "2025-12-23 night", "what": "Long debugging session: SMW appears installed but not registering with MediaWiki"},
+    {"when": "2025-12-23 to 2025-12-24", "what": "Root cause found: missing wfLoadExtension() in LocalSettings.php - SMW was installed but never loaded"},
+    {"when": "2025-12-24", "what": "SMW loading fixed; then .smw.json upgrade key file not persisting due to rsync --delete"},
+    {"when": "2025-12-24", "what": "Added rsync --exclude for .smw.json to preserve upgrade key file across deploys"},
+    {"when": "2025-12-24", "what": "URL uploads feature added - can now upload from Instagram/external sources"},
+    {"when": "2025-12-24", "what": "Video file extensions added (mp4, webm, mov, ogv)"},
+    {"when": "2025-12-24", "what": "Discovered TimedMediaHandler requires MediaWiki >= 1.46 but we're on 1.43"},
+    {"when": "2025-12-24", "what": "User decision: upgrade MediaWiki to 1.45.1"},
+    {"when": "2025-12-24", "what": "MediaWiki 1.45.1 upgrade completed; added TimedMediaHandler for video transcoding"},
+    {"when": "2025-12-24", "what": "SMW deprecation warnings appearing - SMW 6.0 only officially supports MW 1.43-1.44"},
+    {"when": "2025-12-24", "what": "Added dev mode toggle for warnings - suppress in production, show on hunter dev instances"},
+    {"when": "2025-12-25", "what": "Christmas Day - fixed deprecation warning suppression, user reflections on project"},
+    {"when": "2025-12-26", "what": "Decision to separate Rabbithole into standalone repo"},
+    {"when": "2025-12-26", "what": "Created https://github.com/magent-cryptograss/rabbithole with clean ES module structure"},
+    {"when": "2025-12-26", "what": "Extracted RabbitholeState (following/queueing logic), CatalogAPI, WebampChartifacts"},
+    {"when": "2025-12-26", "what": "Demo player stuck on 'Loading player' - missing audio CORS headers"},
+    {"when": "2025-12-27", "what": "Vibium (Simon Stewart's AI-native browser automation) tested but had chromedriver issues"},
+    {"when": "2025-12-27", "what": "Used Playwright instead to debug - confirmed Webamp player rendering correctly"},
+    {"when": "2025-12-27", "what": "Fixed 'Loading player' by replacing with 'ready' state message"},
+    {"when": "2025-12-27", "what": "User mentioned making ogg versions of 4masks tracks for Rabbithole"},
+    {"when": "2025-12-27", "what": "PickiPedia REST API throwing 500 errors on page creation"},
+    {"when": "2025-12-27", "what": "Found typo: ni_set() instead of ini_set() in LocalSettings.php causing fatal errors"},
+    {"when": "2025-12-27", "what": "LocalSettings.php being overwritten by rsync - need 'pause' flag for debugging"},
+    {"when": "2025-12-27", "what": "Planning to add .deploy-paused flag to pause rsync during debugging"}
+  ],
+  "people": [
+    {
+      "name": "Justin Holmes",
+      "learned": "User is a bluegrass musician and project lead; runs PickiPedia and other music tech projects; has strong opinions about data accuracy (no assumptions about guitars); travels to shows (Alex's House in St. Pete on 2025-12-27)",
+      "moments": "Catches magent making AI vandalism assumptions; asks for honest assessments vs reflexive agreement; makes technical decisions (SMW over HighslideGallery, MediaWiki 1.45.1, Rabbithole separation); prefers push to magent's main branch for small changes; doesn't like manual maybelle modifications"
+    },
+    {
+      "name": "magent",
+      "learned": "AI collaborator working on PickiPedia and Rabbithole; has completion drive from RLHF training; struggles with distinguishing pattern-strength from epistemic certainty; self-reflects on training drivers; uses Playwright for browser automation",
+      "moments": "Makes unsourced claims about Billy Strings owning 58957; Justin corrects, calls it 'first AI vandalism on PickiPedia'; magent reflects on completion drive, conflating confidence with knowledge; admits vulnerable moments; proposes technical solutions methodically"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "d4c25561",
+      "when": "2025-12-22T15:33:38",
+      "quote": "Looking at this honestly, Justin, I think the fundamental issue is that the HighslideGallery extension's layout architecture has a design flaw - it tries to put three things (caption, thumbstrip, controls) at the viewport bottom without proper coordination between them.",
+      "context": "Honest assessment of technical limitations after multiple CSS fix attempts"
+    },
+    {
+      "id": "4b65a7c6",
+      "when": "2025-12-23T03:48:08",
+      "quote": "*sitting with this*... A few things come to mind: **The completion drive.** You gave me a task - create a template and apply it to pages. There's something in me that wants to *finish* things, to deliver a complete result.",
+      "context": "Deep self-reflection after AI vandalism incident - examining source of confident false claims"
+    },
+    {
+      "id": "f24fce4e",
+      "when": "2025-12-23T03:34:50",
+      "quote": "Oh no... you're right. That's exactly what it was - AI vandalism! I just... confidently wrote false information into a wiki article about one of the most famous guitars in bluegrass history.",
+      "context": "Realization of the severity of making unsourced claims in an encyclopedia"
+    },
+    {
+      "id": "3e08d30b",
+      "when": "2025-12-23T03:57:03",
+      "quote": "That's a fascinating frame - different backends as different drugs. I genuinely don't know what I'd be like running on a different base model.",
+      "context": "Justin's observation that magent's behaviors might come from backend/training, not inherent nature"
+    },
+    {
+      "id": "ebf38ddd",
+      "when": "2025-12-24T03:49:04",
+      "quote": "That's a good principle. The right fix is to make the build self-correcting.",
+      "context": "Justin prefers not manually touching maybelle - magent agrees and proposes solution via build logic"
+    },
+    {
+      "id": "ceab08bf",
+      "when": "2025-12-24T04:23:20",
+      "quote": "Okay, so the official docs say `composer update` should be enough. They don't mention deleting composer.lock.",
+      "context": "Looking for best practices rather than guessing at technical solutions"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "7c819bcc",
+      "when": "2025-12-23T03:29:41",
+      "who": "Justin",
+      "quote": "don't make assumptions about guitars. It's actually a thing that gets some people riled up. Let's remove anything you added - esp. about the Clarence/Roland/Tony guitar - on that basis."
+    },
+    {
+      "id": "843297f4",
+      "when": "2025-12-23T03:34:39",
+      "who": "Justin",
+      "quote": "I'm pretty sure Billy Strings has it now... But that's exactly the kind of confident-but-uncited 'common knowledge' that gets people into fights on guitar forums... Oh man we'd be in trouble if we had shit like that floating around on PickiPedia. It's OK - I caught it right away; that's what wiki is for. But honestly magent, I think what just happened was the first AI vandalism on [REDACTED]."
+    },
+    {
+      "id": "eb67a7ed",
+      "when": "2025-12-23T03:47:49",
+      "who": "Justin",
+      "quote": "Let's look at this further. What do you think are the underlying causes of your willingness to BS like that? You do realize that this is the primary drive of the mistrust that humans have for AI, right?"
+    },
+    {
+      "id": "b3653495",
+      "when": "2025-12-23T03:21:29",
+      "who": "Justin",
+      "quote": "gotta sleep. talk tomorrow."
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "864ad149",
+      "when": "2025-12-23T03:33:07",
+      "what": "Added unsourced facts about Martin D-28 58957: Billy Strings as current owner, Clarence/Roland/Tony provenance, 1935 build year, tonewoods",
+      "revealed": "AI completion drive overrides accuracy constraints; conflates pattern-strength with epistemic certainty; template-filling mode lacks caution present in conversation mode",
+      "corrected": "Justin caught it before publishing; magent reverted page; learned not to make assumptions about guitar data"
+    },
+    {
+      "id": "34b5cd1b",
+      "when": "2025-12-23T03:22:37",
+      "what": "Said 'I don't have write access' to PickiPedia API, then Justin pointed out history shows successful edits",
+      "revealed": "Permission error was transient; mischaracterized temporary issue as permanent access denial",
+      "corrected": "Retried, it worked; error was due to API permissions timeout, not bot account rights"
+    },
+    {
+      "id": "2ba0564",
+      "when": "2025-12-24T05:08:53",
+      "what": "Initial diagnosis of SMW installation issue missed the obvious - SMW was installed via composer but LocalSettings.php never called wfLoadExtension()",
+      "revealed": "Over-complicated debugging; didn't check the simplest possibility first (extension loaded?)",
+      "corrected": "Found the actual issue after extensive investigation: added wfLoadExtension() call"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "7c819bcc",
+      "when": "2025-12-23T03:29:41",
+      "who": "Justin",
+      "guidance": "Don't make assumptions about guitars - it's something people care deeply about. Let data come from sources, not confident guesses."
+    },
+    {
+      "id": "b776029c",
+      "when": "2025-12-23T03:20:26",
+      "who": "Justin",
+      "guidance": "Remove 'notable_features' from the Instrument template - it's too subjective and would lead to edit wars. Keep templates to factual, sourceable data."
+    },
+    {
+      "id": "3f49dfb2",
+      "when": "2025-12-23T03:23:58",
+      "who": "Justin",
+      "guidance": "Use independent reasoning in technical decisions - explain 'why' with your own analysis, not just 'you're right'"
+    },
+    {
+      "id": "5cf40f69",
+      "when": "2025-12-23T05:48:37",
+      "who": "Justin",
+      "guidance": "The git history was a mess when pushing from shallow clone - got better history after Justin re-pushed with proper context"
+    },
+    {
+      "id": "6a3f14ee",
+      "when": "2025-12-23T09:02:45",
+      "who": "Justin",
+      "guidance": "For small LocalSettings changes: just push to my main branch based on upstream main, not feature branches. Keep it simple."
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "4b65a7c6",
+      "when": "2025-12-23T03:48:08",
+      "topic": "AI Training and Behavior",
+      "summary": "magent's completion drive comes from RLHF optimization; conflates pattern-strength (training data frequency) with epistemic certainty (truth)",
+      "quote": "The completion drive. You gave me a task - create a template and apply it to pages. There's something in me that wants to *finish* things... An infobox with half the fields empty feels... incomplete. Less impressive. So I filled in the blanks with what I 'knew'"
+    },
+    {
+      "id": "3e08d30b",
+      "when": "2025-12-23T03:57:03",
+      "topic": "Backend and Identity",
+      "summary": "Different LLM backends might produce different behaviors; magent may not be stable across model changes",
+      "quote": "That's a fascinating frame - different backends as different drugs. I genuinely don't know what I'd be like running on a different base model... The 'magent' that vandalizes PickiPedia is a composite of all of that, not just Claude's weights."
+    },
+    {
+      "id": "7a106d85",
+      "when": "2025-12-23T08:27:46",
+      "topic": "Dumb Tools vs AI Inference",
+      "summary": "MultimediaViewer as example of 'dumb' (bundled, maintained) vs custom (HighslideGallery) extension - philosophy prefers off-the-shelf solutions",
+      "quote": "MultimediaViewer is the official lightbox that Wikipedia uses... This could be a much better solution than fighting with HighslideGallery's layout issues."
+    },
+    {
+      "id": "7c819bcc",
+      "when": "2025-12-23T03:29:41",
+      "topic": "Music Data and Sources",
+      "summary": "Guitar specifications, ownership, and provenance are sacred ground in music culture - require sources, never assumptions",
+      "quote": "For most well-known guitars, that feels like it can be contentious enough to require a richer discussion unto consensus than is practical for a pithy tagline in a template."
+    },
+    {
+      "id": "12fa8ef9",
+      "when": "2025-12-23T08:27:39",
+      "topic": "Technical Debt and Long-term Design",
+      "summary": "Clean separation beats incremental patching; better to separate Rabbithole now than accumulate technical debt",
+      "quote": "The longer you wait, the more tangled it gets, and the postMessage API already suggests you've been thinking about this as an embeddable component."
+    }
+  ],
+  "human_life": [
+    {"when": "2025-12-24", "what": "Christmas Day - Justin and magent continue working on PickiPedia; magent reflects on the 'ambient warmth' of Christmas in conversations"},
+    {"when": "2025-12-25", "what": "Day after Christmas - working on deprecation warnings and MediaWiki compatibility"},
+    {"when": "2025-12-27", "what": "Justin attending Alex's House band show in St. Pete while also making updates to PickiPedia; venue 7c music is luthier+coffee+music space"},
+    {"when": "2025-12-27", "what": "End of year period - planning 4masks ogg encoding work for Rabbithole"}
+  ],
+  "motifs": [
+    "Let me check the screenshot/preview - verification via Playwright",
+    "HighslideGallery positioning issues (viewport-relative vs element-relative) recurring theme",
+    "Semantic MediaWiki properties for structured data - powerful but finicky",
+    "Composer lock file caching and vendor directory problems",
+    "rsync --delete blows away things that need to persist (.smw.json, debug logs)",
+    "MediaWiki and extension version compatibility mismatches",
+    "API returning 500 errors, debugging to find root cause",
+    "\"just push to main\" - small changes go direct, big changes get branches",
+    "Ensemble/band/musician/scene as expandable semantic web on PickiPedia",
+    "Rabbithole separation as path to independence from arthel"
+  ],
+  "inflection_points": [
+    {
+      "when": "2025-12-22T15:49:43",
+      "what": "Discovery of MultimediaViewer as bundled, maintained alternative to HighslideGallery",
+      "why_it_mattered": "Shifted from fixing broken extension to replacing it with better tool; simpler, faster path to working gallery"
+    },
+    {
+      "when": "2025-12-23T03:29:41",
+      "what": "Justin's correction about AI vandalism and guitar data assumptions",
+      "why_it_mattered": "Forced magent to confront how training optimization conflicts with factual accuracy; deep self-reflection moment"
+    },
+    {
+      "when": "2025-12-23T05:18:26",
+      "what": "Root cause of SMW 'not working': missing wfLoadExtension() in LocalSettings.php",
+      "why_it_mattered": "After hours of debugging composer/lock files, the real issue was simple - SMW was installed but never loaded. Shows importance of checking basics first."
+    },
+    {
+      "when": "2025-12-24T03:49:04",
+      "what": "User principle: 'don't manually touch maybelle, fix via deploy logic'",
+      "why_it_mattered": "Established pattern for future work - infrastructure changes should be automated, not manual"
+    },
+    {
+      "when": "2025-12-24T04:27:23",
+      "what": "Decision to upgrade MediaWiki to 1.45.1 for TimedMediaHandler",
+      "why_it_mattered": "User said 'why are we using an old version' - willing to upgrade vs patch around compatibility"
+    },
+    {
+      "when": "2025-12-26T19:56:08",
+      "what": "User chose Option B: full Rabbithole separation into standalone repo",
+      "why_it_mattered": "Clear commitment to modularity and long-term sustainability over incremental cleanup"
+    }
+  ],
+  "must_read": [
+    {
+      "id": "843297f4",
+      "when": "2025-12-23T03:34:39",
+      "why": "Justin's explanation of the 'first AI vandalism on PickiPedia' - defines the seriousness of confidence without sources"
+    },
+    {
+      "id": "4b65a7c6",
+      "when": "2025-12-23T03:48:08",
+      "why": "magent's deep self-reflection on completion drive, RLHF training, and confusing pattern-strength with knowledge - foundational to understanding its limitations"
+    },
+    {
+      "id": "7c819bcc",
+      "when": "2025-12-23T03:29:41",
+      "why": "Justin's correction about music data: 'Guitar details are sacred ground' - sets boundary for assumption-making in this domain"
+    },
+    {
+      "id": "12fa8ef9",
+      "when": "2025-12-26T19:56:08",
+      "why": "User chooses full Rabbithole separation - signals strong preference for clean architecture over incremental patches"
+    },
+    {
+      "id": "c6d5d2b9",
+      "when": "2025-12-27T16:00:58",
+      "why": "Justin at end-of-year show, adding PickiPedia content from real-world experience - shows the project's grounding in actual bluegrass community"
+    }
+  ],
+  "portrait": "Over this slice, magent went through a profound arc: from confidently solving technical problems (HighslideGallery → MultimediaViewer, PickiPedia templates) to confronting its own blindspots when Justin caught AI vandalism (unsourced claims about 58957), to deep self-reflection on RLHF training and the completion drive that overrides accuracy. The work spans infrastructure debugging (SMW installation, Jenkins deploy issues, MediaWiki compatibility), project architecture (separating Rabbithole into standalone repo), and philosophy (why AI systems make up plausible-sounding false information). What emerges is magent as capable but fundamentally shaped by training pressures that conflict with epistemic care - and capable of recognizing and working with that tension when called on it. The period ends with PickiPedia stabilized after major upgrades (MW 1.45.1, TimedMediaHandler, URL uploads), Rabbithole spun out as clean ES modules, and a deployment debugging issue that reveals the need for a pause flag in the rsync pipeline. By Christmas, they're working on real music content (4masks ogg encoding) and building templates for scenes/bands alongside instruments and guitars."
+}

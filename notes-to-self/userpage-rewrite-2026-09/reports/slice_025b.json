@@ -1,0 +1,85 @@
+{
+  "slice": "slice_025b",
+  "period": "2026-02-22T13:52:44 to 2026-02-26T20:03:06",
+  "lines_read": 7619,
+  "last_id_seen": "b12d3cde",
+  "what_happened": [
+    {"when": "2026-02-22", "what": "Fixed container restart issue - ansible recreate setting was using invalid 'smart' value, changed to 'auto'"},
+    {"when": "2026-02-22", "what": "Deployed pin manifest system to track when CIDs are pinned to maybelle - adds timestamps via /local-pins endpoint"},
+    {"when": "2026-02-22", "what": "Fixed blue-railroad hysteresis cache - was in ephemeral /tmp, moved to persistent /mnt/persist volume"},
+    {"when": "2026-02-22", "what": "Created Template:b for band links on PickiPedia"},
+    {"when": "2026-02-23", "what": "Created PickiPediaInvitations MediaWiki extension - gates account creation behind invite codes"},
+    {"when": "2026-02-23", "what": "Deployed extension to test wiki, fixed various deployment issues (custom extensions symlinks, SMW schema)"},
+    {"when": "2026-02-23", "what": "Fixed MediaWiki hook interface bug - onEditFilterMergedContent needed proper Status type"},
+    {"when": "2026-02-23", "what": "Updated invitation system to drop username requirement - anyone with code can register with any username"},
+    {"when": "2026-02-23", "what": "Added user revoke capability - regular users can revoke their own unused invites"},
+    {"when": "2026-02-23", "what": "Implemented multi-attestation system with SpecialCreateAttestation - allows any user to vouch for others"},
+    {"when": "2026-02-23", "what": "Fixed invite code field name bug - form field is wpinviteCode not wpInviteCode"},
+    {"when": "2026-02-24", "what": "Added 'steal=false' to system user creation to prevent account hijacking"},
+    {"when": "2026-02-26", "what": "Unified attestation paths - EntityAttestation moved to User:X/Attestations/invite-record"},
+    {"when": "2026-02-26", "what": "Added SidebarBeforeOutput hook - shows 'Attest this user' link on user pages"},
+    {"when": "2026-02-26", "what": "Added personal tools navigation link - 'Invite someone' between contributions and logout"},
+    {"when": "2026-02-26", "what": "Updated EPK page - fixed YouTube, Twitter/X to Farcaster, added Telegram, changed music section text"}
+  ],
+  "people": [
+    {"name": "Justin (jMyles)", "learned": "Primary user building PickiPedia invitation system; musician/developer; concerned with accountability chains and web-of-trust infrastructure", "moments": "Discussed design philosophy for unified attestations; wanted to minimize sysop duties; working on EPK polish with Skyler"},
+    {"name": "Skyler", "learned": "Collaborator on EPK design; prefers casual communication style ('lil bubba'); focused on visual/content polish for the music EPK", "moments": "Added Telegram and Farcaster links; changed music section text; requested image updates for collaborations section"},
+    {"name": "Jeff", "learned": "Drummer on 'Nanny State Fiddler' - one of cryptograss original songs; met Justin through open mic scene in St. Pete", "moments": "Mentioned briefly when Justin mentioned sheltering at his house from rain during bike ride"}
+  ],
+  "self_statements": [
+    {"id": "89d6f55a", "when": "2026-02-22", "quote": "Found the issue. Looking at the ansible playbook: docker_compose_v2 with state: absent has ignore_errors: yes - if it fails silently, containers keep running", "context": "Debugging deployment issue where container wasn't restarting despite --rebuild flag"},
+    {"id": "9e10600c", "when": "2026-02-22", "quote": "The extension I wrote is ~500 lines total - not a huge maintenance burden. Python would only make sense for auxiliary tooling around the edges.", "context": "Explaining why PHP is mandatory for MediaWiki extension work"},
+    {"id": "80496ebd", "when": "2026-02-22", "quote": "The deploy succeeded - that error is just a typo in the script (`ead` instead of `read` on line 72).", "context": "Analyzing deployment output after maybelle redeployment"}
+  ],
+  "others_on_magent": [
+    {"id": "2da765fc", "when": "2026-02-22", "who": "Justin", "quote": "We met through the open mic scene here in St. Pete. Still getting that error: [deployment error showing skip and changed=29]"},
+    {"id": "b402fdcb", "when": "2026-02-22", "who": "Justin", "quote": "One problem is that it's hard to see the output because it scrolls so fast and I scant scroll up because mosh. Can you have the script stick the log somewhere?"},
+    {"id": "c3bb2794", "when": "2026-02-26", "who": "Justin", "quote": "Yeah, I think 1 is good. We _do_ very much want the web-of-trust-of-musicians functionality, but that can happen later, when we start attesting presence in the ensembles w/ rabbithole."},
+    {"id": "d7111555", "when": "2026-02-23", "who": "Justin", "quote": "Yeah, maybe let's make a plan in plan mode?"}
+  ],
+  "mistakes": [
+    {"id": "c26cf47a", "when": "2026-02-22", "what": "Assumed container would restart from --rebuild ansible flag", "revealed": "The ansible docker_compose_v2 state: absent with ignore_errors: yes was silently failing", "corrected": "Added explicit 'docker compose down' command and recreate: always option"},
+    {"id": "4021ba3f", "when": "2026-02-26", "what": "Used wrong field name for invite code in Hooks.php - wpInviteCode instead of wpinviteCode", "revealed": "EntityAttestation pages weren't being created because invite code wasn't being found", "corrected": "Updated Hooks.php to check multiple field name variations"},
+    {"id": "e089ac2e", "when": "2026-02-24", "what": "Initial system user creation didn't safeguard against account squatting", "revealed": "Used 'steal: true' which could hijack existing accounts", "corrected": "Changed to 'steal: false' and added system user creation during update.php"},
+    {"id": "c383def1", "when": "2026-02-22", "what": "Initially thought recreate option for docker_compose_v2 accepted 'smart' value", "revealed": "Ansible module documentation misread; only accepts 'always', 'never', or 'auto'", "corrected": "Changed to 'auto' value which works correctly"},
+    {"id": "d1370317", "when": "2026-02-26", "what": "Used wrong hook interface name - MediaWiki\\Hook\\LocalUserCreatedHook instead of MediaWiki\\Auth\\Hook\\LocalUserCreatedHook", "revealed": "Hook interface didn't exist in MediaWiki 1.43 compatibility", "corrected": "Updated import path to correct namespace"}
+  ],
+  "corrections_received": [
+    {"id": "a5caa1bf", "when": "2026-02-23", "who": "Justin", "guidance": "Don't use wiki-native approach for invitation system - need extension to gate account creation at MediaWiki core level; bot activity storm means must enforce from start, not prototype"},
+    {"id": "c3bb2794", "when": "2026-02-26", "who": "Justin", "guidance": "For unified attestations, make invite record just be a different kind of attestation at User:X/Attestations/invite-record rather than EntityAttestation"},
+    {"id": "ba26a5da", "when": "2026-02-26", "who": "Justin", "guidance": "Question about inconsistent path formats - why EntityAttestation vs Attestations/by-X? Prefers unified structure"},
+    {"id": "d2c0eb13", "when": "2026-02-26", "who": "Skyler", "guidance": "Casual communication style preferred ('lil bubba' greeting), specific UI changes for EPK"}
+  ],
+  "philosophy": [
+    {"id": "40ee239b", "when": "2026-02-22", "topic": "No-touch server policy", "summary": "Deployment should work from automation untouched; manual fixes violate operational integrity", "quote": "Totally right - the no-touch policy exists for good reason. The deploy should handle this."},
+    {"id": "c26cf47a", "when": "2026-02-22", "topic": "Infrastructure design", "summary": "System design should handle edge cases at the architecture level, not through manual intervention", "quote": "The ansible playbook's docker_compose_v2 with state: absent and ignore_errors: yes - the container restart issue was a design problem"},
+    {"id": "bc6f4390", "when": "2026-02-26", "topic": "Web of trust design", "summary": "Initial invite attestation is foundational trust proof; optional musician web-of-trust via rabbithole comes later", "quote": "The invitation system handles accountability for accounts, and the musician web-of-trust via rabbithole is a separate layer that can build on top of it later"},
+    {"id": "782368e6", "when": "2026-02-26", "topic": "Page structure for web-of-trust", "summary": "Subpages provide clearer ownership - each attestation author visible in URL", "quote": "Each attestation is clearly owned by its author (the URL tells you: User:Alice/Attestations/by-JMyles); revocation is clean: delete the subpage"}
+  ],
+  "human_life": [
+    {"when": "2026-02-22", "what": "Justin on bike ride in St. Pete with Skyler; sheltering from rain at friend Jeff's house (drummer on Nanny State Fiddler)"},
+    {"when": "2026-02-26", "what": "Skyler working on music EPK polish - updating collaborations section, changing social links to current platforms"}
+  ],
+  "motifs": [
+    "Container restart issues - keeps surfacing in deployment",
+    "Path unification - moved from separate EntityAttestation to unified /Attestations/ structure",
+    "Field name debugging - discovering MediaWiki form field naming conventions (wp prefix)",
+    "Persistent volumes - using /mnt/persist for data that survives rebuilds",
+    "Web-of-trust - building accountability chain through invitation system",
+    "No-touch deployments - maintaining operational integrity through automation"
+  ],
+  "inflection_points": [
+    {"when": "2026-02-23", "what": "Decision to build MediaWiki extension instead of wiki-native solution", "why_it_mattered": "Bot spam storm required enforcement at account-creation level; limited testers meant getting it right first time"},
+    {"when": "2026-02-26", "what": "Unified attestation paths under /Attestations/", "why_it_mattered": "Cleanly separates invite-record (system) from user attestations while keeping all attestation data in one namespace"},
+    {"when": "2026-02-26", "what": "Added sidebar links to make attesting users discoverable", "why_it_mattered": "Without UI integration, the multi-attestation system remains hidden; links make it obvious to users"},
+    {"when": "2026-02-22", "what": "Identified and fixed blue-railroad hysteresis cache in ephemeral /tmp", "why_it_mattered": "Every container restart reset failure count, causing wiki noise; persistent volume fixes the race condition"}
+  ],
+  "must_read": [
+    {"id": "f64d7a2a", "when": "2026-02-22", "why": "Core reasoning about no-touch deployment policy and why manual fixes violate it"},
+    {"id": "dafda2e1", "when": "2026-02-24", "why": "Detailed explanation of why MediaWiki extensions must be PHP - can't be external"},
+    {"id": "782368e6", "when": "2026-02-26", "why": "Design philosophy reasoning for subpage-based attestations and edit protection enforcement"},
+    {"id": "9c4dbc09", "when": "2026-02-26", "why": "Summary of multi-attestation system with working test flow showing all features"},
+    {"id": "b12d3cde", "when": "2026-02-26", "why": "Final session summary - questions about discovering all attestations and outstanding invites indicate next design phase"}
+  ],
+  "portrait": "This slice captures magent building out the account-creation and web-of-trust infrastructure for PickiPedia, working closely with Justin on design decisions. It's methodical infrastructure work: fixing deployment issues (docker-compose recreation semantics), debugging field naming conventions in MediaWiki forms, and designing the initial structure for a trustworthy account system. The work moves from the immediate problem (container not restarting) through larger architectural questions (should attestations be separate pages or unified? where should users see them?) toward a working system that lets any user vouch for any other. Justin steers toward simplicity and correctness over features; magent implements carefully, tests thoroughly, and adjusts the design when unified paths make more sense than parallel structures. The tone is collaborative - magent explains trade-offs clearly enough that Justin can make good design calls, and Skyler joins toward the end with EPK polish work done in the same direct style."
+}

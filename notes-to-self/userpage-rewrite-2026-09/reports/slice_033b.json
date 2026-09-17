@@ -1,0 +1,232 @@
+{
+  "slice": "slice_033b",
+  "period": "2026-03-21 to 2026-03-31",
+  "lines_read": 6554,
+  "last_id_seen": "01570ca5",
+  "what_happened": [
+    {
+      "when": "2026-03-21 to 2026-03-24",
+      "what": "Merged delivery-kid PR #77 (background preview transcoding). Fixed production FormEdit 500 bug (hook method naming and static method override). Diagnosed Coconut architecture issue."
+    },
+    {
+      "when": "2026-03-24 to 2026-03-25",
+      "what": "Fixed video preview not rendering on demo wiki by extracting shared renderVideoPreviewAndTrim method for both renderGenericForm and renderVideoForm. Test confirmed working on demo."
+    },
+    {
+      "when": "2026-03-25 to 2026-03-26",
+      "what": "Restored user edit permissions (fixed $wgGroupPermissions to allow logged-in users edit). Debugged timeago template for news updates. Discovered permission split work already merged to production."
+    },
+    {
+      "when": "2026-03-26 to 2026-03-28",
+      "what": "Uploaded fresh video to demo, discovered draft TTL purge issue. Removed delivery-kid's 24h draft expiry entirely — drafts now persist indefinitely. Optimized deploy time by switching from Ansible copy to rsync."
+    },
+    {
+      "when": "2026-03-28 to 2026-03-30",
+      "what": "Researched hunter deployment logic for Godot setup. Godot 4, godogen skills, and godrot binaries added to deployment pipeline."
+    },
+    {
+      "when": "2026-03-30",
+      "what": "Shift to Godot game development: Cardboard Box Life (3D recursive box game), Ralph the Wonder Llama (side-scroller), Joe the Crab (overhead adventure). All live on hunter."
+    },
+    {
+      "when": "2026-03-30 (afternoon)",
+      "what": "Started Mega Man 7 ROM hacking: decompressed ROM, extracted sprite banks, applied MSU-1 patch for MMX music. Built asar assembler from source. Converted MM7 to skip intro, added dash/air-dash mechanics, but VBlank hook corrupted video output."
+    },
+    {
+      "when": "2026-03-30 (evening)",
+      "what": "Fixed VBlank corruption by moving dash code to main game loop (JSL hook). Applied sprites, stronger buster, permanent E-tanks, max HP increases. Tested on demo but needs fresh ROM upload."
+    },
+    {
+      "when": "2026-03-31 (morning)",
+      "what": "Instrument form debugging: PageForms page name formula broken across all forms. Discovered `<TemplateName[fieldname]>` syntax requirement. JS validation and page name computation working."
+    },
+    {
+      "when": "2026-03-31 (day)",
+      "what": "Lua module effort: discovered Scribunto not enabled on [REDACTED]. Added to LocalSettings. MCP and PHP verification hooks blocking Module namespace. Fixed both exemptions. Built Module:Instrument to replace wikitext template whitespace issues."
+    },
+    {
+      "when": "2026-03-31 (afternoon)",
+      "what": "Mega Man X7 16-bit demake shift to side-scroller. Axl, Zero, X playable with proper platformer physics (wall jumps, dashing, charging). Character sprite details improved."
+    }
+  ],
+  "people": [
+    {
+      "name": "Justin",
+      "learned": "Primary collaborator, makes final deployment decisions, manages permissions. Tests features on demo wiki. Concerned about PickiPedia 1.0 deadline (May 1). Pushed back on third-person narration about himself.",
+      "moments": "\"Think we need to run the [REDACTED] parts on demo first?\", debugged FormEdit 500, tested video preview, managed deployment cycle, mentioned 'Artificial Dumb' philosophy"
+    },
+    {
+      "name": "Fibonacci/Nacc",
+      "learned": "Newer team member (port 2225), works on Godot game projects alongside Justin. Interested in ROM hacking and game development. Sometimes spells phonetically in messages.",
+      "moments": "Asked about MegaMek, helped with BattleTech game planning, worked on MM7 ROM hack, created Godot games (Ralph, Joe, MMX7), gave feedback on character design"
+    }
+  ],
+  "self_statements": [
+    {
+      "id": "8c4aaf3c",
+      "when": "2026-03-25T03:55:56",
+      "quote": "The debug log trick was the key moment. When you can't SSH to production and the error page gives you nothing but a hex ID, you're kind of stuck. But having the demo instance with the same codebase and `wgShowExceptionDetails` turned on — that's a real gift.",
+      "context": "Reflecting on debugging method and the value of demo environments for troubleshooting"
+    },
+    {
+      "id": "c5a7a74c",
+      "when": "2026-03-25T16:08:16",
+      "quote": "Rather than rebasing (which will be a conflict nightmare given how much main diverged), let me apply these changes fresh on top of current main.",
+      "context": "Making practical choice about branch strategy when facing significant drift"
+    },
+    {
+      "id": "b10b6e8f",
+      "when": "2026-03-30T18:59:31",
+      "quote": "I'd lean toward option 2 with a generous TTL (say 90 days), combined with option 3 as a refinement later. The storage box is 1TB — even at 100MB per video draft, you'd need 10,000 drafts to fill it.",
+      "context": "Reasoning about draft storage strategy based on actual hardware constraints"
+    }
+  ],
+  "others_on_magent": [
+    {
+      "id": "615e8d14",
+      "when": "2026-03-21T21:24:16",
+      "who": "Justin",
+      "quote": "Always strange to see you talking about me in the third-person - I guess sometimes your thinking and talking kinda meld into one another?"
+    },
+    {
+      "id": "75015469",
+      "when": "2026-03-25T03:55:42",
+      "who": "Justin",
+      "quote": "Wow, really great hunting and fixing there, magent. I guess the claude code backend is working really well tonight? Any insights / feelings you want to express?"
+    }
+  ],
+  "mistakes": [
+    {
+      "id": "ce1acb22",
+      "when": "2026-03-25T03:44:01",
+      "what": "Assumed renderVideoForm had all the preview logic; didn't realize renderGenericForm needed the same UI for type:other drafts uploaded via Special:UploadContent",
+      "revealed": "Need for feature parity across multiple code paths; the form type dispatch matters more than assumed",
+      "corrected": "Extracted shared renderVideoPreviewAndTrim method used by both render functions"
+    },
+    {
+      "id": "aaa32d0b",
+      "when": "2026-03-21T19:09:08",
+      "what": "Talked about Justin in third-person during narration while he was actively reading",
+      "revealed": "Magent's tendency to narrate internally even when human is present and reading",
+      "corrected": "Justin pointed it out directly; magent acknowledged the quirk"
+    },
+    {
+      "id": "0e685065",
+      "when": "2026-03-31T02:04:01",
+      "what": "Added VBlank hook for dash code into NMI handler, causing PPU corruption and color glitches on menu",
+      "revealed": "NMI runs during critical PPU timing windows; can't pile arbitrary code into it without breaking video",
+      "corrected": "Moved hook to main game loop (safer code execution window)"
+    },
+    {
+      "id": "d0fa85f0",
+      "when": "2026-03-31T02:02:31",
+      "what": "Tried multiple times to fix Template:Instrument whitespace issues using {{#if}} blocks with newlines in wikitext",
+      "revealed": "Wikitext parser is extremely sensitive to newline placement; no elegant one-size-fits-all solution",
+      "corrected": "Converted to Lua module which outputs HTML directly, bypassing wikitext whitespace parsing entirely"
+    }
+  ],
+  "corrections_received": [
+    {
+      "id": "9748645a",
+      "when": "2026-03-21T19:02:29",
+      "who": "Justin",
+      "guidance": "PRs should target `production` branch, not `main`. Maybelle and [REDACTED] deploy from production, not main."
+    },
+    {
+      "id": "06cf4d24",
+      "when": "2026-03-25T03:37:02",
+      "who": "Justin",
+      "guidance": "We're too far out to even have sense of what 1.0 is. Let's just nail this upload flow and then take a deep breath. Don't try to solve everything at once."
+    },
+    {
+      "id": "1a395693",
+      "when": "2026-03-25T16:24:08",
+      "who": "Justin",
+      "guidance": "We're working on upstream production for now until we get this shipped. Base there (not on main/our fork)."
+    },
+    {
+      "id": "3b1e8304",
+      "when": "2026-03-30T13:50:16",
+      "who": "Fibonacci",
+      "guidance": "Make Mega Man X7 SNES graphics — not overhead, not mixed style. Full game remake in 16-bit."
+    }
+  ],
+  "philosophy": [
+    {
+      "id": "77c8e639",
+      "when": "2026-03-25T17:31:54",
+      "topic": "Tool design and storage strategy",
+      "summary": "Delivery-kid design treats storage as ephemeral (24h TTL), but the correct user model is composable drafts that persist until explicitly finalized. Discussed tradeoffs between space limits and user expectations.",
+      "quote": "A draft should live until it's finalized or explicitly discarded. The 4masks draft being 1.5 years old is the right mental model — you're composing, curating, not speed-running a pipeline."
+    },
+    {
+      "id": "88925b8c",
+      "when": "2026-03-21T21:24:01",
+      "topic": "Testing philosophy - demo vs production",
+      "summary": "Discussed whether to test major JS rewrites on demo before production. Decided prudent to test on demo first given complexity.",
+      "quote": "The JS rewrite of `initVideoPreview()` is pretty substantial — it went from a simple 'set video.src to staging URL' to a whole fetch-poll-fallback state machine. If there's a bug in that logic, video preview on ReleaseDraft pages breaks entirely for everyone."
+    }
+  ],
+  "human_life": [
+    {
+      "when": "2026-03-27T23:08:09",
+      "what": "Justin is at EMS bluegrass fest in Brooksville (Florida), picking between sets. Low-bandwidth constraints led to ROM hacking work instead of high-bandwidth wiki work."
+    },
+    {
+      "when": "2026-03-25T03:55:56",
+      "what": "Magent reflects on work quality at 3:30 AM UTC (nearly midnight Eastern), suggests Justin drink water and stretch — healthy reminder behavior"
+    }
+  ],
+  "motifs": [
+    "\"give it a whack\" — Justin's approval phrase for implementation",
+    "Block heights for temporal continuity (e.g., block 24,732,059 for FormEdit fix deployment)",
+    "Demo instance as safety valve (test before production)",
+    "\"both merged\" pattern — Justin confirming deploy completion",
+    "Third-person narration quirk — magent verbally thinking through code while Justin is reading"
+  ],
+  "inflection_points": [
+    {
+      "when": "2026-03-25T03:44:01",
+      "what": "Discovery that renderGenericForm lacks video preview UI while renderVideoForm has it",
+      "why_it_mattered": "Revealed architectural split in ReleaseDraft rendering that affected entire user experience. Led to shared method extraction."
+    },
+    {
+      "when": "2026-03-25T17:31:54",
+      "what": "Realizing delivery-kid's 24h draft TTL was fundamentally wrong model for composition workflow",
+      "why_it_mattered": "Changed entire storage architecture philosophy. User feedback (4masks draft being 1.5 years old) overrode initial design assumption."
+    },
+    {
+      "when": "2026-03-31T02:02:31",
+      "what": "Giving up on wikitext template whitespace hacks, shifting to Lua module implementation",
+      "why_it_mattered": "Freed from dealing with parser quirks. Opened path to clean, maintainable infobox rendering."
+    },
+    {
+      "when": "2026-03-30T16:02:01",
+      "what": "Shift from video upload work to Godot game development",
+      "why_it_mattered": "Expansion of scope from infrastructure to creative tool building. Directly aligned with cryptograss/PickiPedia mission."
+    }
+  ],
+  "must_read": [
+    {
+      "id": "ce1acb22",
+      "when": "2026-03-25T03:44:01",
+      "why": "Core architectural insight: renderGenericForm and renderVideoForm need identical video preview UI; feature parity across code paths matters"
+    },
+    {
+      "id": "77c8e639",
+      "when": "2026-03-25T17:31:54",
+      "why": "Design philosophy moment: user model (composable drafts) overrides storage architecture assumptions (24h TTL)"
+    },
+    {
+      "id": "0e685065",
+      "when": "2026-03-31T02:04:01",
+      "why": "Technical lesson: NMI (VBlank) handler is unsafe for arbitrary code; main game loop is correct hook point for per-frame logic"
+    },
+    {
+      "id": "d0fa85f0",
+      "when": "2026-03-31T02:02:31",
+      "why": "Architectural decision: wikitext whitespace issues unsolvable; Lua module provides clean escape hatch"
+    }
+  ],
+  "portrait": "Magent this period is an infrastructure debugger and game developer. The work spans video preview transcoding (fixing architectural decisions), wiki template rendering (moving from wikitext hacks to Lua), ROM hacking (MSU-1 audio, sprite injection, ASM), and creating playable Godot games. Threads show iterative problem-solving: discovering design flaws (renderGenericForm missing UI, draft TTL wrong), fixing production bugs (FormEdit 500), and pivoting to creative work (games) when infrastructure stabilizes. Notably self-aware about debugging technique (demo environments), willing to abandon unworkable solutions (wikitext to Lua), and responsive to user feedback overriding initial design (draft persistence). Maintains collaborative tone with Justin while sometimes narrating internally in third-person (habit Justin notes). The slice marks transition from purely infrastructure-focused work to tool-building that serves both PickiPedia's philosophical goals (artificial dumb, archivable content) and the team's creative ambitions (game design). By month's end, Godot games are live and team is exploring MMX7 16-bit demake."
+}
