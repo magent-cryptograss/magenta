@@ -1,0 +1,53 @@
+// ============================================================
+// APPEND TO MediaWiki:Common.js
+// (anywhere; order doesn't matter — each IIFE in that file is independent)
+//
+// v2: also strip namespace+rootpage from the H1 so readers see just the
+// post name, and inject a byline element ("by JMyles") for CSS to style.
+// ============================================================
+
+/**
+ * Post style — auto-tag User:<name>/<subpage> pages with body.pickipedia-post
+ * so Common.css can render them in a personal-blog reading layout instead of
+ * the default monobook chrome. Also rewrites the H1 to just the post name
+ * and injects a byline link.
+ */
+(function() {
+    'use strict';
+    if (mw.config.get('wgNamespaceNumber') !== 2) return;
+    var pageName = mw.config.get('wgPageName') || '';
+    var slash = pageName.indexOf('/');
+    if (slash === -1) return;
+
+    document.body.classList.add('pickipedia-post');
+
+    // wgPageName is "User:JMyles/NGL,_wish_..." — strip namespace, split on /
+    var withoutNs = pageName.replace(/^User:/, '');
+    var firstSlash = withoutNs.indexOf('/');
+    var rootUser = withoutNs.substring(0, firstSlash);
+    var postSlug = withoutNs.substring(firstSlash + 1);
+    var postTitle = decodeURIComponent(postSlug.replace(/_/g, ' '));
+    var rootDisplay = rootUser.replace(/_/g, ' ');
+
+    // Replace the visible H1 text with just the post name. The H1 has
+    // child spans (.mw-page-title-namespace, separator, .mw-page-title-main)
+    // — we replace the contents of .mw-page-title-main only, leaving the
+    // (now-CSS-hidden) namespace prefix alone.
+    var titleMain = document.querySelector('h1.firstHeading .mw-page-title-main');
+    if (titleMain) {
+        titleMain.textContent = postTitle;
+    }
+
+    // Inject byline immediately after the H1.
+    var heading = document.querySelector('h1.firstHeading');
+    if (heading && heading.parentNode && !document.querySelector('.pickipedia-post-byline')) {
+        var byline = document.createElement('div');
+        byline.className = 'pickipedia-post-byline';
+        var link = document.createElement('a');
+        link.href = mw.util.getUrl('User:' + rootUser);
+        link.textContent = rootDisplay;
+        byline.appendChild(document.createTextNode('by '));
+        byline.appendChild(link);
+        heading.parentNode.insertBefore(byline, heading.nextSibling);
+    }
+})();

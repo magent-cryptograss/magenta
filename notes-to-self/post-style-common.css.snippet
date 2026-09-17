@@ -1,0 +1,186 @@
+/* ============================================================
+ * APPEND TO MediaWiki:Common.css   (REPLACE the previous v1 block)
+ * Post style — applied via body.pickipedia-post (added by Common.js
+ * to any User:<name>/<subpage> page). Substack-ish reading layout.
+ * v2: kill sidebar, center the card, byline-driven attribution.
+ * ============================================================ */
+
+/* --- Layout: hide the left sidebar so the content can center on the
+       page like a real post, not a wiki page squeezed to one side. --- */
+body.pickipedia-post #column-one {
+	display: none;
+}
+
+body.pickipedia-post #globalWrapper,
+body.pickipedia-post #column-content {
+	float: none;
+	margin: 0 auto;
+}
+
+body.pickipedia-post #content {
+	max-width: 720px;
+	margin: 1.5em auto 3em auto !important;
+	padding: 2.5em 2.5em 3em 2.5em;
+	background: #fff;
+	border: none;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+	border-radius: 4px;
+	float: none;
+}
+
+/* The page-actions tabs (user page / discussion / view source / history)
+   sit absolutely at left:138.7px in monobook — that's relative to a
+   layout that no longer exists when we hide column-one. Pin them to
+   the top-right of the viewport instead, small and unobtrusive. */
+body.pickipedia-post #p-cactions {
+	position: fixed !important;
+	top: 0.5em;
+	right: 1em;
+	left: auto !important;
+	width: auto !important;
+	font-size: 0.85em;
+	z-index: 5;
+	background: rgba(255, 255, 255, 0.85);
+	padding: 0.25em 0.5em;
+	border-radius: 3px;
+}
+
+body.pickipedia-post #p-cactions .pBody {
+	background: transparent;
+	border: none;
+}
+
+/* --- Title: drop the namespace prefix and the User_/ part visually,
+       then style what remains as a real post title. --- */
+body.pickipedia-post .firstHeading,
+body.pickipedia-post h1.firstHeading {
+	font-family: Georgia, "Times New Roman", serif;
+	font-size: 2.5em;
+	font-weight: 700;
+	line-height: 1.18;
+	letter-spacing: -0.01em;
+	border-bottom: none;
+	margin: 0 0 0.25em 0;
+	color: #1a1a1a;
+}
+
+body.pickipedia-post .mw-page-title-namespace,
+body.pickipedia-post .mw-page-title-separator {
+	display: none;
+}
+
+/* --- Byline (injected by Common.js): small sans, under the title --- */
+.pickipedia-post-byline {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif;
+	font-size: 0.95em;
+	color: #666;
+	margin: 0 0 2em 0;
+	letter-spacing: 0.01em;
+}
+
+.pickipedia-post-byline a {
+	color: #1a1a1a;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.pickipedia-post-byline a:hover {
+	text-decoration: underline;
+}
+
+/* --- The wiki cruft we don't want on a post --- */
+body.pickipedia-post #siteSub,
+body.pickipedia-post .subpages,
+body.pickipedia-post #contentSub,
+body.pickipedia-post #jump-to-nav,
+body.pickipedia-post .printfooter {
+	display: none;
+}
+
+/* --- Body copy: serif, generous line-height --- */
+body.pickipedia-post .mw-parser-output {
+	font-family: Charter, "Iowan Old Style", Georgia, serif;
+	font-size: 1.1em;
+	line-height: 1.7;
+	color: #2a2a2a;
+}
+
+body.pickipedia-post .mw-parser-output h2,
+body.pickipedia-post .mw-parser-output h3,
+body.pickipedia-post .mw-parser-output h4 {
+	font-family: Georgia, serif;
+	font-weight: 700;
+	color: #1a1a1a;
+	margin-top: 1.6em;
+	margin-bottom: 0.5em;
+}
+
+body.pickipedia-post .mw-parser-output h2 {
+	font-size: 1.55em;
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+body.pickipedia-post .mw-parser-output h3 {
+	font-size: 1.22em;
+}
+
+body.pickipedia-post .mw-parser-output p {
+	margin: 0 0 1.15em 0;
+}
+
+body.pickipedia-post .mw-parser-output a {
+	color: #1a4480;
+	text-decoration: underline;
+	text-decoration-color: rgba(26, 68, 128, 0.3);
+	text-underline-offset: 2px;
+}
+
+body.pickipedia-post .mw-parser-output a:hover {
+	text-decoration-color: #1a4480;
+}
+
+body.pickipedia-post .mw-parser-output blockquote {
+	border-left: 3px solid #aaa;
+	margin: 1.4em 0;
+	padding: 0.2em 0 0.2em 1.2em;
+	color: #555;
+	font-style: italic;
+}
+
+body.pickipedia-post .mw-parser-output pre,
+body.pickipedia-post .mw-parser-output code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.92em;
+}
+
+/* Categories (if any) sit at the bottom in a quiet strip */
+body.pickipedia-post .catlinks {
+	border: none;
+	background: transparent;
+	font-size: 0.82em;
+	color: #888;
+	margin-top: 2.5em;
+	padding-top: 1em;
+	border-top: 1px solid #eee;
+}
+
+/* Embedded videos breathe inside the reading column — overrides the
+   inline width=400px the user might have set in {{HLSVideo}}. */
+body.pickipedia-post .hls-video-player {
+	margin: 1.8em 0;
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
+body.pickipedia-post .hls-video-player + br,
+body.pickipedia-post .mw-parser-output > div[style*="width:400px"] {
+	width: 100% !important;
+	max-width: 100% !important;
+}
+
+body.pickipedia-post .hls-video-player video {
+	max-width: 100% !important;
+	width: 100% !important;
+	border-radius: 4px;
+}

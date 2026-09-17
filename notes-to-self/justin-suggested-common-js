@@ -1,0 +1,172 @@
+/* ============================================================
+ * Pickipedia — User-subpage zine/Substack JS
+ * Drop into MediaWiki:Common.js
+ *
+ * Activates on User:<username>/<subpagename> ONLY (not the
+ * User: root page). Adds the body class .pickipedia-userpost
+ * and injects:
+ *   - hero block (kicker, title, dek, byline)
+ *   - tucked edit/history/talk corner
+ *   - colophon
+ *   - light/dark mode toggle (persisted in localStorage)
+ *
+ * Variant is read from a {{#vardefine}} or first-line magic
+ * word, or falls back to "letter". To set per-page, include
+ * an HTML comment <!-- pickipedia:variant=masthead --> in the
+ * wikitext, or add the page to Category:Masthead-style.
+ * ============================================================ */
+
+(function () {
+  'use strict';
+
+  // mw.config is set by MediaWiki on every page load
+  if (typeof mw === 'undefined' || !mw.config) return;
+
+  var nsNumber = mw.config.get('wgNamespaceNumber');     // 2 = User
+  var pageName = mw.config.get('wgPageName') || '';      // e.g. "User:Mira_R/Newsstands"
+  var title    = mw.config.get('wgTitle') || '';         // e.g. "Mira_R/Newsstands"
+  var action   = mw.config.get('wgAction') || 'view';
+
+  // Trigger ONLY on User:<name>/<subpage> view pages
+  if (nsNumber !== 2) return;
+  if (action !== 'view') return;
+  if (title.indexOf('/') === -1) return;
+
+  var slash      = title.indexOf('/');
+  var username   = title.slice(0, slash).replace(/_/g, ' ');
+  var subpage    = title.slice(slash + 1).replace(/_/g, ' ');
+  var userInitials = username
+    .split(/\s+/)
+    .map(function (w) { return w.charAt(0); })
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || username.slice(0, 2).toUpperCase();
+
+  // ---------- Activate skin ----------
+  var body = document.body;
+  body.classList.add('pickipedia-userpost');
+
+  // ---------- Variant detection ----------
+  // Look for an HTML comment marker in the parser output.
+  var variant = 'letter';
+  var content = document.querySelector('.mw-parser-output');
+  if (content) {
+    var html = content.innerHTML || '';
+    var m = html.match(/pickipedia:variant\s*=\s*(letter|masthead)/i);
+    if (m) variant = m[1].toLowerCase();
+  }
+  // Categories override: Category:Masthead style
+  var cats = mw.config.get('wgCategories') || [];
+  if (cats.indexOf('Masthead style') !== -1) variant = 'masthead';
+  if (cats.indexOf('Letter style') !== -1) variant = 'letter';
+
+  body.classList.add('pickipedia-variant-' + variant);
+
+  // ---------- Light / dark mode (persisted) ----------
+  var STORAGE_KEY = 'pickipedia-mode';
+  var saved = null;
+  try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  if (saved === 'dark') body.classList.add('pickipedia-dark');
+
+  // ---------- Build hero ----------
+  if (content) {
+    // Pull a "dek" if the wikitext starts with a {{Dek|...}} template
+    // rendered as <p class="pp-dek-source">. Otherwise blank.
+    var dek = '';
+    var dekEl = content.querySelector('.pp-dek-source');
+    if (dekEl) {
+      dek = dekEl.innerHTML;
+      dekEl.remove();
+    }
+
+    // Optional kicker: <p class="pp-kicker-source">…</p> in wikitext.
+    // Falls back to the user's namespace prefix — real metadata only.
+    var kicker = 'User:' + username;
+    var kickerEl = content.querySelector('.pp-kicker-source');
+    if (kickerEl) {
+      kicker = kickerEl.textContent.trim();
+      kickerEl.remove();
+    }
+
+    // Pull last-edited date from MediaWiki's footer info if present
+    var lastMod = '';
+    var lastModEl = document.getElementById('footer-info-lastmod');
+    if (lastModEl) lastMod = lastModEl.textContent.replace(/^\s*This page was last (edited|modified) on\s*/i, '').trim();
+
+    // Build the hero DOM
+    var hero = document.createElement('header');
+    hero.className = 'pickipedia-hero';
+
+    var titleText = subpage;
+
+    if (variant === 'masthead') {
+      hero.innerHTML =
+        '<div class="pp-topbar">' +
+          '<div class="pp-kicker">' + escapeHtml(kicker) + '</div>' +
+          '<div class="pp-topbar-rule"></div>' +
+          (lastMod ? '<div class="pp-topbar-vol">' + escapeHtml(lastMod) + '</div>' : '') +
+        '</div>' +
+        '<div class="pp-titlewrap">' +
+          '<h1 class="pp-title">' + escapeHtml(titleText) + '</h1>' +
+          (dek ? '<p class="pp-dek">' + dek + '</p>' : '') +
+        '</div>' +
+        '<div class="pp-byline">' +
+          '<a class="pp-avatar" href="/wiki/User:' + encodeURIComponent(username.replace(/ /g, '_')) + '">' + escapeHtml(userInitials) + '</a>' +
+          '<a class="pp-byline-name" href="/wiki/User:' + encodeURIComponent(username.replace(/ /g, '_')) + '">' + escapeHtml(username) + '</a>' +
+          '<div class="pp-byline-meta">' + escapeHtml(lastMod || '') + '</div>' +
+        '</div>';
+    } else {
+      hero.innerHTML =
+        '<div class="pp-kicker">' + escapeHtml(kicker) + '</div>' +
+        '<h1 class="pp-title">' + escapeHtml(titleText) + '</h1>' +
+        (dek ? '<p class="pp-dek">' + dek + '</p>' : '') +
+        '<div class="pp-byline">' +
+          '<a class="pp-avatar" href="/wiki/User:' + encodeURIComponent(username.replace(/ /g, '_')) + '">' + escapeHtml(userInitials) + '</a>' +
+          '<div>' +
+            '<a class="pp-byline-name" href="/wiki/User:' + encodeURIComponent(username.replace(/ /g, '_')) + '">' + escapeHtml(username) + '</a>' +
+            '<div class="pp-byline-meta">' + escapeHtml(lastMod || '') + '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    content.parentNode.insertBefore(hero, content);
+
+    // Colophon
+    var colophon = document.createElement('div');
+    colophon.className = 'pickipedia-colophon';
+    colophon.innerHTML =
+      '<span>' + escapeHtml('User:' + username + ' / ' + subpage) + '</span>' +
+      '<span>' + escapeHtml(lastMod ? 'Last edited ' + lastMod : '') + '</span>';
+    content.parentNode.insertBefore(colophon, content.nextSibling);
+  }
+
+  // ---------- Tucked corner: edit / history / talk ----------
+  var corner = document.createElement('nav');
+  corner.className = 'pickipedia-corner';
+  corner.innerHTML =
+    '<a href="' + mw.util.getUrl(pageName, { action: 'edit' }) + '">edit</a>' +
+    '<a href="' + mw.util.getUrl(pageName, { action: 'history' }) + '">history</a>' +
+    '<a href="' + mw.util.getUrl('Talk:' + pageName) + '">talk</a>';
+  document.body.appendChild(corner);
+
+  // ---------- Light/dark toggle ----------
+  var toggle = document.createElement('button');
+  toggle.className = 'pickipedia-mode';
+  toggle.type = 'button';
+  toggle.textContent = body.classList.contains('pickipedia-dark') ? '☼ Light' : '☾ Dark';
+  toggle.addEventListener('click', function () {
+    var dark = body.classList.toggle('pickipedia-dark');
+    toggle.textContent = dark ? '☼ Light' : '☾ Dark';
+    try { localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light'); } catch (e) {}
+  });
+  document.body.appendChild(toggle);
+
+  // ---------- helpers ----------
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+}());

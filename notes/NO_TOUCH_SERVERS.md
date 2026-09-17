@@ -1,0 +1,1 @@
+Unless there's a _really_ good reason (ie, production outage at a critically important moment), let's treat all our servers as 'no touch' - in other words, let's only modify the servers from the deploy logic (ansible playbooks, jenkinsfiles, dockerfiles, etc), so that our organization is always in a state such that our deploy logic matches our server states.
