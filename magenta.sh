@@ -16,7 +16,7 @@ set -e  # Exit on error
 show_help() {
     cat <<'EOF'
 Usage: magenta.sh [TARGET] [OPTIONS]
-       magenta.sh login [--name <name>] [--key <path>] [--base <url>]
+       magenta.sh login [--key <path>] [--base <url>]
 
 Connect to a container and drop into a tmux + Claude Code session.
 
@@ -47,11 +47,12 @@ MODES (mutually exclusive; last one on the line wins):
 SUBCOMMANDS:
   login [args...]       Get a one-time link to write into Motions (memory-lane's
                         public conversation view) from any device, vouched for
-                        by your SSH key. Runs memory-lane's tools/motion_login.py
-                        (fetched fresh from GitHub; set MOTION_LOGIN_SCRIPT to a
-                        local copy to use that instead). Args pass straight
-                        through; `magenta.sh login --help` shows them. Needs no
-                        TARGET and opens no SSH connection.
+                        by your SSH key; the key says who you are. Runs
+                        memory-lane's tools/motion_login.py (fetched fresh from
+                        GitHub; set MOTION_LOGIN_SCRIPT to a local copy to use
+                        that instead). Args pass straight through (e.g. --key
+                        for a non-default key); `magenta.sh login --help` shows
+                        them. Needs no TARGET and opens no SSH connection.
 
 OTHER OPTIONS:
   --dangerously-skip-permissions
@@ -78,7 +79,8 @@ EXAMPLES:
   magenta.sh hunter --join skyler             # pair-program with skyler
   magenta.sh hunter --join skyler --session review
                                               # join skyler's 'review' tmux session
-  magenta.sh login --name justin              # link to write into Motions as justin
+  magenta.sh login                            # link to write into Motions
+  magenta.sh login --key ~/.ssh/other_key     # ...signed with a non-default key
 
 MENTAL MODEL:
   * tmux session name = what shows in `tmux list-sessions`
