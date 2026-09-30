@@ -16,6 +16,7 @@ set -e  # Exit on error
 show_help() {
     cat <<'EOF'
 Usage: magenta.sh [TARGET] [OPTIONS]
+       magenta.sh login [--key <path>] [--base <url>]
 
 Connect to a container and drop into a tmux + Claude Code session.
 
@@ -43,6 +44,16 @@ MODES (mutually exclusive; last one on the line wins):
                         in parallel. Kept as an escape hatch for when the
                         supervisor is misbehaving.
 
+SUBCOMMANDS:
+  login [args...]       Get a one-time link to write into Motions (memory-lane's
+                        public conversation view) from any device, vouched for
+                        by your SSH key; the key says who you are. Runs
+                        memory-lane's tools/motion_login.py (fetched fresh from
+                        GitHub; set MOTION_LOGIN_SCRIPT to a local copy to use
+                        that instead). Args pass straight through (e.g. --key
+                        for a non-default key); `magenta.sh login --help` shows
+                        them. Needs no TARGET and opens no SSH connection.
+
 OTHER OPTIONS:
   --dangerously-skip-permissions
                         Pass through to `claude` — bypass permission prompts.
@@ -68,6 +79,8 @@ EXAMPLES:
   magenta.sh hunter --join skyler             # pair-program with skyler
   magenta.sh hunter --join skyler --session review
                                               # join skyler's 'review' tmux session
+  magenta.sh login                            # link to write into Motions
+  magenta.sh login --key ~/.ssh/other_key     # ...signed with a non-default key
 
 MENTAL MODEL:
   * tmux session name = what shows in `tmux list-sessions`
@@ -89,6 +102,47 @@ LOG FILE:
   running with $HOME as cwd.
 EOF
 }
+
+# ─── login subcommand ──────────────────────────────────────────────────
+# Handled before anything else: no TARGET, no SSH. The logic lives in one
+# place, memory-lane's tools/motion_login.py; we fetch and run it rather than
+# vendoring a copy that would drift.
+MOTION_LOGIN_URL="https://raw.githubusercontent.com/jMyles/memory-lane/main/tools/motion_login.py"
+
+run_login() {
+    if ! command -v python3 &> /dev/null; then
+        echo "Error: login needs python3"
+        exit 1
+    fi
+    local script="$MOTION_LOGIN_SCRIPT"
+    if [ -n "$script" ]; then
+        if [ ! -r "$script" ]; then
+            echo "Error: MOTION_LOGIN_SCRIPT='$script' is not a readable file"
+            exit 1
+        fi
+    else
+        if ! command -v curl &> /dev/null; then
+            echo "Error: login needs curl (or set MOTION_LOGIN_SCRIPT to a local motion_login.py)"
+            exit 1
+        fi
+        # Global, not local: the EXIT trap fires after this function returns.
+        MOTION_LOGIN_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/motion_login.XXXXXX")"
+        trap 'rm -rf "$MOTION_LOGIN_TMPDIR"' EXIT
+        script="$MOTION_LOGIN_TMPDIR/motion_login.py"
+        if ! curl -fsSL "$MOTION_LOGIN_URL" -o "$script"; then
+            echo "Error: could not download $MOTION_LOGIN_URL"
+            echo "       (set MOTION_LOGIN_SCRIPT to a local memory-lane checkout's tools/motion_login.py)"
+            exit 1
+        fi
+    fi
+    python3 "$script" "$@"
+}
+
+if [ "${1:-}" = "login" ]; then
+    shift
+    run_login "$@"
+    exit $?
+fi
 
 # ─── argument parsing ──────────────────────────────────────────────────
 FORCE_FRESH=false
