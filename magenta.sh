@@ -17,6 +17,8 @@ show_help() {
     cat <<'EOF'
 Usage: magenta.sh [TARGET] [OPTIONS]
        magenta.sh login [--key <path>] [--base <url>]
+       magenta.sh kick <name> [--ban]   |   magenta.sh unban <name>
+       magenta.sh AZ5 [TARGET]          |   magenta.sh AZ5 --lift
 
 Connect to a container and drop into a tmux + Claude Code session.
 
@@ -53,6 +55,17 @@ SUBCOMMANDS:
                         that instead). Args pass straight through (e.g. --key
                         for a non-default key); `magenta.sh login --help` shows
                         them. Needs no TARGET and opens no SSH connection.
+  kick <name> [--ban]   Sign <name> out of Motions everywhere: every device
+                        and every live login link of theirs. With --ban,
+                        their key can't sign in again until `unban`. For a
+                        stolen phone or a leaked link. Needs an admin's key
+                        (memory-lane's MOTION_ADMINS); signed like login.
+  unban <name>          Let <name> sign in again.
+  AZ5 [TARGET]          The scram. Signs everyone out of Motions, locks them
+                        (no posting, no signing in) and stills every agent
+                        runner -- then drops you into the session picker on
+                        TARGET (default: hunter), as `magenta.sh hunter` does.
+                        Undo with `magenta.sh AZ5 --lift`.
 
 OTHER OPTIONS:
   --dangerously-skip-permissions
@@ -81,6 +94,10 @@ EXAMPLES:
                                               # join skyler's 'review' tmux session
   magenta.sh login                            # link to write into Motions
   magenta.sh login --key ~/.ssh/other_key     # ...signed with a non-default key
+  magenta.sh kick skyler                      # sign skyler out of Motions everywhere
+  magenta.sh kick skyler --ban                # ...and bar their key until unbanned
+  magenta.sh AZ5                              # everyone out, everything still, then the picker
+  magenta.sh AZ5 --lift                       # back to normal
 
 MENTAL MODEL:
   * tmux session name = what shows in `tmux list-sessions`
@@ -103,46 +120,73 @@ LOG FILE:
 EOF
 }
 
-# ─── login subcommand ──────────────────────────────────────────────────
-# Handled before anything else: no TARGET, no SSH. The logic lives in one
-# place, memory-lane's tools/motion_login.py; we fetch and run it rather than
-# vendoring a copy that would drift.
-MOTION_LOGIN_URL="https://raw.githubusercontent.com/jMyles/memory-lane/main/tools/motion_login.py"
+# ─── Motions subcommands: login, kick, unban, AZ5 ──────────────────────
+# Handled before anything else: no TARGET, no SSH (until AZ5's picker). The
+# logic lives in one place, memory-lane's tools/; we fetch and run it rather
+# than vendoring a copy that would drift.
+MEMORY_LANE_TOOLS="https://raw.githubusercontent.com/jMyles/memory-lane/main/tools"
 
-run_login() {
+# run_motion_tool <tool.py> <env var naming a local copy> [args...]
+run_motion_tool() {
+    local tool="$1" override_var="$2"
+    shift 2
     if ! command -v python3 &> /dev/null; then
-        echo "Error: login needs python3"
+        echo "Error: this needs python3"
         exit 1
     fi
-    local script="$MOTION_LOGIN_SCRIPT"
+    local script="${!override_var}"
     if [ -n "$script" ]; then
         if [ ! -r "$script" ]; then
-            echo "Error: MOTION_LOGIN_SCRIPT='$script' is not a readable file"
+            echo "Error: $override_var='$script' is not a readable file"
             exit 1
         fi
     else
         if ! command -v curl &> /dev/null; then
-            echo "Error: login needs curl (or set MOTION_LOGIN_SCRIPT to a local motion_login.py)"
+            echo "Error: this needs curl (or set $override_var to a local $tool)"
             exit 1
         fi
         # Global, not local: the EXIT trap fires after this function returns.
-        MOTION_LOGIN_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/motion_login.XXXXXX")"
-        trap 'rm -rf "$MOTION_LOGIN_TMPDIR"' EXIT
-        script="$MOTION_LOGIN_TMPDIR/motion_login.py"
-        if ! curl -fsSL "$MOTION_LOGIN_URL" -o "$script"; then
-            echo "Error: could not download $MOTION_LOGIN_URL"
-            echo "       (set MOTION_LOGIN_SCRIPT to a local memory-lane checkout's tools/motion_login.py)"
+        MOTION_TOOL_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/motion_tool.XXXXXX")"
+        trap 'rm -rf "$MOTION_TOOL_TMPDIR"' EXIT
+        script="$MOTION_TOOL_TMPDIR/$tool"
+        if ! curl -fsSL "$MEMORY_LANE_TOOLS/$tool" -o "$script"; then
+            echo "Error: could not download $MEMORY_LANE_TOOLS/$tool"
+            echo "       (set $override_var to a local memory-lane checkout's tools/$tool)"
             exit 1
         fi
     fi
     python3 "$script" "$@"
 }
 
-if [ "${1:-}" = "login" ]; then
-    shift
-    run_login "$@"
-    exit $?
-fi
+case "${1:-}" in
+    login)
+        shift
+        run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT "$@"
+        exit $?
+        ;;
+    kick)
+        shift
+        run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT kick "$@"
+        exit $?
+        ;;
+    unban)
+        shift
+        run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT unban "$@"
+        exit $?
+        ;;
+    AZ5|az5)
+        shift
+        if [ "${1:-}" = "--lift" ]; then
+            shift
+            run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT lift "$@"
+            exit $?
+        fi
+        run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT az5
+        echo "Dropping you into the session picker…"
+        # Then just as `magenta.sh hunter` (or the TARGET given): pick a session.
+        exec "$0" "${@:-hunter}"
+        ;;
+esac
 
 # ─── argument parsing ──────────────────────────────────────────────────
 FORCE_FRESH=false
