@@ -55,6 +55,14 @@ SUBCOMMANDS:
                         that instead). Args pass straight through (e.g. --key
                         for a non-default key); `magenta.sh login --help` shows
                         them. Needs no TARGET and opens no SSH connection.
+  renew <device>        Bring one of your timed-out devices back (a device
+                        unused for 30 days times out), by the name you gave
+                        it when it signed in. Signed with your SSH key, like
+                        login; no new link needed.
+  attest "<words>"      Post a statement into #general, signed with your SSH
+                        key. Its proof (what was signed, the signature, your
+                        key) is kept beside it, checkable with ssh-keygen
+                        anywhere, memory-lane or not.
   kick <name> [--ban]   Sign <name> out of Motions everywhere: every device
                         and every live login link of theirs. With --ban,
                         their key can't sign in again until `unban`. For a
@@ -162,6 +170,16 @@ case "${1:-}" in
     login)
         shift
         run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT "$@"
+        exit $?
+        ;;
+    renew)
+        shift
+        run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT renew "$@"
+        exit $?
+        ;;
+    attest)
+        shift
+        run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT attest "$@"
         exit $?
         ;;
     kick)
