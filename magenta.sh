@@ -47,11 +47,11 @@ MODES (mutually exclusive; last one on the line wins):
                         supervisor is misbehaving.
 
 SUBCOMMANDS:
-  login [args...]       Get a one-time link to write into Motions (memory-lane's
+  login [args...]       Get a one-time link to write into Moods (memory-lane's
                         public conversation view) from any device, vouched for
                         by your SSH key; the key says who you are. Runs
-                        memory-lane's tools/motion_login.py (fetched fresh from
-                        GitHub; set MOTION_LOGIN_SCRIPT to a local copy to use
+                        memory-lane's tools/mood_login.py (fetched fresh from
+                        GitHub; set MOOD_LOGIN_SCRIPT to a local copy to use
                         that instead). Args pass straight through (e.g. --key
                         for a non-default key); `magenta.sh login --help` shows
                         them. Needs no TARGET and opens no SSH connection.
@@ -63,13 +63,13 @@ SUBCOMMANDS:
                         key. Its proof (what was signed, the signature, your
                         key) is kept beside it, checkable with ssh-keygen
                         anywhere, memory-lane or not.
-  kick <name> [--ban]   Sign <name> out of Motions everywhere: every device
+  kick <name> [--ban]   Sign <name> out of Moods everywhere: every device
                         and every live login link of theirs. With --ban,
                         their key can't sign in again until `unban`. For a
                         stolen phone or a leaked link. Needs an admin's key
-                        (memory-lane's MOTION_ADMINS); signed like login.
+                        (memory-lane's MOOD_ADMINS); signed like login.
   unban <name>          Let <name> sign in again.
-  AZ5 [TARGET]          The scram. Signs everyone out of Motions, locks them
+  AZ5 [TARGET]          The scram. Signs everyone out of Moods, locks them
                         (no posting, no signing in) and stills every agent
                         runner -- then drops you into the session picker on
                         TARGET (default: hunter), as `magenta.sh hunter` does.
@@ -100,9 +100,9 @@ EXAMPLES:
   magenta.sh hunter --join skyler             # pair-program with skyler
   magenta.sh hunter --join skyler --session review
                                               # join skyler's 'review' tmux session
-  magenta.sh login                            # link to write into Motions
+  magenta.sh login                            # link to write into Moods
   magenta.sh login --key ~/.ssh/other_key     # ...signed with a non-default key
-  magenta.sh kick skyler                      # sign skyler out of Motions everywhere
+  magenta.sh kick skyler                      # sign skyler out of Moods everywhere
   magenta.sh kick skyler --ban                # ...and bar their key until unbanned
   magenta.sh AZ5                              # everyone out, everything still, then the picker
   magenta.sh AZ5 --lift                       # back to normal
@@ -128,14 +128,14 @@ LOG FILE:
 EOF
 }
 
-# ─── Motions subcommands: login, kick, unban, AZ5 ──────────────────────
+# ─── Moods subcommands: login, kick, unban, AZ5 ──────────────────────
 # Handled before anything else: no TARGET, no SSH (until AZ5's picker). The
 # logic lives in one place, memory-lane's tools/; we fetch and run it rather
 # than vendoring a copy that would drift.
 MEMORY_LANE_TOOLS="https://raw.githubusercontent.com/jMyles/memory-lane/main/tools"
 
-# run_motion_tool <tool.py> <env var naming a local copy> [args...]
-run_motion_tool() {
+# run_mood_tool <tool.py> <env var naming a local copy> [args...]
+run_mood_tool() {
     local tool="$1" override_var="$2"
     shift 2
     if ! command -v python3 &> /dev/null; then
@@ -154,9 +154,9 @@ run_motion_tool() {
             exit 1
         fi
         # Global, not local: the EXIT trap fires after this function returns.
-        MOTION_TOOL_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/motion_tool.XXXXXX")"
-        trap 'rm -rf "$MOTION_TOOL_TMPDIR"' EXIT
-        script="$MOTION_TOOL_TMPDIR/$tool"
+        MOOD_TOOL_TMPDIR="$(mktemp -d "${TMPDIR:-/tmp}/mood_tool.XXXXXX")"
+        trap 'rm -rf "$MOOD_TOOL_TMPDIR"' EXIT
+        script="$MOOD_TOOL_TMPDIR/$tool"
         if ! curl -fsSL "$MEMORY_LANE_TOOLS/$tool" -o "$script"; then
             echo "Error: could not download $MEMORY_LANE_TOOLS/$tool"
             echo "       (set $override_var to a local memory-lane checkout's tools/$tool)"
@@ -169,37 +169,37 @@ run_motion_tool() {
 case "${1:-}" in
     login)
         shift
-        run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT "$@"
+        run_mood_tool mood_login.py MOOD_LOGIN_SCRIPT "$@"
         exit $?
         ;;
     renew)
         shift
-        run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT renew "$@"
+        run_mood_tool mood_login.py MOOD_LOGIN_SCRIPT renew "$@"
         exit $?
         ;;
     attest)
         shift
-        run_motion_tool motion_login.py MOTION_LOGIN_SCRIPT attest "$@"
+        run_mood_tool mood_login.py MOOD_LOGIN_SCRIPT attest "$@"
         exit $?
         ;;
     kick)
         shift
-        run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT kick "$@"
+        run_mood_tool mood_admin.py MOOD_ADMIN_SCRIPT kick "$@"
         exit $?
         ;;
     unban)
         shift
-        run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT unban "$@"
+        run_mood_tool mood_admin.py MOOD_ADMIN_SCRIPT unban "$@"
         exit $?
         ;;
     AZ5|az5)
         shift
         if [ "${1:-}" = "--lift" ]; then
             shift
-            run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT lift "$@"
+            run_mood_tool mood_admin.py MOOD_ADMIN_SCRIPT lift "$@"
             exit $?
         fi
-        run_motion_tool motion_admin.py MOTION_ADMIN_SCRIPT az5
+        run_mood_tool mood_admin.py MOOD_ADMIN_SCRIPT az5
         echo "Dropping you into the session picker…"
         # Then just as `magenta.sh hunter` (or the TARGET given): pick a session.
         exec "$0" "${@:-hunter}"
