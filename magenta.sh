@@ -17,7 +17,7 @@ show_help() {
     cat <<'EOF'
 Usage: magenta.sh [TARGET] [OPTIONS]
        magenta.sh login [--key <path>] [--base <url>]
-       magenta.sh kick <name> [--ban]   |   magenta.sh unban <name>
+       magenta.sh kick <name> --all [--ban] | --device <id>   |   magenta.sh unban <name>
        magenta.sh AZ5 [TARGET]          |   magenta.sh AZ5 --lift
 
 Connect to a container and drop into a tmux + Claude Code session.
@@ -63,10 +63,15 @@ SUBCOMMANDS:
                         key. Its proof (what was signed, the signature, your
                         key) is kept beside it, checkable with ssh-keygen
                         anywhere, memory-lane or not.
-  kick <name> [--ban]   Sign <name> out of Moods everywhere: every device
+  kick <name> --all     Sign <name> out of Moods everywhere: every device
                         and every live login link of theirs. With --ban,
                         their key can't sign in again until `unban`. For a
-                        stolen phone or a leaked link. Needs an admin's key
+                        leaked link or a stolen key.
+  kick <name> --device <id>
+                        Sign out just one of their devices -- a stolen phone,
+                        say. <id> is the start of its id: in Moods, your name
+                        → your devices → everyone, then click it to copy the
+                        whole command. Either kick needs an admin's key
                         (memory-lane's MOOD_ADMINS); signed like login.
   unban <name>          Let <name> sign in again.
   AZ5 [TARGET]          The scram. Signs everyone out of Moods, locks them
@@ -102,8 +107,9 @@ EXAMPLES:
                                               # join skyler's 'review' tmux session
   magenta.sh login                            # link to write into Moods
   magenta.sh login --key ~/.ssh/other_key     # ...signed with a non-default key
-  magenta.sh kick skyler                      # sign skyler out of Moods everywhere
-  magenta.sh kick skyler --ban                # ...and bar their key until unbanned
+  magenta.sh kick skyler --all                # sign skyler out of Moods everywhere
+  magenta.sh kick skyler --all --ban          # ...and bar their key until unbanned
+  magenta.sh kick skyler --device 21c74117    # sign out just that one device of theirs
   magenta.sh AZ5                              # everyone out, everything still, then the picker
   magenta.sh AZ5 --lift                       # back to normal
 
